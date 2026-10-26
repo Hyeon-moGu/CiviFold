@@ -1,0 +1,29 @@
+{
+  "name": "civifold",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.9.0"
+  },
+  "scripts": {
+    "smoke:image": "tsx --env-file=.env.local scripts/smoke/image.ts",
+    "smoke:spark": "tsx --env-file=.env.local scripts/smoke/spark.ts",
+    "smoke:sam": "tsx --env-file=.env.local scripts/smoke/sam.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@meta-sam/parser": "^0.1.0",
+    "openai": "^7.44.0",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^4.1.11",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}
