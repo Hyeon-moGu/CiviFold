@@ -10,3 +10,8 @@ export const DECIDE_CONFIG: DecideConfig = {
   time_margin_h: 6, // observations this close to a repair are ambiguous
   sig_uncertain_factor: 0.8, // confidence penalty when the damage signature is uncertain
 };
+
+export const COMPARE_CONFIG = {
+  min_same_evidence: 2, // "same" with fewer distinctive evidence items is downgraded to uncertain
+  weak_same_conf_cap: 0.5, // confidence ceiling after that downgrade
+};

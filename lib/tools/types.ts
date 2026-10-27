@@ -4,9 +4,19 @@
 // Shared schemas and the tool shape. The pipeline and the investigation agent call the same
 // tools, so everything that crosses a tool boundary is defined here once.
 import { z } from "zod";
+import type { ToolData } from "./data";
+import type { ImageStore } from "./images";
 
 export const Category = z.enum(["fire_hydrant", "streetlight", "traffic_sign", "bench", "other"]);
 export const IncidentStatus = z.enum(["open", "in_progress", "resolved", "closed"]);
+export const IncidentEventType = z.enum([
+  "created",
+  "report_linked",
+  "status_changed",
+  "repair_recorded",
+  "recurrence_created",
+  "note",
+]);
 export const Label = z.enum([
   "NEW",
   "DUPLICATE",
@@ -58,6 +68,7 @@ export const CompareResult = z
 
 export type Category = z.infer<typeof Category>;
 export type IncidentStatus = z.infer<typeof IncidentStatus>;
+export type IncidentEventType = z.infer<typeof IncidentEventType>;
 export type Label = z.infer<typeof Label>;
 export type MissingItem = z.infer<typeof MissingItem>;
 export type Box = z.infer<typeof Box>;
@@ -68,6 +79,8 @@ export type ToolContext = {
   runId: string | null; // null when called from the fixed pipeline
   mode: "live" | "cached" | "cached_then_live";
   budget: { usdLeft: number; deadline: number };
+  data: ToolData;
+  images: ImageStore;
 };
 
 export type Tool<I extends z.ZodType, O extends z.ZodType> = {
