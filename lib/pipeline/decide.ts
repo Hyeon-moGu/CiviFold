@@ -3,7 +3,7 @@
 
 // Decision engine. Pure function: no I/O, no model calls, no clock.
 // The model judges what the photos show; these rules judge time and incident state.
-// Rule ids (R0–R7h, P1) are recorded in every decision and mirrored in decide.test.ts.
+// Rule ids (R0–R7t, P1) are recorded in every decision and mirrored in decide.test.ts.
 import type { CompareResult, IncidentStatus, Label, MissingItem } from "../tools/types";
 
 export type DecideConfig = {
@@ -71,8 +71,9 @@ export function decide(input: DecideInput): Decision {
 function applyRules(input: DecideInput): Decision {
   const { triage, candidates, config } = input;
 
-  // R0: judge photo quality before anything else.
-  if (triage.image_quality !== "ok") {
+  // R0: a photo with nothing to compare stops here. A distant photo still goes on to matching:
+  // it can identify the asset, and R7t asks for a close-up only where damage detail decides the label.
+  if (triage.image_quality === "blurry" || triage.image_quality === "object_not_visible") {
     const item = triage.image_quality === "object_not_visible" ? "wider_context" : "close_up";
     return needsInfo("R0", `Photo quality is "${triage.image_quality}".`, [item], 0);
   }
@@ -117,7 +118,8 @@ function applyRules(input: DecideInput): Decision {
     });
   }
 
-  const d = isOpen(best.candidate.status) ? openRules(best, config) : resolvedRules(best, observedMs, config);
+  const tooFar = triage.image_quality === "too_far";
+  const d = isOpen(best.candidate.status) ? openRules(best, config) : resolvedRules(best, observedMs, tooFar, config);
   return { ...d, reasons: [...chainReasons, ...d.reasons] };
 }
 
@@ -177,7 +179,7 @@ function openRules(best: Matched, config: DecideConfig): Decision {
 }
 
 // R7: the matched incident was repaired. Δ = observed − resolved, with a ±margin of ambiguity.
-function resolvedRules(best: Matched, observedMs: number, config: DecideConfig): Decision {
+function resolvedRules(best: Matched, observedMs: number, tooFar: boolean, config: DecideConfig): Decision {
   const c = best.candidate;
   const id = c.incident_id;
   const { new_damage_present: dmg, same_damage_signature: sig, repair_signs_in_new: rep } = best.result.damage;
@@ -194,6 +196,8 @@ function resolvedRules(best: Matched, observedMs: number, config: DecideConfig):
     return decision("HUMAN_REVIEW", id, "R7b", `Observed ${when}, but the damage differs.`, conf);
   }
   if (deltaMs > marginMs) {
+    // R7t: after a repair only damage detail separates recurrence from a repaired asset.
+    if (tooFar) return needsInfo("R7t", `Observed ${when}, but the photo is too far to tell new damage from the repair.`, ["close_up"], conf);
     if (!dmg && rep) return decision("ALREADY_RESOLVED", id, "R7c", `Observed ${when}, shows the repair.`, conf);
     if (!dmg) return needsInfo("R7g", `Observed ${when}, but neither damage nor repair is visible.`, ["close_up"], conf);
     if (sig === "different") return decision("POSSIBLE_RECURRENCE", id, "R7d", `Observed ${when}, with new damage.`, conf);

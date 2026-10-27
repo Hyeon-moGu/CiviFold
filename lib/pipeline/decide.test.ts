@@ -308,6 +308,39 @@ const DECIDE_CASES: Case[] = [
     }),
     { label: "DUPLICATE", incident_id: "I3", rule_id: "R6a", via: "R4c" },
   ),
+
+  // Distant photo: matched like any other, close-up asked only after a repair
+  c("D-45", "too far, no candidates", input({ quality: "too_far" }), { label: "NEW", rule_id: "R1" }),
+  c(
+    "D-46",
+    "too far, matches an open incident",
+    input({ quality: "too_far", candidates: [cand("I1", "open")], comparisons: [cmp("I1", "same", 0.9, { sig: "uncertain" })] }),
+    { label: "DUPLICATE", incident_id: "I1", rule_id: "R6a", confidence: 0.72 },
+  ),
+  c(
+    "D-47",
+    "too far, observed after the repair",
+    input({ quality: "too_far", candidates: repaired(), observed: at("+2d"), comparisons: [cmp("I1", "same", 0.9, { sig: "different" })] }),
+    { label: "NEEDS_INFO", rule_id: "R7t", missing_info: ["close_up"], confidence: 0.9 },
+  ),
+  c(
+    "D-48",
+    "too far, observed before the repair",
+    input({ quality: "too_far", candidates: repaired(), observed: at("-2d"), comparisons: [cmp("I1", "same", 0.9, { sig: "uncertain" })] }),
+    { label: "LATE_REPORT", incident_id: "I1", rule_id: "R7a" },
+  ),
+  c(
+    "D-49",
+    "too far after the repair, already asked",
+    input({ quality: "too_far", asked: true, candidates: repaired(), observed: at("+2d"), comparisons: [cmp("I1", "same", 0.9)] }),
+    { label: "HUMAN_REVIEW", rule_id: "P1", via: "R7t" },
+  ),
+  c(
+    "D-50",
+    "too far, different asset",
+    input({ quality: "too_far", candidates: [cand("I1", "open")], comparisons: [cmp("I1", "different", 0.9)] }),
+    { label: "NEW", rule_id: "R3" },
+  ),
 ];
 
 // Timeline scenarios with ideal model outputs: rules alone must produce the answer.
