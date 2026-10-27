@@ -11,7 +11,8 @@
     "smoke:spark": "tsx --env-file=.env.local scripts/smoke/spark.ts",
     "smoke:sam": "tsx --env-file=.env.local scripts/smoke/sam.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "analyze": "tsx --env-file=.env.local scripts/analyze-one.ts"
   },
   "dependencies": {
     "@meta-sam/parser": "^0.1.0",

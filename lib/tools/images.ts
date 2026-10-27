@@ -41,6 +41,7 @@ export type ImageStore = {
   saveSegmentation(row: SegmentationRow): Promise<void>;
   incidentOf(imageId: string): Promise<string | null>;
   triageOf(reportId: string): Promise<ReportTriage | null>;
+  saveTriage(reportId: string, triage: ReportTriage): Promise<void>;
 };
 
 export function memoryImages(seed: {
@@ -50,6 +51,7 @@ export function memoryImages(seed: {
 } = {}): ImageStore & { segmentations: SegmentationRow[] } {
   const images = new Map((seed.images ?? []).map((i) => [i.row.id, i]));
   const segmentations: SegmentationRow[] = [];
+  const triage = { ...seed.triageByReport };
   return {
     segmentations,
     get: async (id) => images.get(id)?.row ?? null,
@@ -65,7 +67,8 @@ export function memoryImages(seed: {
       const reportId = images.get(imageId)?.row.report_id;
       return reportId === undefined ? null : (seed.incidentByReport?.[reportId] ?? null);
     },
-    triageOf: async (reportId) => seed.triageByReport?.[reportId] ?? null,
+    triageOf: async (reportId) => triage[reportId] ?? null,
+    saveTriage: async (reportId, t) => void (triage[reportId] = t),
   };
 }
 

@@ -1,0 +1,18 @@
+{
+  "asOf": "2026-10-27T06:00:00.000Z",
+  "report_at": { "lat": 37.56652, "lng": 126.97802 },
+  "incidents": [
+    {
+      "id": "inc_h1",
+      "category": "fire_hydrant",
+      "status": "open",
+      "lat": 37.5665,
+      "lng": 126.978,
+      "title": "Hydrant leaking from the top, BAKERY corner",
+      "created_at": "2026-10-26T23:00:00.000Z",
+      "resolved_at": null,
+      "recurrence_of": null,
+      "photos": [{ "path": ".cache/smoke/h1-front.webp", "report_id": "r_h1_first", "observed_at": "2026-10-26T22:50:00.000Z" }]
+    }
+  ]
+}

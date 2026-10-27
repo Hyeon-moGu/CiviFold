@@ -24,9 +24,9 @@ Step 2 — damage comparison
 
 Step 3 — what would resolve remaining doubt (missing_info). Empty if nothing is needed.
 
-Calibration for asset_match.confidence:
-  0.9+  several independent distinctive features match, no conflicts
-  0.75  at least two distinctive features match
-  0.5   plausible but weak or partially conflicting evidence
-  <0.4  evidence points to different assets
+asset_match.confidence is how sure you are of your verdict, whichever verdict it is:
+  0.9+  several independent distinctive features support the verdict, none conflict
+  0.75  two distinctive features support it
+  0.5   weak or partially conflicting evidence (then the verdict should be "uncertain")
+A clear "different" (other sign text, other surroundings) gets a high confidence, not a low one.
 Return JSON matching the schema. Evidence items must be short, observable facts.

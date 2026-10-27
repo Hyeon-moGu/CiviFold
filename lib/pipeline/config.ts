@@ -2,6 +2,7 @@
 // Created: 2026-10-27
 
 // Every threshold lives here. Tune against the dev split only.
+import type { Category } from "../tools/types";
 import type { DecideConfig } from "./decide";
 
 export const DECIDE_CONFIG: DecideConfig = {
@@ -14,4 +15,10 @@ export const DECIDE_CONFIG: DecideConfig = {
 export const COMPARE_CONFIG = {
   min_same_evidence: 2, // "same" with fewer distinctive evidence items is downgraded to uncertain
   weak_same_conf_cap: 0.5, // confidence ceiling after that downgrade
+};
+
+export const SEARCH_CONFIG = {
+  radius_m: { fire_hydrant: 40, streetlight: 40, traffic_sign: 40, bench: 30, other: 40 } satisfies Record<Category, number>,
+  days_back: 90, // resolved incidents older than this are not candidates
+  max_candidates: 5,
 };
