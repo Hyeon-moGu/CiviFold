@@ -247,7 +247,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   </div>
                   {decision && answerChanged && (
                     <p className="mt-1 text-xs text-ops-dim">
-                      Before verification: {LABEL_TEXT[decision.label]} (fast path, {pct(decision.confidence)} confidence)
+                      Before verification: {LABEL_TEXT[decision.label]} (fast path, model confidence {pct(decision.confidence)})
                       <span className="ml-2 font-mono text-[10px]">
                         {decision.rule_id} → {final.rule_id}
                       </span>
@@ -577,10 +577,9 @@ function MatchChip({ verdict, confidence, crops }: { verdict: string; confidence
   return (
     <span
       className={`whitespace-nowrap rounded px-1.5 py-0.5 font-mono text-[10px] normal-case tracking-normal ring-1 ring-inset ${tone}`}
-      title={`Muse Spark compared ${crops ? "the SAM cut-outs" : "the whole photos"}: "${VERDICT_TEXT[verdict] ?? verdict}", ${pct(confidence)} confidence. Not a similarity score.`}
+      title={`Muse Spark compared ${crops ? "the SAM cut-outs" : "the whole photos"}: "${VERDICT_TEXT[verdict] ?? verdict}". ${pct(confidence)} is the model's own confidence in that verdict, not a measured accuracy or a similarity score.`}
     >
-      {crops ? "cut-out" : "whole photo"}: {VERDICT_TEXT[verdict] ?? verdict} · {pct(confidence)}
-      {verdict === "uncertain" ? "" : " sure"}
+      {crops ? "cut-out" : "whole photo"}: {VERDICT_TEXT[verdict] ?? verdict} · model {pct(confidence)}
     </span>
   );
 }
@@ -591,8 +590,8 @@ function Notice({ children }: { children: React.ReactNode }) {
 
 function Confidence({ value }: { value: number }) {
   return (
-    <span className="ml-auto flex items-center gap-2 text-[11px] text-ops-dim">
-      confidence
+    <span className="ml-auto flex items-center gap-2 text-[11px] text-ops-dim" title="The comparison model's own confidence in the verdict this suggestion rests on. Not a measured accuracy.">
+      model confidence
       <span className="relative h-1.5 w-24 overflow-hidden rounded-full bg-ops-raised">
         <span className="absolute inset-y-0 left-0 rounded-full bg-zinc-300" style={{ width: pct(value) }} />
       </span>

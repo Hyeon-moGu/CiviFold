@@ -404,7 +404,7 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
               <label className="mt-5 block text-sm font-medium">
                 Demo access code
                 <input value={accessCode} onChange={(e) => setAccessCode(e.target.value)} className={`${input} mt-1.5 font-normal`} placeholder="Given to hackathon judges" />
-                <span className="mt-1 block text-xs font-normal text-zinc-500">Your own photo or recording is analyzed live, so it needs the code.</span>
+                <span className="mt-1 block text-xs font-normal text-zinc-500">Your own photo or recording is analyzed live, so it needs the code. Anyone on the staff console can see it.</span>
               </label>
             )}
 

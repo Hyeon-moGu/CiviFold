@@ -16,8 +16,8 @@ const RESULTS = [
 const FLOW = [
   { who: "Resident", what: "Sends a photo, a message, a voice note, or a mix.", model: "Muse Voice Transcribe" },
   { who: "Read", what: "Reads the message for danger, then names the fixture and the problem in the photo.", model: "Muse Spark" },
-  { who: "Isolate", what: "Cuts out that one hydrant, light or pile so the background does not decide.", model: "SAM 3.1" },
-  { who: "Compare", what: "Compares the cut-outs with the open incidents nearby, then rules check dates and repairs.", model: "Muse Spark + rules" },
+  { who: "Isolate", what: "Cuts out the hydrant, light or pile, and a wider crop of what stands around it.", model: "SAM 3.1" },
+  { who: "Compare", what: "Compares the object and its surroundings with incidents nearby, then rules check dates and repairs.", model: "Muse Spark + rules" },
   { who: "Staff", what: "See the suggestion with its evidence and decide. Nothing is merged on its own.", model: "Human decision" },
 ];
 
@@ -27,6 +27,9 @@ const SCOPE = [
   { title: "People or behavior", examples: "Noise, loitering, parking", handled: "Never matched by image; sent to staff" },
   { title: "Possible emergencies", examples: "Smoke, a gas smell, a fallen power line", handled: "No matching; top of the staff queue, resident told to call 911", urgent: true },
 ];
+
+// Pothole requests created in September 2026, grouped by resolution description (queried 2026-10-29).
+const NYC_311 = "https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9";
 
 export const dynamic = "force-dynamic";
 
@@ -44,11 +47,16 @@ export default function Home() {
             <h1 className="mt-3 text-4xl font-semibold leading-[1.1] tracking-tight text-zinc-900 sm:text-5xl">
               Fold the duplicates.
               <br />
-              <span className="text-rose-600">Never fold a recurrence.</span>
+              <span className="text-rose-600">Keep recurrences apart.</span>
             </h1>
             <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-zinc-600">
-              Ten residents report the same broken hydrant; city staff review it ten times. Grouping by location saves that work, but it also hides the
-              hydrant across the street and the one that broke again after its repair. CiviFold groups reports by what the photos show, and only suggests.
+              In September 2026, NYC 311 resolved 454 of 3,673 pothole reports as duplicates of an earlier one (
+              <a href={NYC_311} className="underline underline-offset-2 hover:text-zinc-900">
+                NYC Open Data
+              </a>
+              ). Grouping by location saves that work,
+              but it also hides the hydrant across the street and the one that broke again after its repair. CiviFold groups reports by what the photos
+              show, and only suggests.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/demo" className="rounded-lg bg-zinc-900 px-5 py-3 text-sm font-semibold text-white hover:bg-zinc-800">
@@ -73,8 +81,8 @@ export default function Home() {
           fixed&rdquo; suggestion.
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Stat value={pct(head.geo, head.n)} label="Grouping by location alone" sub={`${head.geo} of ${head.n} buried`} tone="text-zinc-400" />
-          <Stat value={pct(head.ours, head.n)} label="CiviFold" sub={head.ours === 0 ? `0 of ${head.n} buried · all shown to staff` : `${head.ours} of ${head.n} buried · the rest shown to staff`} tone="text-zinc-900" />
+          <Stat value={pct(head.geo, head.n)} label="Grouping by location alone" sub={`${head.geo} of ${head.n} got a wrong closing suggestion`} tone="text-zinc-400" />
+          <Stat value={pct(head.ours, head.n)} label="CiviFold" sub={`${head.ours} of ${head.n} got a wrong closing suggestion`} tone="text-zinc-900" />
         </div>
         <table className="mt-6 w-full max-w-2xl text-left text-sm">
           <thead className="text-xs text-zinc-500">

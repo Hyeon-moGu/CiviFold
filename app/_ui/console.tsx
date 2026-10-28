@@ -66,7 +66,7 @@ export function Kpi({ label, value, hint, tone = "text-white" }: { label: string
   );
 }
 
-/** A model's confidence as staff read it. */
+/** A model's confidence as staff read it: what the model said of its own verdict, not a measured accuracy. */
 export const pct = (x: number) => `${Math.round(x * 100)}%`;
 
 /**
@@ -75,10 +75,10 @@ export const pct = (x: number) => `${Math.round(x * 100)}%`;
  */
 export const readable = (text: string) =>
   text
-    .replace(/Same place or fixture as (\S+) \((0(?:\.\d+)?|1(?:\.0+)?)\)/g, (_, id: string, x: string) => `Same place as ${id} in the photos (${pct(Number(x))} sure)`)
+    .replace(/Same place or fixture as (\S+) \((0(?:\.\d+)?|1(?:\.0+)?)\)/g, (_, id: string, x: string) => `Same place as ${id} in the photos (model confidence ${pct(Number(x))})`)
     .replace(/problem looks same/g, "the problem looks the same")
     .replace(/problem looks uncertain/g, "unclear if the problem is the same")
-    .replace(/\((0(?:\.\d+)?|1(?:\.0+)?)\)/g, (_, x: string) => `(${pct(Number(x))} sure)`);
+    .replace(/\((0(?:\.\d+)?|1(?:\.0+)?)\)/g, (_, x: string) => `(model confidence ${pct(Number(x))})`);
 
 /** What one image comparison concluded: is it the same fixture or spot? */
 export const VERDICT_TEXT: Record<string, string> = { same: "same", different: "not the same", uncertain: "unsure" };

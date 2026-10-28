@@ -84,7 +84,7 @@ export function verdictOf(run: {
   for (const s of steps) {
     const c = compared(s);
     if (!c) continue;
-    const line = `${c.mode === "cut-out" ? "Cut-out" : "Whole photo"} vs ${c.incident_id}: ${VERDICT_TEXT[c.verdict] ?? c.verdict}, ${pct(c.confidence)} sure`;
+    const line = `${c.mode === "cut-out" ? "Cut-out" : "Whole photo"} vs ${c.incident_id}: ${VERDICT_TEXT[c.verdict] ?? c.verdict}, model confidence ${pct(c.confidence)}`;
     const suggested = c.incident_id === before.incident_id;
     if (suggested && c.verdict === "same") backed = true;
     if (suggested ? c.verdict === "same" : c.verdict === "different") agree.push(suggested ? line : `${line} (ruled out)`);
