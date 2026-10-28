@@ -18,7 +18,7 @@ export async function load(name: string): Promise<Buffer> {
   try {
     return await readFile(path.join(OUT_DIR, name));
   } catch {
-    throw new Error(`${name} not found in ${OUT_DIR} — run \`npm run smoke:image\` first`);
+    throw new Error(`${name} not found in ${OUT_DIR}; run \`npm run smoke:image\` first`);
   }
 }
 

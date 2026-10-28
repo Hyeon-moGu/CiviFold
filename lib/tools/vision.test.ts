@@ -41,7 +41,7 @@ function original(id: string, report_id: string): { row: ImageRow; bytes: Buffer
 
 function setup() {
   const images = memoryImages({
-    images: [original("img_new", "r_new"), original("img_cand", "r_old")],
+    images: [original("img_new", "r_new"), original("img_cand", "r_old"), original("img_cand2", "r_old"), original("img_other", "r_loose")],
     incidentByReport: { r_old: "inc_1" },
     triageByReport: { r_new: { category: "fire_hydrant", sam_prompt: "fire hydrant" }, r_old: { category: "fire_hydrant", sam_prompt: "hydrant" } },
   });
@@ -163,9 +163,19 @@ describe("compare_images", () => {
 
   it("refuses a candidate photo that belongs to no incident", async () => {
     const { ctx } = setup();
-    await expect(compareImages.run({ new_image_id: "img_cand", candidate_image_id: "img_new", mode: "full" }, ctx)).rejects.toThrow(
+    await expect(compareImages.run({ new_image_id: "img_new", candidate_image_id: "img_other", mode: "full" }, ctx)).rejects.toThrow(
       "does not belong to an incident",
     );
+    expect(sparkJson).not.toHaveBeenCalled();
+  });
+
+  it("refuses a new side that is not this report's photo, and the same photo on both sides", async () => {
+    const { ctx, images } = setup();
+    await expect(compareImages.run({ new_image_id: "img_cand", candidate_image_id: "img_cand2", mode: "full" }, ctx)).rejects.toThrow("not a photo of the report");
+    await expect(compareImages.run({ new_image_id: "img_cand", candidate_image_id: "img_new", mode: "full" }, ctx)).rejects.toThrow("not a photo of the report");
+    await images.put({ ...original("img_new_crop", "r_new").row, kind: "object_crop", source_image_id: "img_new" }, Buffer.alloc(0));
+    await images.put({ ...original("img_new_copy", "r_old").row, source_image_id: "img_new" }, Buffer.alloc(0));
+    await expect(compareImages.run({ new_image_id: "img_new_crop", candidate_image_id: "img_new_copy", mode: "full" }, ctx)).rejects.toThrow("same photo");
     expect(sparkJson).not.toHaveBeenCalled();
   });
 
@@ -180,6 +190,7 @@ describe("compare_images", () => {
 
 describe("triage", () => {
   const base: TriageResult = {
+    out_of_scope: false,
     category: "fire_hydrant",
     sam_prompt: "Fire Hydrant",
     damage_present: true,
@@ -197,6 +208,8 @@ describe("triage", () => {
   it("replaces phrases outside the category's list with the default", () => {
     expect(normalizeTriage({ ...base, sam_prompt: "broken hydrant" }).sam_prompt).toBe("fire hydrant");
     expect(normalizeTriage({ ...base, category: "other", sam_prompt: "mailbox" }).sam_prompt).toBe("mailbox");
+    expect(normalizeTriage({ ...base, category: "trash", sam_prompt: "Garbage Bags" }).sam_prompt).toBe("garbage bags");
+    expect(normalizeTriage({ ...base, category: "road_damage", sam_prompt: "road hole" }).sam_prompt).toBe("pothole");
     expect(normalizeTriage({ ...base, category: "other", sam_prompt: "mailbox and pole" }).sam_prompt).toBe("object");
     expect(normalizeTriage({ ...base, category: "other", sam_prompt: "big blue public mailbox" }).sam_prompt).toBe("object");
   });

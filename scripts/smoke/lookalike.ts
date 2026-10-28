@@ -47,7 +47,7 @@ async function main() {
       console.log("  invalid output:", res.choices[0]?.message.content);
       continue;
     }
-    console.log(`  → ${parsed.data.same_asset} (${parsed.data.confidence}) — ${parsed.data.evidence.join(" | ")}`);
+    console.log(`  → ${parsed.data.same_asset} (${parsed.data.confidence}): ${parsed.data.evidence.join(" | ")}`);
   }
 }
 

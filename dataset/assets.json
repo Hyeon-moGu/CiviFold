@@ -1,0 +1,2169 @@
+{
+  "base": {
+    "lat": 37.5665,
+    "lng": 126.978
+  },
+  "assets": [
+    {
+      "id": "H1",
+      "category": "fire_hydrant",
+      "split": "dev",
+      "role": "main",
+      "pair_of": null,
+      "object": "red hydrant with white caps",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "yellow stucco wall",
+        "green metal bike rack",
+        "striped red-white awning"
+      ],
+      "sign_texts": [
+        "BAKERY"
+      ],
+      "offset_m": {
+        "dx": 0,
+        "dy": 0
+      },
+      "special_cases": [
+        "time_conflict"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "top cap missing, water bubbling out of the top and pooling on the sidewalk",
+        "repaired": "new white top cap, fresh glossy red paint, dry sidewalk",
+        "damaged_v2": "the hydrant now leans to the right at an angle and its right side is dented"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters in front of a red fire hydrant with white caps on the sidewalk of a quiet city street, overcast daytime. Clearly visible behind and around it: a yellow stucco wall, a green metal bike rack, a striped red-and-white awning with a shop sign reading \"BAKERY\". The hydrant is damaged: its top cap is missing and water is bubbling out of the top and pooling on the sidewalk. The hydrant is in the center of the frame and fully visible."
+    },
+    {
+      "id": "H5",
+      "category": "fire_hydrant",
+      "split": "dev",
+      "role": "lookalike",
+      "pair_of": "H1",
+      "object": "red hydrant with white caps (same model as H1)",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "brown brick wall with a blue door",
+        "black metal bollard",
+        "gray awning"
+      ],
+      "sign_texts": [
+        "LAUNDRY"
+      ],
+      "offset_m": {
+        "dx": 28,
+        "dy": 0
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "top cap missing, water bubbling out of the top"
+      },
+      "prompt": "A different fire hydrant of exactly the same model and color, on another part of the same street. Replace the surroundings with: a brown brick wall with a blue door, a black metal bollard, a gray awning with a shop sign reading \"LAUNDRY\". Same type of damage: top cap missing, water bubbling out of the top."
+    },
+    {
+      "id": "H2",
+      "category": "fire_hydrant",
+      "split": "val",
+      "role": "main",
+      "pair_of": null,
+      "object": "yellow hydrant with blue caps",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "low red-brick wall with ivy",
+        "white picket fence",
+        "wooden utility pole"
+      ],
+      "sign_texts": [
+        "FLOWERS"
+      ],
+      "offset_m": {
+        "dx": 200,
+        "dy": 60
+      },
+      "special_cases": [
+        "gps_large"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "side outlet cap broken off, water spraying sideways onto the street",
+        "repaired": "new blue outlet cap, fresh yellow paint",
+        "damaged_v2": "black spray-paint graffiti tag across the body, top bonnet cracked"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters in front of a yellow fire hydrant with blue caps on the sidewalk of a quiet city street, overcast daytime. Clearly visible behind and around it: a low red-brick wall covered with ivy, a white picket fence, a wooden utility pole, and a small shop sign reading \"FLOWERS\". The hydrant is damaged: a side outlet cap is broken off and water is spraying sideways onto the street. The hydrant is in the center of the frame and fully visible."
+    },
+    {
+      "id": "H3",
+      "category": "fire_hydrant",
+      "split": "test",
+      "role": "main",
+      "pair_of": null,
+      "object": "red hydrant with silver caps, a red mailbox right next to it",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "red mailbox",
+        "gray concrete apartment entrance with glass doors",
+        "green cross sign"
+      ],
+      "sign_texts": [
+        "PHARMACY"
+      ],
+      "offset_m": {
+        "dx": -180,
+        "dy": 140
+      },
+      "special_cases": [
+        "gps_small",
+        "sam_distractor"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "front outlet cap hanging by its chain, water dripping",
+        "repaired": "cap reattached, fresh red paint",
+        "damaged_v2": "hydrant leaning backward, base bolts exposed and bent"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters in front of a red fire hydrant with silver caps on the sidewalk of a quiet city street, overcast daytime. A red mailbox stands right next to the hydrant. Clearly visible behind it: a gray concrete apartment entrance with glass doors and a green cross sign reading \"PHARMACY\". The hydrant is damaged: its front outlet cap is hanging by its chain and water is dripping. The hydrant is in the center of the frame and fully visible."
+    },
+    {
+      "id": "H6",
+      "category": "fire_hydrant",
+      "split": "test",
+      "role": "lookalike",
+      "pair_of": "H3",
+      "object": "red hydrant with silver caps (same model as H3)",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "red newspaper box",
+        "gray concrete wall with a chalkboard menu",
+        "dark green awning"
+      ],
+      "sign_texts": [
+        "CAFE 21"
+      ],
+      "offset_m": {
+        "dx": -180,
+        "dy": 170
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "front outlet cap hanging by its chain, water dripping"
+      },
+      "prompt": "A different fire hydrant of exactly the same model and color, on another part of the same street. Replace the surroundings with: a red newspaper box, a gray concrete wall with a chalkboard menu, a dark green awning with a shop sign reading \"CAFE 21\". Same type of damage: front outlet cap hanging by its chain, water dripping."
+    },
+    {
+      "id": "H4",
+      "category": "fire_hydrant",
+      "split": "test",
+      "role": "main",
+      "pair_of": null,
+      "object": "yellow hydrant with a white top",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "green metal park fence",
+        "large oak tree",
+        "park entrance arch"
+      ],
+      "sign_texts": [
+        "RIVERSIDE PARK"
+      ],
+      "offset_m": {
+        "dx": 320,
+        "dy": -120
+      },
+      "special_cases": [
+        "closeup_late"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "long vertical crack on the body, water seeping, puddle at the base",
+        "repaired": "body replaced, fresh yellow paint",
+        "damaged_v2": "operating nut on top broken off, pink spray paint stripes on the left side"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters in front of a yellow fire hydrant with a white top on the sidewalk next to a park, overcast daytime. Clearly visible behind and around it: a green metal park fence, a large oak tree, and a park entrance arch with a sign reading \"RIVERSIDE PARK\". The hydrant is damaged: a long vertical crack runs down its body, water is seeping out and forming a puddle at the base. The hydrant is in the center of the frame and fully visible."
+    },
+    {
+      "id": "S1",
+      "category": "streetlight",
+      "split": "dev",
+      "role": "main",
+      "pair_of": null,
+      "object": "gray steel street light pole with a curved arm and a flat LED head",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "bus shelter with a blue roof",
+        "tall pine tree",
+        "bookstore window display"
+      ],
+      "sign_texts": [
+        "BOOKS"
+      ],
+      "offset_m": {
+        "dx": 0,
+        "dy": 400
+      },
+      "special_cases": [
+        "gps_small"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "lamp cover shattered, glass shards scattered on the sidewalk below",
+        "repaired": "new clear lamp cover, sidewalk clean",
+        "damaged_v2": "the pole is snapped and bent over at mid-height, so its upper half and the lamp head hang down toward the sidewalk at a sharp angle"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 5 meters away, of a gray steel street light pole with a curved arm and a flat LED head on the sidewalk of a city street, overcast daytime. Clearly visible behind and around it: a bus shelter with a blue roof, a tall pine tree, and a bookstore window with a shop sign reading \"BOOKS\". The street light is damaged: the lamp cover is shattered and glass shards are scattered on the sidewalk below. The whole pole and lamp head are visible."
+    },
+    {
+      "id": "S5",
+      "category": "streetlight",
+      "split": "dev",
+      "role": "lookalike",
+      "pair_of": "S1",
+      "object": "gray steel street light pole with a curved arm (same model as S1)",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "bus shelter with a green roof",
+        "white birch tree",
+        "hardware store window"
+      ],
+      "sign_texts": [
+        "TOOLS"
+      ],
+      "offset_m": {
+        "dx": 30,
+        "dy": 400
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "lamp cover shattered, glass shards on the sidewalk"
+      },
+      "prompt": "A different street light pole of exactly the same model and color, on another part of the same street. Replace the surroundings with: a bus shelter with a green roof, a white birch tree, a hardware store window with a shop sign reading \"TOOLS\". Same type of damage: lamp cover shattered, glass shards on the sidewalk."
+    },
+    {
+      "id": "S2",
+      "category": "streetlight",
+      "split": "test",
+      "role": "main",
+      "pair_of": null,
+      "object": "black ornamental lamp post with a lantern top",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "stone staircase to a library entrance with columns",
+        "large stone planter with flowers",
+        "brass plaque on the wall"
+      ],
+      "sign_texts": [
+        "CITY LIBRARY"
+      ],
+      "offset_m": {
+        "dx": 220,
+        "dy": 460
+      },
+      "special_cases": [
+        "time_conflict"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "one lantern glass panel broken, lantern top tilted to one side",
+        "repaired": "new glass panel, lantern straight",
+        "damaged_v2": "the small access panel at the base of the post is missing, leaving an open dark square hole, and the lantern top is gone"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 5 meters away, of a black ornamental lamp post with a lantern top, overcast daytime. Clearly visible behind and around it: a stone staircase leading to a library entrance with columns and a sign reading \"CITY LIBRARY\", a large stone planter with flowers, a brass plaque on the wall. The lamp post is damaged: one lantern glass panel is broken and the lantern top is tilted to one side. The whole post is visible."
+    },
+    {
+      "id": "S3",
+      "category": "streetlight",
+      "split": "test",
+      "role": "main",
+      "pair_of": null,
+      "object": "concrete street light pole with a single lamp head, a wooden utility pole with wires right next to it",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "wooden utility pole",
+        "orange metal fire escape on a brick building",
+        "pizza shop sign"
+      ],
+      "sign_texts": [
+        "PIZZA 7"
+      ],
+      "offset_m": {
+        "dx": -200,
+        "dy": 520
+      },
+      "special_cases": [
+        "sam_distractor"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "lamp head hanging down by its cable",
+        "repaired": "lamp head reattached and level",
+        "damaged_v2": "crack in the concrete at the base, pole leaning, stickers all over the lower pole"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 5 meters away, of a concrete street light pole with a single lamp head, overcast daytime. A wooden utility pole with wires stands right next to it. Clearly visible behind: a brick building with an orange metal fire escape and a pizza shop sign reading \"PIZZA 7\". The street light is damaged: its lamp head is hanging down by its cable. The whole pole is visible."
+    },
+    {
+      "id": "S6",
+      "category": "streetlight",
+      "split": "test",
+      "role": "lookalike",
+      "pair_of": "S3",
+      "object": "concrete street light pole (same model as S3), a wooden utility pole nearby",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "wooden utility pole",
+        "green metal fire escape",
+        "tailor shop sign"
+      ],
+      "sign_texts": [
+        "TAILOR"
+      ],
+      "offset_m": {
+        "dx": -175,
+        "dy": 520
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "lamp head hanging down by its cable"
+      },
+      "prompt": "A different concrete street light pole of exactly the same model, on another part of the same street, with a wooden utility pole nearby. Replace the surroundings with: a brick building with a green metal fire escape and a tailor shop sign reading \"TAILOR\". Same type of damage: lamp head hanging down by its cable."
+    },
+    {
+      "id": "S4",
+      "category": "streetlight",
+      "split": "val",
+      "role": "main",
+      "pair_of": null,
+      "object": "slim white modern light pole with a small solar panel on top",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "glass office building facade",
+        "large red abstract sculpture",
+        "row of parked bicycles in a rack"
+      ],
+      "sign_texts": [
+        "INNOVATION HUB"
+      ],
+      "offset_m": {
+        "dx": 360,
+        "dy": 300
+      },
+      "special_cases": [],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "solar panel cracked and hanging loose from its bracket",
+        "repaired": "new solar panel, firmly attached",
+        "damaged_v2": "pole bent near the base, LED head pointing at the sky"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 5 meters away, of a slim white modern light pole with a small solar panel on top, on a plaza, overcast daytime. Clearly visible behind and around it: a glass office building facade with a sign reading \"INNOVATION HUB\", a large red abstract sculpture, a row of parked bicycles in a rack. The light pole is damaged: the solar panel is cracked and hanging loose from its bracket. The whole pole is visible."
+    },
+    {
+      "id": "W1",
+      "category": "trash",
+      "split": "dev",
+      "role": "main",
+      "pair_of": null,
+      "object": "pile of black garbage bags and a torn gray mattress dumped against a wall",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "red brick wall with a faded blue wave mural",
+        "green metal electrical cabinet",
+        "corner barber shop"
+      ],
+      "sign_texts": [
+        "BARBER"
+      ],
+      "offset_m": {
+        "dx": 0,
+        "dy": -400
+      },
+      "special_cases": [
+        "time_conflict"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "pile of black garbage bags and a torn gray mattress against the wall",
+        "repaired": "bags and mattress removed, sidewalk swept clean and wet from washing",
+        "damaged_v2": "a new pile: a broken office chair, flattened cardboard boxes and a blue tarp"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 4 meters away, of a pile of black garbage bags and a torn gray mattress dumped against a wall on the sidewalk of a quiet city street, overcast daytime. Clearly visible behind and around it: a red brick wall with a faded blue wave mural, a green metal electrical cabinet, and a corner shop sign reading \"BARBER\". The pile is in the center of the frame and fully visible."
+    },
+    {
+      "id": "W5",
+      "category": "trash",
+      "split": "dev",
+      "role": "lookalike",
+      "pair_of": "W1",
+      "object": "very similar pile of black garbage bags and a torn mattress",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "plain gray concrete wall",
+        "white metal electrical cabinet",
+        "boutique storefront"
+      ],
+      "sign_texts": [
+        "BOUTIQUE"
+      ],
+      "offset_m": {
+        "dx": 28,
+        "dy": -400
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "pile of black garbage bags and a torn mattress"
+      },
+      "prompt": "A different spot on another part of the same street, with a very similar pile of black garbage bags and a torn gray mattress dumped on the sidewalk. Replace the surroundings with: a plain gray concrete wall, a white metal electrical cabinet, and a shop sign reading \"BOUTIQUE\". Overcast daytime, eye level, about 4 meters away."
+    },
+    {
+      "id": "W2",
+      "category": "trash",
+      "split": "val",
+      "role": "main",
+      "pair_of": null,
+      "object": "overflowing public trash bin with white bags piled around its base",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "bus stop bench with a yellow roof",
+        "tall palm tree",
+        "phone repair shop"
+      ],
+      "sign_texts": [
+        "PHONE FIX"
+      ],
+      "offset_m": {
+        "dx": 220,
+        "dy": -360
+      },
+      "special_cases": [
+        "gps_small"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "bin overflowing, a dozen white bags stacked around its base, litter on the sidewalk",
+        "repaired": "bin emptied, bags removed, sidewalk clean",
+        "damaged_v2": "bin knocked over on its side, trash spilled across the sidewalk"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 4 meters away, of an overflowing public trash bin on a sidewalk, overcast daytime, with a dozen white garbage bags stacked around its base and litter scattered on the sidewalk. Clearly visible behind and around it: a bus stop bench with a yellow roof, a tall palm tree, and a small shop sign reading \"PHONE FIX\". The bin and the bags are in the center of the frame."
+    },
+    {
+      "id": "W3",
+      "category": "trash",
+      "split": "test",
+      "role": "main",
+      "pair_of": null,
+      "object": "stack of flattened cardboard boxes and two broken wooden chairs on the curb, a blue recycling bin right next to it",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "blue recycling bin",
+        "brick apartment entrance with a green door",
+        "dry cleaner shop"
+      ],
+      "sign_texts": [
+        "CLEANERS"
+      ],
+      "offset_m": {
+        "dx": -200,
+        "dy": -300
+      },
+      "special_cases": [
+        "sam_distractor"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "stack of flattened cardboard boxes and two broken wooden chairs",
+        "repaired": "curb cleared",
+        "damaged_v2": "an old sofa with torn cushions dumped on the curb"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 4 meters away, of a stack of flattened cardboard boxes and two broken wooden chairs dumped on the curb of a residential street, overcast daytime. A blue recycling bin stands right next to the pile. Clearly visible behind it: a brick apartment entrance with a green door and a dry cleaner shop sign reading \"CLEANERS\". The pile is in the center of the frame and fully visible."
+    },
+    {
+      "id": "W6",
+      "category": "trash",
+      "split": "test",
+      "role": "lookalike",
+      "pair_of": "W3",
+      "object": "similar stack of cardboard boxes and broken chairs, a blue recycling bin nearby",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "blue recycling bin",
+        "stone apartment steps with a red door",
+        "shoe repair shop"
+      ],
+      "sign_texts": [
+        "SHOES"
+      ],
+      "offset_m": {
+        "dx": -200,
+        "dy": -272
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "stack of cardboard boxes and broken chairs"
+      },
+      "prompt": "A different spot on another part of the same street, with a similar stack of cardboard boxes and broken wooden chairs on the curb and a blue recycling bin nearby. Replace the surroundings with: stone apartment steps with a red door and a shoe repair shop sign reading \"SHOES\"."
+    },
+    {
+      "id": "W4",
+      "category": "trash",
+      "split": "test",
+      "role": "main",
+      "pair_of": null,
+      "object": "old white refrigerator lying on its side with plastic bags around it",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "concrete underpass pillar with yellow-black stripes",
+        "chain-link fence",
+        "tire shop"
+      ],
+      "sign_texts": [
+        "TIRES"
+      ],
+      "offset_m": {
+        "dx": 380,
+        "dy": -480
+      },
+      "special_cases": [
+        "gps_large"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "old white refrigerator on its side with plastic bags",
+        "repaired": "area cleared",
+        "damaged_v2": "a pile of construction rubble and broken tiles"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 5 meters away, of an old white refrigerator lying on its side on a strip of dirt beside a road, with plastic bags around it, overcast daytime. Clearly visible behind and around it: a concrete underpass pillar painted with yellow and black stripes, a chain-link fence, and a tire shop sign reading \"TIRES\". The refrigerator is in the center of the frame."
+    },
+    {
+      "id": "P1",
+      "category": "road_damage",
+      "split": "dev",
+      "role": "main",
+      "pair_of": null,
+      "object": "round pothole in the asphalt near the curb, filled with muddy water",
+      "object_short": "pothole",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "yellow-painted curb",
+        "blue bike lane symbol painted on the road",
+        "gelato shop"
+      ],
+      "sign_texts": [
+        "GELATO"
+      ],
+      "offset_m": {
+        "dx": 700,
+        "dy": 0
+      },
+      "special_cases": [
+        "time_conflict"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "round pothole filled with muddy water",
+        "repaired": "square patch of fresh black asphalt where the pothole was",
+        "damaged_v2": "a new crack running from the patch edge toward the crosswalk, edge crumbling"
+      },
+      "prompt": "Smartphone photo taken standing on the sidewalk, looking down at the road about 3 meters away, of a round pothole in the asphalt next to the curb, filled with muddy water, overcast daytime. Clearly visible around it: a yellow-painted curb, a blue bike lane symbol painted on the road, and across the sidewalk an ice cream shop with a sign reading \"GELATO\". The pothole is in the center of the frame."
+    },
+    {
+      "id": "P5",
+      "category": "road_damage",
+      "split": "dev",
+      "role": "lookalike",
+      "pair_of": "P1",
+      "object": "similar round pothole near the curb, filled with water",
+      "object_short": "pothole",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "plain gray curb",
+        "white bike lane symbol",
+        "tea house"
+      ],
+      "sign_texts": [
+        "TEA HOUSE"
+      ],
+      "offset_m": {
+        "dx": 728,
+        "dy": 0
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "round pothole filled with water"
+      },
+      "prompt": "A different spot on another part of the same street, with a similar round pothole next to the curb, filled with water. Change the surroundings completely: the curb is plain gray concrete with no yellow paint, the bike lane symbol is painted white, and across the sidewalk is a tea house storefront with a large, clearly readable sign reading \"TEA HOUSE\"."
+    },
+    {
+      "id": "P2",
+      "category": "road_damage",
+      "split": "val",
+      "role": "main",
+      "pair_of": null,
+      "object": "patch of alligator cracking with a sunken section across the lane",
+      "object_short": "cracked patch",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "speed bump with yellow stripes",
+        "row of young ginkgo trees",
+        "gym storefront"
+      ],
+      "sign_texts": [
+        "FITNESS"
+      ],
+      "offset_m": {
+        "dx": 900,
+        "dy": 60
+      },
+      "special_cases": [
+        "gps_small"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "alligator cracking with a sunken section",
+        "repaired": "lane resurfaced with smooth new asphalt",
+        "damaged_v2": "a new pothole opened in the middle of the fresh surface"
+      },
+      "prompt": "Smartphone photo taken from the sidewalk about 4 meters away, of a patch of alligator cracking with a sunken section across a traffic lane, overcast daytime. Clearly visible around it: a speed bump painted with yellow stripes, a row of young ginkgo trees along the sidewalk, and a gym storefront with a sign reading \"FITNESS\". The damaged patch is in the center of the frame."
+    },
+    {
+      "id": "P3",
+      "category": "road_damage",
+      "split": "test",
+      "role": "main",
+      "pair_of": null,
+      "object": "deep pothole right next to a storm drain grate",
+      "object_short": "pothole",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "storm drain grate",
+        "green park bench",
+        "music store"
+      ],
+      "sign_texts": [
+        "GUITARS"
+      ],
+      "offset_m": {
+        "dx": 700,
+        "dy": 220
+      },
+      "special_cases": [
+        "sam_distractor"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "deep pothole next to the drain",
+        "repaired": "pothole patched with asphalt",
+        "damaged_v2": "drain grate sunk below the road surface, asphalt broken around it"
+      },
+      "prompt": "Smartphone photo taken from the sidewalk about 3 meters away, of a deep pothole in the road right next to a storm drain grate at the curb, overcast daytime. Clearly visible around it: a green park bench on the sidewalk and a music store with a sign reading \"GUITARS\". The pothole is in the center of the frame and the drain grate is beside it."
+    },
+    {
+      "id": "P6",
+      "category": "road_damage",
+      "split": "test",
+      "role": "lookalike",
+      "pair_of": "P3",
+      "object": "similar deep pothole next to a storm drain grate",
+      "object_short": "pothole",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "storm drain grate",
+        "wooden planter box",
+        "bicycle shop"
+      ],
+      "sign_texts": [
+        "BIKES"
+      ],
+      "offset_m": {
+        "dx": 700,
+        "dy": 248
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "deep pothole next to a drain"
+      },
+      "prompt": "A different spot further along the same street, with a similar deep pothole next to a storm drain grate. Replace the surroundings with: a wooden planter box on the sidewalk and a bicycle shop with a sign reading \"BIKES\"."
+    },
+    {
+      "id": "P4",
+      "category": "road_damage",
+      "split": "test",
+      "role": "main",
+      "pair_of": null,
+      "object": "sidewalk slab lifted and cracked by a tree root",
+      "object_short": "lifted sidewalk slab",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "large plane tree",
+        "red telephone booth",
+        "wine bar"
+      ],
+      "sign_texts": [
+        "WINE BAR"
+      ],
+      "offset_m": {
+        "dx": 1000,
+        "dy": -150
+      },
+      "special_cases": [
+        "closeup_late"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "sidewalk slab lifted by a tree root, a tripping hazard",
+        "repaired": "slab replaced with flat new concrete",
+        "damaged_v2": "the new slab cracked diagonally, one corner sunk"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters away, of a concrete sidewalk slab lifted and cracked by the root of a large plane tree, a tripping hazard, overcast daytime. Clearly visible around it: the plane tree trunk, a red telephone booth, and a wine bar with a sign reading \"WINE BAR\". The lifted slab is in the center of the frame."
+    },
+    {
+      "id": "H7",
+      "category": "fire_hydrant",
+      "split": "val",
+      "role": "lookalike",
+      "pair_of": "H2",
+      "object": "yellow hydrant with blue caps (same model as H2)",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "gray stone wall",
+        "black iron fence",
+        "metal lamp post with a hanging flower basket"
+      ],
+      "sign_texts": [
+        "HARDWARE"
+      ],
+      "offset_m": {
+        "dx": 228,
+        "dy": 60
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "side outlet cap broken off, water spraying sideways onto the street"
+      },
+      "prompt": "A different fire hydrant of exactly the same model and color, on another part of the same street. Replace the surroundings with: a gray stone wall, a black iron fence, a metal lamp post with a hanging flower basket, and a small shop sign reading \"HARDWARE\". Same type of damage: side outlet cap broken off, water spraying sideways onto the street."
+    },
+    {
+      "id": "H8",
+      "category": "fire_hydrant",
+      "split": "test",
+      "role": "lookalike",
+      "pair_of": "H4",
+      "object": "yellow hydrant with a white top (same model as H4)",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "red brick schoolyard wall",
+        "row of young maple trees",
+        "blue school gate"
+      ],
+      "sign_texts": [
+        "MAPLE SCHOOL"
+      ],
+      "offset_m": {
+        "dx": 348,
+        "dy": -120
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "long vertical crack on the body, water seeping, puddle at the base"
+      },
+      "prompt": "A different fire hydrant of exactly the same model and color, further along the same street. Replace the surroundings with: a red brick schoolyard wall, a row of young maple trees, and a blue school gate with a sign reading \"MAPLE SCHOOL\". Same type of damage: a long vertical crack on the body, water seeping and forming a puddle at the base."
+    },
+    {
+      "id": "S7",
+      "category": "streetlight",
+      "split": "test",
+      "role": "lookalike",
+      "pair_of": "S2",
+      "object": "black ornamental lamp post with a lantern top (same model as S2)",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "red brick church facade with arched doors",
+        "wooden bench",
+        "low hedge"
+      ],
+      "sign_texts": [
+        "ST. MARK HALL"
+      ],
+      "offset_m": {
+        "dx": 248,
+        "dy": 460
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "one lantern glass panel broken, lantern top tilted to one side"
+      },
+      "prompt": "A different black ornamental lamp post of exactly the same model, on another part of the same street. Replace the surroundings with: a red brick church facade with arched wooden doors and a sign reading \"ST. MARK HALL\", a wooden bench, a low hedge. Same type of damage: one lantern glass panel broken, lantern top tilted to one side."
+    },
+    {
+      "id": "S8",
+      "category": "streetlight",
+      "split": "val",
+      "role": "lookalike",
+      "pair_of": "S4",
+      "object": "slim white modern light pole with a small solar panel (same model as S4)",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "low concrete parking garage",
+        "row of potted olive trees",
+        "electric car charging posts without cars"
+      ],
+      "sign_texts": [
+        "PARKING P2"
+      ],
+      "offset_m": {
+        "dx": 388,
+        "dy": 300
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "solar panel cracked and hanging loose from its bracket"
+      },
+      "prompt": "A different slim white light pole of exactly the same model with a small solar panel on top, at the other end of the same plaza. Replace the surroundings with: a low concrete parking garage with a sign reading \"PARKING P2\", a row of potted olive trees, empty electric charging posts. Same type of damage: solar panel cracked and hanging loose from its bracket."
+    },
+    {
+      "id": "W7",
+      "category": "trash",
+      "split": "val",
+      "role": "lookalike",
+      "pair_of": "W2",
+      "object": "overflowing public trash bin with bags piled around it",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "plain glass bus shelter with a red roof",
+        "young linden tree",
+        "bakery storefront"
+      ],
+      "sign_texts": [
+        "DONUTS"
+      ],
+      "offset_m": {
+        "dx": 248,
+        "dy": -360
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "bin overflowing, a dozen white bags stacked around its base, litter on the sidewalk"
+      },
+      "prompt": "A different spot on another part of the same street, with a very similar overflowing public trash bin and white garbage bags piled around its base. Replace the surroundings with: a plain glass bus shelter with a red roof, a young linden tree, and a bakery storefront with a sign reading \"DONUTS\"."
+    },
+    {
+      "id": "W8",
+      "category": "trash",
+      "split": "test",
+      "role": "lookalike",
+      "pair_of": "W4",
+      "object": "old white refrigerator lying on its side with plastic bags",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "brick warehouse wall with a rolling steel door",
+        "orange traffic barrier",
+        "car wash"
+      ],
+      "sign_texts": [
+        "CAR WASH"
+      ],
+      "offset_m": {
+        "dx": 408,
+        "dy": -480
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "old white refrigerator on its side with plastic bags"
+      },
+      "prompt": "A different spot further along the same road, with a very similar old white refrigerator lying on its side and plastic bags around it. Replace the surroundings with: a brick warehouse wall with a rolling steel door, an orange traffic barrier, and a car wash sign reading \"CAR WASH\"."
+    },
+    {
+      "id": "P7",
+      "category": "road_damage",
+      "split": "val",
+      "role": "lookalike",
+      "pair_of": "P2",
+      "object": "patch of alligator cracking with a sunken section",
+      "object_short": "cracked patch",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "white zebra crosswalk",
+        "row of tall poplar trees",
+        "pharmacy storefront"
+      ],
+      "sign_texts": [
+        "DRUGSTORE"
+      ],
+      "offset_m": {
+        "dx": 928,
+        "dy": 60
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "alligator cracking with a sunken section"
+      },
+      "prompt": "A different spot on another part of the same street, with a similar patch of alligator cracking and a sunken section across the lane. Change the surroundings completely: a white zebra crosswalk next to it, a row of tall poplar trees, and a storefront with a sign reading \"DRUGSTORE\"."
+    },
+    {
+      "id": "P8",
+      "category": "road_damage",
+      "split": "test",
+      "role": "lookalike",
+      "pair_of": "P4",
+      "object": "sidewalk slab lifted and cracked by a tree root",
+      "object_short": "lifted sidewalk slab",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "large linden tree",
+        "green newspaper vending box",
+        "ice cream parlor"
+      ],
+      "sign_texts": [
+        "SCOOPS"
+      ],
+      "offset_m": {
+        "dx": 1028,
+        "dy": -150
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "sidewalk slab lifted by a tree root, a tripping hazard"
+      },
+      "prompt": "A different spot further along the same sidewalk, with a similar concrete slab lifted and cracked by a tree root. Change the surroundings completely: a large linden tree, a green newspaper vending box, and an ice cream parlor with a sign reading \"SCOOPS\"."
+    },
+    {
+      "id": "H9",
+      "category": "fire_hydrant",
+      "split": "holdout",
+      "role": "main",
+      "pair_of": null,
+      "object": "short red hydrant with a black top and chains on its caps",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "blue post office drop box",
+        "glass bus shelter",
+        "white stone bank facade with columns"
+      ],
+      "sign_texts": [
+        "SAVINGS BANK"
+      ],
+      "offset_m": {
+        "dx": -600,
+        "dy": 0
+      },
+      "special_cases": [
+        "time_conflict"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "side outlet cap missing, the open outlet dripping water onto the sidewalk",
+        "repaired": "new outlet cap fitted, fresh red paint",
+        "damaged_v2": "a jagged crack splits the black top cap, and water trickles out of it leaving a dark wet streak down one side of the red body and a small puddle at the base"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters in front of a short red fire hydrant with a black top and chains on its caps, on the sidewalk of a downtown street, overcast daytime. Clearly visible behind and around it: a blue post office drop box, a glass bus shelter, and a white stone bank facade with columns and a sign reading \"SAVINGS BANK\". The hydrant is damaged: its side outlet cap is missing and water drips from the open outlet onto the sidewalk. The hydrant is in the center of the frame and fully visible."
+    },
+    {
+      "id": "H10",
+      "category": "fire_hydrant",
+      "split": "holdout",
+      "role": "lookalike",
+      "pair_of": "H9",
+      "object": "short red hydrant with a black top (same model as H9)",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "green newspaper box",
+        "bike rack with two bicycles removed (empty rack)",
+        "yellow brick bakery front"
+      ],
+      "sign_texts": [
+        "SUNRISE DELI"
+      ],
+      "offset_m": {
+        "dx": -572,
+        "dy": 0
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "side outlet cap missing, water dripping"
+      },
+      "prompt": "A different short red fire hydrant of exactly the same model, further along the same street. Replace the surroundings with: a green newspaper box, an empty metal bike rack, and a yellow brick shop front with a sign reading \"SUNRISE DELI\". Same type of damage: side outlet cap missing, water dripping onto the sidewalk."
+    },
+    {
+      "id": "S9",
+      "category": "streetlight",
+      "split": "holdout",
+      "role": "main",
+      "pair_of": null,
+      "object": "tall gray steel street light pole with a single curved arm",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "red fire alarm box on the pole base",
+        "row of parking meters",
+        "glass office lobby entrance"
+      ],
+      "sign_texts": [
+        "TECH TOWER"
+      ],
+      "offset_m": {
+        "dx": -600,
+        "dy": 400
+      },
+      "special_cases": [
+        "gps_small"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "lamp cover cracked open and hanging from the arm",
+        "repaired": "new lamp cover, arm straight",
+        "damaged_v2": "a small dent near the base of the pole with peeling gray paint around it"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 6 meters away, of a tall gray steel street light pole with a single curved arm on a business street, overcast daytime. Clearly visible around it: a red fire alarm box mounted low on the pole, a row of parking meters, and a glass office lobby entrance with a sign reading \"TECH TOWER\". The light is damaged: the lamp cover at the end of the arm is cracked open and hanging down. The whole pole is visible."
+    },
+    {
+      "id": "S10",
+      "category": "streetlight",
+      "split": "holdout",
+      "role": "lookalike",
+      "pair_of": "S9",
+      "object": "tall gray steel street light pole with a single curved arm (same model as S9)",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "blue recycling bin",
+        "small tree in a metal grate",
+        "laundromat window"
+      ],
+      "sign_texts": [
+        "WASH & FOLD"
+      ],
+      "offset_m": {
+        "dx": -570,
+        "dy": 400
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "lamp cover cracked open and hanging"
+      },
+      "prompt": "A different tall gray steel street light pole of exactly the same model, further along the same street. Replace the surroundings with: a blue recycling bin, a small tree in a metal grate, and a laundromat window with a sign reading \"WASH & FOLD\". Same type of damage: the lamp cover cracked open and hanging from the arm."
+    },
+    {
+      "id": "W9",
+      "category": "trash",
+      "split": "holdout",
+      "role": "main",
+      "pair_of": null,
+      "object": "pile of black garbage bags and a broken wooden pallet next to a gray electrical utility box",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "gray electrical utility box",
+        "orange brick wall with a metal roll-up shutter",
+        "streetlight with a banner"
+      ],
+      "sign_texts": [
+        "AUTO PARTS"
+      ],
+      "offset_m": {
+        "dx": -600,
+        "dy": -400
+      },
+      "special_cases": [
+        "sam_distractor"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "pile of black garbage bags and a broken wooden pallet",
+        "repaired": "spot swept clean",
+        "damaged_v2": "a few loose plastic bottles and one torn bag by the utility box"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 4 meters away, of a pile of black garbage bags and a broken wooden pallet dumped on the sidewalk next to a gray electrical utility box, overcast daytime. Clearly visible behind it: an orange brick wall with a metal roll-up shutter and a sign reading \"AUTO PARTS\", and a streetlight with a banner. The pile is in the center of the frame and fully visible."
+    },
+    {
+      "id": "W10",
+      "category": "trash",
+      "split": "holdout",
+      "role": "lookalike",
+      "pair_of": "W9",
+      "object": "similar pile of black garbage bags and a broken pallet next to a gray utility box",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "gray electrical utility box",
+        "white painted wall with a blue door",
+        "fire escape ladder"
+      ],
+      "sign_texts": [
+        "PRINT SHOP"
+      ],
+      "offset_m": {
+        "dx": -572,
+        "dy": -400
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "pile of black garbage bags and a broken pallet"
+      },
+      "prompt": "A different spot further along the same street, with a similar pile of black garbage bags and a broken wooden pallet next to a gray electrical utility box. Replace the surroundings with: a white painted wall with a blue door, a fire escape ladder, and a sign reading \"PRINT SHOP\"."
+    },
+    {
+      "id": "P9",
+      "category": "road_damage",
+      "split": "holdout",
+      "role": "main",
+      "pair_of": null,
+      "object": "wide crack with broken asphalt in a painted crosswalk",
+      "object_short": "damaged spot",
+      "sam_prompt": "broken pavement",
+      "landmarks": [
+        "white crosswalk stripes",
+        "pedestrian signal pole",
+        "corner flower shop with green awning"
+      ],
+      "sign_texts": [
+        "BLOOM"
+      ],
+      "offset_m": {
+        "dx": -900,
+        "dy": 200
+      },
+      "special_cases": [
+        "closeup_late"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "wide crack with loose broken asphalt chunks across two crosswalk stripes",
+        "repaired": "crack filled with fresh black asphalt, stripes repainted",
+        "damaged_v2": "a hairline crack reopening along the edge of the new patch"
+      },
+      "prompt": "Smartphone photo taken from the curb about 3 meters away, of a wide crack with loose broken asphalt chunks running across two white crosswalk stripes, overcast daytime. Clearly visible around it: a pedestrian signal pole and a corner flower shop with a green awning and a sign reading \"BLOOM\". The damaged spot is in the center of the frame."
+    },
+    {
+      "id": "P10",
+      "category": "road_damage",
+      "split": "holdout",
+      "role": "lookalike",
+      "pair_of": "P9",
+      "object": "similar wide crack with broken asphalt in a painted crosswalk",
+      "object_short": "damaged spot",
+      "sam_prompt": "broken pavement",
+      "landmarks": [
+        "white crosswalk stripes",
+        "mailbox on a post",
+        "barbershop pole"
+      ],
+      "sign_texts": [
+        "CUTS"
+      ],
+      "offset_m": {
+        "dx": -872,
+        "dy": 200
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "wide crack with broken asphalt across crosswalk stripes"
+      },
+      "prompt": "A different crosswalk at the next corner of the same street, with a similar wide crack and loose broken asphalt across two white stripes. Replace the surroundings with: a mailbox on a post, a red-white-blue barbershop pole and a sign reading \"CUTS\"."
+    },
+    {
+      "id": "H11",
+      "category": "fire_hydrant",
+      "split": "holdout2",
+      "role": "main",
+      "pair_of": null,
+      "object": "yellow hydrant with a silver bonnet",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "red brick church with a bell tower",
+        "stone bench",
+        "bike lane sign on a post"
+      ],
+      "sign_texts": [
+        "ST. PAUL'S"
+      ],
+      "offset_m": {
+        "dx": -1200,
+        "dy": -900
+      },
+      "special_cases": [
+        "time_conflict"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "bonnet cracked open with a thin jet of water spraying upward",
+        "repaired": "new bonnet fitted, fresh yellow paint",
+        "damaged_v2": "a chunk chipped off the lower barrel, exposing rusty metal"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters in front of a yellow fire hydrant with a silver bonnet on the sidewalk, overcast daytime. Clearly visible behind and around it: a red brick church with a bell tower and a sign reading \"ST. PAUL'S\", a stone bench, and a bike lane sign on a post. The hydrant is damaged: its bonnet is cracked open and a thin jet of water sprays upward. The hydrant is in the center of the frame and fully visible."
+    },
+    {
+      "id": "H13",
+      "category": "fire_hydrant",
+      "split": "holdout2",
+      "role": "lookalike",
+      "pair_of": "H11",
+      "object": "yellow hydrant with a silver bonnet (same model as H11)",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "gray stone library steps",
+        "bronze statue",
+        "bike lane sign on a post"
+      ],
+      "sign_texts": [
+        "PUBLIC LIBRARY"
+      ],
+      "offset_m": {
+        "dx": -1172,
+        "dy": -900
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "bonnet cracked, thin jet of water"
+      },
+      "prompt": "A different yellow fire hydrant of exactly the same model, further along the same street. Replace the surroundings with: gray stone library steps with a sign reading \"PUBLIC LIBRARY\", a bronze statue on a plinth, and a bike lane sign on a post. Same type of damage: the bonnet is cracked open and a thin jet of water sprays upward."
+    },
+    {
+      "id": "H12",
+      "category": "fire_hydrant",
+      "split": "holdout2",
+      "role": "main",
+      "pair_of": null,
+      "object": "green hydrant with white caps",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "white picket fence",
+        "wooden mailbox post",
+        "community garden gate"
+      ],
+      "sign_texts": [
+        "GREEN GARDENS"
+      ],
+      "offset_m": {
+        "dx": -1500,
+        "dy": -900
+      },
+      "special_cases": [
+        "gps_large"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "front cap missing, water gushing into the gutter",
+        "repaired": "cap replaced, hydrant dry",
+        "damaged_v2": "a small black graffiti tag scrawled on the side of the hydrant"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters in front of a green fire hydrant with white caps on a residential sidewalk, overcast daytime. Clearly visible behind and around it: a white picket fence, a wooden mailbox post, and a community garden gate with a sign reading \"GREEN GARDENS\". The hydrant is damaged: its front cap is missing and water gushes into the gutter. The hydrant is in the center of the frame and fully visible."
+    },
+    {
+      "id": "H14",
+      "category": "fire_hydrant",
+      "split": "holdout2",
+      "role": "lookalike",
+      "pair_of": "H12",
+      "object": "green hydrant with white caps (same model as H12)",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "low stone wall",
+        "empty concrete driveway",
+        "blue front door"
+      ],
+      "sign_texts": [
+        "MAPLE HOUSE"
+      ],
+      "offset_m": {
+        "dx": -1472,
+        "dy": -900
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "front cap missing, water gushing"
+      },
+      "prompt": "A different green fire hydrant with white caps of exactly the same model, at another house on the same street. Replace the surroundings with: a low stone wall, an empty driveway, and a house with a blue front door and a sign reading \"MAPLE HOUSE\". Same type of damage: the front cap is missing and water gushes into the gutter."
+    },
+    {
+      "id": "S11",
+      "category": "streetlight",
+      "split": "holdout2",
+      "role": "main",
+      "pair_of": null,
+      "object": "concrete pole with a cobra-head lamp",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "bus stop bench with an ad panel",
+        "yellow painted curb",
+        "car dealership window"
+      ],
+      "sign_texts": [
+        "CITY MOTORS"
+      ],
+      "offset_m": {
+        "dx": -1800,
+        "dy": -900
+      },
+      "special_cases": [
+        "closeup_late"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "lamp head hanging down by its wires, glass shattered",
+        "repaired": "new lamp head fitted, glass intact",
+        "damaged_v2": "the small access door at the base of the pole hanging open, wires visible inside"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 6 meters away, of a concrete street light pole with a cobra-head lamp on a commercial street, overcast daytime. Clearly visible around it: a bus stop bench with an advertising panel, a yellow painted curb, and a car dealership window with a sign reading \"CITY MOTORS\". The light is damaged: the lamp head hangs down by its wires and its glass is shattered. The whole pole is visible."
+    },
+    {
+      "id": "S13",
+      "category": "streetlight",
+      "split": "holdout2",
+      "role": "lookalike",
+      "pair_of": "S11",
+      "object": "concrete pole with a cobra-head lamp (same model as S11)",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "blue bike share dock",
+        "glass phone booth",
+        "furniture store window"
+      ],
+      "sign_texts": [
+        "HOME & SOFA"
+      ],
+      "offset_m": {
+        "dx": -1770,
+        "dy": -900
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "lamp head hanging by its wires, glass shattered"
+      },
+      "prompt": "A different concrete street light pole with a cobra-head lamp of exactly the same model, further along the same street. Replace the surroundings with: a blue bike share dock, a glass phone booth, and a furniture store window with a sign reading \"HOME & SOFA\". Same type of damage: the lamp head hangs down by its wires with shattered glass."
+    },
+    {
+      "id": "S12",
+      "category": "streetlight",
+      "split": "holdout2",
+      "role": "main",
+      "pair_of": null,
+      "object": "green cast-iron lamp post with two glass globes",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "brick plaza with a fountain",
+        "round metal trash can",
+        "clock tower"
+      ],
+      "sign_texts": [
+        "MARKET SQUARE"
+      ],
+      "offset_m": {
+        "dx": -2100,
+        "dy": -900
+      },
+      "special_cases": [
+        "gps_small",
+        "sam_distractor"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "one of the two glass globes broken, jagged glass left",
+        "repaired": "both globes intact",
+        "damaged_v2": "the other glass globe now missing completely, bare bulb socket"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 5 meters away, of a green cast-iron lamp post with two glass globes on a brick plaza, overcast daytime. Another similar lamp post stands far in the background. Clearly visible around it: a stone fountain, a round metal trash can, and a clock tower with a sign reading \"MARKET SQUARE\". The lamp post is damaged: one of its two glass globes is broken, leaving jagged glass. The whole lamp post is visible."
+    },
+    {
+      "id": "S14",
+      "category": "streetlight",
+      "split": "holdout2",
+      "role": "lookalike",
+      "pair_of": "S12",
+      "object": "green cast-iron lamp post with two glass globes (same model as S12)",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "brick plaza with flower beds",
+        "wooden bench",
+        "museum entrance with banners"
+      ],
+      "sign_texts": [
+        "CITY MUSEUM"
+      ],
+      "offset_m": {
+        "dx": -2070,
+        "dy": -900
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "one glass globe broken"
+      },
+      "prompt": "A different green cast-iron lamp post with two glass globes of exactly the same model, at the other end of the plaza. Replace the surroundings with: brick flower beds, a wooden bench, and a museum entrance with hanging banners and a sign reading \"CITY MUSEUM\". Same type of damage: one of the two glass globes is broken."
+    },
+    {
+      "id": "W11",
+      "category": "trash",
+      "split": "holdout2",
+      "role": "main",
+      "pair_of": null,
+      "object": "old mattress and a broken TV dumped next to a green dumpster",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "green dumpster",
+        "chain-link fence",
+        "brick warehouse with a loading dock"
+      ],
+      "sign_texts": [
+        "STORAGE"
+      ],
+      "offset_m": {
+        "dx": -1200,
+        "dy": -1300
+      },
+      "special_cases": [
+        "time_conflict"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "old stained mattress and a broken TV leaning against the dumpster",
+        "repaired": "spot cleared, only the dumpster left",
+        "damaged_v2": "one tied bag of household trash and a flattened cardboard box beside the dumpster"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 4 meters away, of an old stained mattress and a broken TV dumped next to a green dumpster on the edge of an alley, overcast daytime. Clearly visible behind it: a chain-link fence and a brick warehouse with a loading dock and a sign reading \"STORAGE\". The dumped items are in the center of the frame and fully visible."
+    },
+    {
+      "id": "W13",
+      "category": "trash",
+      "split": "holdout2",
+      "role": "lookalike",
+      "pair_of": "W11",
+      "object": "similar old mattress and broken TV next to a green dumpster",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "green dumpster",
+        "wooden fence",
+        "empty parking spot"
+      ],
+      "sign_texts": [
+        "LOT B"
+      ],
+      "offset_m": {
+        "dx": -1172,
+        "dy": -1300
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "old mattress and broken TV"
+      },
+      "prompt": "A different spot further down the same alley, with a similar old stained mattress and a broken TV next to a green dumpster. Replace the surroundings with: a wooden fence, an empty parking spot, and a sign reading \"LOT B\"."
+    },
+    {
+      "id": "W12",
+      "category": "trash",
+      "split": "holdout2",
+      "role": "main",
+      "pair_of": null,
+      "object": "construction debris: broken drywall pieces and empty paint buckets",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "orange traffic barrel",
+        "tan stucco wall",
+        "tile store window"
+      ],
+      "sign_texts": [
+        "TILE & STONE"
+      ],
+      "offset_m": {
+        "dx": -1500,
+        "dy": -1300
+      },
+      "special_cases": [
+        "gps_small"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "broken drywall pieces and several empty paint buckets on the sidewalk",
+        "repaired": "sidewalk swept clean",
+        "damaged_v2": "three empty paint buckets left again by the wall"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 4 meters away, of construction debris dumped on the sidewalk: broken drywall pieces and several empty paint buckets, overcast daytime. Clearly visible behind it: an orange traffic barrel, a tan stucco wall, and a tile store window with a sign reading \"TILE & STONE\". The debris is in the center of the frame and fully visible."
+    },
+    {
+      "id": "W14",
+      "category": "trash",
+      "split": "holdout2",
+      "role": "lookalike",
+      "pair_of": "W12",
+      "object": "similar broken drywall and paint buckets",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "orange traffic barrel",
+        "gray concrete wall with a mural",
+        "hardware store window"
+      ],
+      "sign_texts": [
+        "FIX-IT"
+      ],
+      "offset_m": {
+        "dx": -1472,
+        "dy": -1300
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "broken drywall and paint buckets"
+      },
+      "prompt": "A different spot further along the same street, with similar broken drywall pieces and empty paint buckets on the sidewalk and an orange traffic barrel. Replace the surroundings with: a gray concrete wall with a colorful mural and a hardware store window with a sign reading \"FIX-IT\"."
+    },
+    {
+      "id": "P11",
+      "category": "road_damage",
+      "split": "holdout2",
+      "role": "main",
+      "pair_of": null,
+      "object": "large pothole in a green-painted bike lane",
+      "object_short": "pothole",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "green bike lane paint",
+        "bike share dock",
+        "cafe with red umbrellas"
+      ],
+      "sign_texts": [
+        "ESPRESSO BAR"
+      ],
+      "offset_m": {
+        "dx": -1800,
+        "dy": -1300
+      },
+      "special_cases": [
+        "closeup_late"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "large deep pothole breaking through the green bike lane paint",
+        "repaired": "pothole patched with asphalt, green paint redone",
+        "damaged_v2": "the edge of the patch broken up, a small new pothole forming beside it"
+      },
+      "prompt": "Smartphone photo taken from the curb about 3 meters away, of a large deep pothole breaking through a green-painted bike lane, overcast daytime. Clearly visible around it: a bike share dock and a cafe with red umbrellas and a sign reading \"ESPRESSO BAR\". The pothole is in the center of the frame."
+    },
+    {
+      "id": "P13",
+      "category": "road_damage",
+      "split": "holdout2",
+      "role": "lookalike",
+      "pair_of": "P11",
+      "object": "similar large pothole in a green bike lane",
+      "object_short": "pothole",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "green bike lane paint",
+        "parking meter",
+        "bookstore window"
+      ],
+      "sign_texts": [
+        "PAGES"
+      ],
+      "offset_m": {
+        "dx": -1772,
+        "dy": -1300
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "large pothole in the green bike lane"
+      },
+      "prompt": "A different spot further along the same street, with a similar large pothole in a green-painted bike lane. Replace the surroundings with: a parking meter and a bookstore window with a sign reading \"PAGES\"."
+    },
+    {
+      "id": "P12",
+      "category": "road_damage",
+      "split": "holdout2",
+      "role": "main",
+      "pair_of": null,
+      "object": "lifted and cracked concrete sidewalk slab beside a street tree",
+      "object_short": "damaged spot",
+      "sam_prompt": "broken pavement",
+      "landmarks": [
+        "tree in a metal grate",
+        "blue newspaper box",
+        "dentist office door"
+      ],
+      "sign_texts": [
+        "SMILE DENTAL"
+      ],
+      "offset_m": {
+        "dx": -2100,
+        "dy": -1300
+      },
+      "special_cases": [
+        "sam_distractor"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "a sidewalk slab lifted about 5 cm by tree roots and cracked across",
+        "repaired": "slab replaced, sidewalk flat and smooth",
+        "damaged_v2": "a new hairline crack across the replaced slab"
+      },
+      "prompt": "Smartphone photo taken from about 3 meters away, of a concrete sidewalk slab lifted about 5 cm by the roots of a street tree and cracked across, overcast daytime. Clearly visible around it: the tree in a metal grate, a blue newspaper box, and a dentist office door with a sign reading \"SMILE DENTAL\". The damaged slab is in the center of the frame."
+    },
+    {
+      "id": "P14",
+      "category": "road_damage",
+      "split": "holdout2",
+      "role": "lookalike",
+      "pair_of": "P12",
+      "object": "similar lifted sidewalk slab beside a street tree",
+      "object_short": "damaged spot",
+      "sam_prompt": "broken pavement",
+      "landmarks": [
+        "tree in a metal grate",
+        "red fire hydrant",
+        "yoga studio door"
+      ],
+      "sign_texts": [
+        "FLOW YOGA"
+      ],
+      "offset_m": {
+        "dx": -2072,
+        "dy": -1300
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "sidewalk slab lifted by tree roots and cracked"
+      },
+      "prompt": "A different spot further along the same sidewalk, with a similar concrete slab lifted by the roots of a street tree and cracked across. Replace the surroundings with: a red fire hydrant and a yoga studio door with a sign reading \"FLOW YOGA\"."
+    },
+    {
+      "id": "H15",
+      "category": "fire_hydrant",
+      "split": "holdout3",
+      "role": "main",
+      "pair_of": null,
+      "object": "red hydrant with chrome caps",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "pharmacy window with a green cross",
+        "blue street mailbox",
+        "parking meter"
+      ],
+      "sign_texts": [
+        "CORNER PHARMACY"
+      ],
+      "offset_m": {
+        "dx": 1200,
+        "dy": 1300
+      },
+      "special_cases": [
+        "time_conflict"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "side outlet cap knocked off, water spilling across the sidewalk",
+        "repaired": "new outlet cap fitted, hydrant dry",
+        "damaged_v2": "the hydrant leaning to one side, a crack running through its base flange"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters in front of a red fire hydrant with chrome caps on a downtown sidewalk, overcast daytime. Clearly visible behind and around it: a pharmacy window with a green cross and a sign reading \"CORNER PHARMACY\", a blue street mailbox, and a parking meter. The hydrant is damaged: its side outlet cap is knocked off and water spills across the sidewalk. The hydrant is in the center of the frame and fully visible."
+    },
+    {
+      "id": "H17",
+      "category": "fire_hydrant",
+      "split": "holdout3",
+      "role": "lookalike",
+      "pair_of": "H15",
+      "object": "red hydrant with chrome caps (same model as H15)",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "flower shop with buckets of flowers",
+        "wooden bench",
+        "lamp post with a hanging basket"
+      ],
+      "sign_texts": [
+        "BLOOM FLORIST"
+      ],
+      "offset_m": {
+        "dx": 1228,
+        "dy": 1300
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "side outlet cap knocked off, water spilling"
+      },
+      "prompt": "A different red fire hydrant with chrome caps of exactly the same model, further along the same street. Replace the surroundings with: a flower shop with buckets of flowers out front and a sign reading \"BLOOM FLORIST\", a wooden bench, and a lamp post with a hanging flower basket. Same type of damage: the side outlet cap is knocked off and water spills across the sidewalk."
+    },
+    {
+      "id": "H16",
+      "category": "fire_hydrant",
+      "split": "holdout3",
+      "role": "main",
+      "pair_of": null,
+      "object": "white hydrant with a red top",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "school fence with a crosswalk sign",
+        "yellow school zone sign",
+        "brick school building"
+      ],
+      "sign_texts": [
+        "OAK ELEMENTARY"
+      ],
+      "offset_m": {
+        "dx": 1500,
+        "dy": 1300
+      },
+      "special_cases": [
+        "gps_large"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "red top bonnet dented in and leaking, water running down the side",
+        "repaired": "bonnet replaced, fresh white paint, hydrant dry",
+        "damaged_v2": "the front outlet cap and its chain missing, the open outlet visible"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 3 meters in front of a white fire hydrant with a red top on the sidewalk outside a school, overcast daytime. Clearly visible behind and around it: a school fence with a crosswalk sign, a yellow school zone sign, and a brick school building with a sign reading \"OAK ELEMENTARY\". The hydrant is damaged: its red top bonnet is dented in and leaking, with water running down the side. The hydrant is in the center of the frame and fully visible."
+    },
+    {
+      "id": "H18",
+      "category": "fire_hydrant",
+      "split": "holdout3",
+      "role": "lookalike",
+      "pair_of": "H16",
+      "object": "white hydrant with a red top (same model as H16)",
+      "object_short": "hydrant",
+      "sam_prompt": "fire hydrant",
+      "landmarks": [
+        "playground fence",
+        "red slide",
+        "park entrance arch"
+      ],
+      "sign_texts": [
+        "SUNNY PLAYGROUND"
+      ],
+      "offset_m": {
+        "dx": 1528,
+        "dy": 1300
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "red top bonnet dented and leaking"
+      },
+      "prompt": "A different white fire hydrant with a red top of exactly the same model, further along the same street. Replace the surroundings with: a playground fence, a red slide, and a park entrance arch with a sign reading \"SUNNY PLAYGROUND\". Same type of damage: the red top bonnet is dented in and leaking, with water running down the side."
+    },
+    {
+      "id": "S15",
+      "category": "streetlight",
+      "split": "holdout3",
+      "role": "main",
+      "pair_of": null,
+      "object": "black metal pole with a lantern-style lamp",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "townhouse front steps",
+        "green wheelie bins",
+        "corner grocery awning"
+      ],
+      "sign_texts": [
+        "FRESH MART"
+      ],
+      "offset_m": {
+        "dx": 1800,
+        "dy": 1300
+      },
+      "special_cases": [
+        "closeup_late"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "the lantern's glass panes smashed, two panes missing",
+        "repaired": "new lantern glass, all panes intact",
+        "damaged_v2": "the lantern head knocked crooked, tilted to one side on top of the pole"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 5 meters away, of a black metal street light pole with a lantern-style lamp on a residential street, overcast daytime. Clearly visible around it: townhouse front steps, green wheelie bins, and a corner grocery with an awning and a sign reading \"FRESH MART\". The light is damaged: the lantern's glass panes are smashed and two panes are missing. The whole pole is visible."
+    },
+    {
+      "id": "S17",
+      "category": "streetlight",
+      "split": "holdout3",
+      "role": "lookalike",
+      "pair_of": "S15",
+      "object": "black metal pole with a lantern-style lamp (same model as S15)",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "stone garden wall",
+        "bicycle rack",
+        "bookshop window"
+      ],
+      "sign_texts": [
+        "BOOK NOOK"
+      ],
+      "offset_m": {
+        "dx": 1830,
+        "dy": 1300
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "lantern glass smashed, panes missing"
+      },
+      "prompt": "A different black metal street light pole with a lantern-style lamp of exactly the same model, further along the same street. Replace the surroundings with: a stone garden wall, a bicycle rack, and a bookshop window with a sign reading \"BOOK NOOK\". Same type of damage: the lantern's glass panes are smashed and two are missing."
+    },
+    {
+      "id": "S16",
+      "category": "streetlight",
+      "split": "holdout3",
+      "role": "main",
+      "pair_of": null,
+      "object": "gray steel pole with a double-arm LED lamp",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "shopping cart corral",
+        "painted parking lines",
+        "supermarket entrance"
+      ],
+      "sign_texts": [
+        "VALUE FOODS"
+      ],
+      "offset_m": {
+        "dx": 2100,
+        "dy": 1300
+      },
+      "special_cases": [
+        "gps_small",
+        "sam_distractor"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "one of the two LED heads hanging loose from its arm",
+        "repaired": "both LED heads firmly fixed and level",
+        "damaged_v2": "a large dent and scrape on the pole about a meter up, gray paint scraped off"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 6 meters away, of a gray steel street light pole with a double-arm LED lamp in a supermarket parking lot, overcast daytime. Another similar pole stands far in the background. Clearly visible around it: a shopping cart corral, painted parking lines, and the supermarket entrance with a sign reading \"VALUE FOODS\". The light is damaged: one of its two LED heads hangs loose from its arm. The whole pole is visible."
+    },
+    {
+      "id": "S18",
+      "category": "streetlight",
+      "split": "holdout3",
+      "role": "lookalike",
+      "pair_of": "S16",
+      "object": "gray steel pole with a double-arm LED lamp (same model as S16)",
+      "object_short": "street light",
+      "sam_prompt": "street light",
+      "landmarks": [
+        "recycling bins",
+        "car wash bay",
+        "painted parking lines"
+      ],
+      "sign_texts": [
+        "QUICK WASH"
+      ],
+      "offset_m": {
+        "dx": 2130,
+        "dy": 1300
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "one LED head hanging loose"
+      },
+      "prompt": "A different gray steel street light pole with a double-arm LED lamp of exactly the same model, at the other end of the parking lot. Replace the surroundings with: a row of recycling bins and a car wash bay with a sign reading \"QUICK WASH\". Same type of damage: one of its two LED heads hangs loose from its arm."
+    },
+    {
+      "id": "W15",
+      "category": "trash",
+      "split": "holdout3",
+      "role": "main",
+      "pair_of": null,
+      "object": "black garbage bags and a broken office chair heaped on a sidewalk corner",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "bus shelter",
+        "newsstand kiosk",
+        "fire alarm box on a post"
+      ],
+      "sign_texts": [
+        "DAILY NEWS"
+      ],
+      "offset_m": {
+        "dx": 1200,
+        "dy": 1700
+      },
+      "special_cases": [
+        "time_conflict"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "six black garbage bags and a broken office chair heaped on the corner",
+        "repaired": "corner cleared and swept",
+        "damaged_v2": "a single broken wooden pallet leaning against the kiosk"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 4 meters away, of six black garbage bags and a broken office chair heaped on a sidewalk corner, overcast daytime. Clearly visible behind it: a bus shelter, a newsstand kiosk with a sign reading \"DAILY NEWS\", and a red fire alarm box on a post. The dumped items are in the center of the frame and fully visible."
+    },
+    {
+      "id": "W17",
+      "category": "trash",
+      "split": "holdout3",
+      "role": "lookalike",
+      "pair_of": "W15",
+      "object": "similar black garbage bags and a broken office chair",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "bus shelter",
+        "pizza shop window",
+        "parking sign"
+      ],
+      "sign_texts": [
+        "PIZZA SLICE"
+      ],
+      "offset_m": {
+        "dx": 1228,
+        "dy": 1700
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "black garbage bags and a broken office chair"
+      },
+      "prompt": "A different corner further along the same street, with similar black garbage bags and a broken office chair heaped on the sidewalk by a bus shelter. Replace the surroundings with: a pizza shop window with a sign reading \"PIZZA SLICE\" and a parking sign on a pole."
+    },
+    {
+      "id": "W16",
+      "category": "trash",
+      "split": "holdout3",
+      "role": "main",
+      "pair_of": null,
+      "object": "a torn gray sofa and a stack of wet cardboard boxes in front of an apartment building",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "apartment entrance with a green awning",
+        "black iron railing",
+        "row of mailboxes by the door"
+      ],
+      "sign_texts": [
+        "ELM COURT"
+      ],
+      "offset_m": {
+        "dx": 1500,
+        "dy": 1700
+      },
+      "special_cases": [
+        "gps_small"
+      ],
+      "sunny_v2": true,
+      "states": {
+        "damaged_v1": "a torn gray sofa and a stack of wet cardboard boxes on the sidewalk",
+        "repaired": "spot cleared, sidewalk empty",
+        "damaged_v2": "a broken floor lamp and a small bag of old clothes left by the railing"
+      },
+      "prompt": "Eye-level smartphone photo, taken from about 4 meters away, of a torn gray sofa and a stack of wet cardboard boxes dumped on the sidewalk in front of an apartment building, overcast daytime. Clearly visible behind it: an apartment entrance with a green awning and a sign reading \"ELM COURT\", a black iron railing, and a row of mailboxes by the door. The dumped items are in the center of the frame and fully visible."
+    },
+    {
+      "id": "W18",
+      "category": "trash",
+      "split": "holdout3",
+      "role": "lookalike",
+      "pair_of": "W16",
+      "object": "similar torn gray sofa and wet cardboard boxes",
+      "object_short": "pile",
+      "sam_prompt": "trash",
+      "landmarks": [
+        "red brick apartment with a white door",
+        "potted shrubs",
+        "street number plaque"
+      ],
+      "sign_texts": [
+        "BIRCH HALL"
+      ],
+      "offset_m": {
+        "dx": 1528,
+        "dy": 1700
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "torn gray sofa and wet boxes"
+      },
+      "prompt": "A different apartment building further along the same street, with a similar torn gray sofa and a stack of wet cardboard boxes dumped on the sidewalk. Replace the surroundings with: a red brick building with a white door and a sign reading \"BIRCH HALL\", potted shrubs, and a street number plaque."
+    },
+    {
+      "id": "P15",
+      "category": "road_damage",
+      "split": "holdout3",
+      "role": "main",
+      "pair_of": null,
+      "object": "wide pothole breaking up a zebra crosswalk",
+      "object_short": "pothole",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "white zebra crosswalk stripes",
+        "pedestrian signal pole",
+        "bank with stone columns"
+      ],
+      "sign_texts": [
+        "CITY BANK"
+      ],
+      "offset_m": {
+        "dx": 1800,
+        "dy": 1700
+      },
+      "special_cases": [
+        "closeup_late"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "a wide pothole breaking up two white crosswalk stripes",
+        "repaired": "patched with fresh black asphalt, stripes repainted",
+        "damaged_v2": "a long crack running across the new patch, its edge starting to crumble"
+      },
+      "prompt": "Smartphone photo taken from the curb about 3 meters away, of a wide pothole breaking up two white stripes of a zebra crosswalk, overcast daytime. Clearly visible around it: a pedestrian signal pole and a bank with stone columns and a sign reading \"CITY BANK\". The pothole is in the center of the frame."
+    },
+    {
+      "id": "P17",
+      "category": "road_damage",
+      "split": "holdout3",
+      "role": "lookalike",
+      "pair_of": "P15",
+      "object": "similar wide pothole in a zebra crosswalk",
+      "object_short": "pothole",
+      "sam_prompt": "pothole",
+      "landmarks": [
+        "white zebra crosswalk stripes",
+        "gas station canopy",
+        "air pump"
+      ],
+      "sign_texts": [
+        "FUEL STOP"
+      ],
+      "offset_m": {
+        "dx": 1828,
+        "dy": 1700
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "wide pothole in the crosswalk stripes"
+      },
+      "prompt": "A different crosswalk further along the same street, with a similar wide pothole breaking up two white zebra stripes. Replace the surroundings with: a gas station canopy with a sign reading \"FUEL STOP\" and an air pump."
+    },
+    {
+      "id": "P16",
+      "category": "road_damage",
+      "split": "holdout3",
+      "role": "main",
+      "pair_of": null,
+      "object": "sunken manhole cover with crumbling asphalt around it",
+      "object_short": "damaged spot",
+      "sam_prompt": "manhole cover",
+      "landmarks": [
+        "yellow center line",
+        "red fire station doors",
+        "flagpole"
+      ],
+      "sign_texts": [
+        "FIRE STATION 9"
+      ],
+      "offset_m": {
+        "dx": 2100,
+        "dy": 1700
+      },
+      "special_cases": [
+        "sam_distractor"
+      ],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "a manhole cover sunk several centimeters, the asphalt crumbling in a ring around it",
+        "repaired": "asphalt ring rebuilt, cover level with the road",
+        "damaged_v2": "a chunk of asphalt broken out at one edge of the new ring"
+      },
+      "prompt": "Smartphone photo taken from the roadside about 3 meters away, of a manhole cover sunk several centimeters into the road with the asphalt crumbling in a ring around it, overcast daytime. Another intact manhole cover is visible a few meters away. Clearly visible around it: a yellow center line, the red doors of a fire station with a sign reading \"FIRE STATION 9\", and a flagpole. The damaged manhole is in the center of the frame."
+    },
+    {
+      "id": "P18",
+      "category": "road_damage",
+      "split": "holdout3",
+      "role": "lookalike",
+      "pair_of": "P16",
+      "object": "similar sunken manhole cover with crumbling asphalt",
+      "object_short": "damaged spot",
+      "sam_prompt": "manhole cover",
+      "landmarks": [
+        "yellow center line",
+        "car repair garage",
+        "stacked tires"
+      ],
+      "sign_texts": [
+        "AUTO CARE"
+      ],
+      "offset_m": {
+        "dx": 2128,
+        "dy": 1700
+      },
+      "special_cases": [],
+      "sunny_v2": false,
+      "states": {
+        "damaged_v1": "sunken manhole cover, crumbling asphalt ring"
+      },
+      "prompt": "A different spot further along the same road, with a similar manhole cover sunk into the road and crumbling asphalt around it. Replace the surroundings with: a car repair garage with a sign reading \"AUTO CARE\" and a stack of old tires."
+    }
+  ]
+}

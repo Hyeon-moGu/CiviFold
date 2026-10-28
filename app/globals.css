@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+
+  /* Staff console palette */
+  --color-ops-bg: #090b0e;
+  --color-ops-panel: #0f1318;
+  --color-ops-raised: #151a21;
+  --color-ops-line: #222a35;
+  --color-ops-dim: #6b7685;
+  --color-ops-text: #d7dde5;
+}
+
+:root {
+  color-scheme: light;
+}
+
+.ops {
+  color-scheme: dark;
+}
+
+/* Leaflet draws its own controls; match them to the console when they sit inside it. */
+.ops .leaflet-container {
+  background: var(--color-ops-bg);
+  font-family: var(--font-sans);
+}
+.ops .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.4);
+}
+.ops .leaflet-control-attribution {
+  background: rgb(9 11 14 / 0.75) !important;
+  color: var(--color-ops-dim) !important;
+}
+.ops .leaflet-control-attribution a {
+  color: var(--color-ops-dim) !important;
+}
+.ops .leaflet-bar a {
+  background: var(--color-ops-raised);
+  color: var(--color-ops-text);
+  border-color: var(--color-ops-line);
+}

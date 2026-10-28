@@ -1,0 +1,146 @@
+// Author: HyeonMo Gu
+// Created: 2026-10-27
+
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { incidentDetail } from "@/lib/server/reports";
+import { runtime } from "@/lib/server/runtime";
+import { when } from "@/app/_ui/format";
+import { SyntheticBadge } from "@/app/_ui/labels";
+import { Fact, Panel } from "@/app/_ui/console";
+import { QueueMapLoader } from "../../queue-map-loader";
+import { RepairButton } from "./repair-button";
+
+export const dynamic = "force-dynamic";
+export const metadata = { title: "Incident · CiviFold" };
+
+const EVENT_DOT: Record<string, string> = {
+  created: "bg-zinc-300",
+  report_linked: "bg-sky-400",
+  status_changed: "bg-amber-400",
+  repair_recorded: "bg-emerald-400",
+  recurrence_created: "bg-rose-400",
+  note: "bg-ops-dim",
+};
+
+export default async function IncidentDetail({ params }: { params: Promise<{ id: string }> }) {
+  const detail = await incidentDetail(await runtime(), (await params).id);
+  if (!detail) notFound();
+  const { incident, events, reports, photos, recurrences } = detail;
+  const open = incident.status === "open" || incident.status === "in_progress";
+  const mapReports = reports.map((r) => ({ id: r.id, code: r.tracking_code, lat: r.lat, lng: r.lng, label: null, urgent: r.urgent, incident_id: incident.id, n: null }));
+
+  return (
+    <main className="mx-auto max-w-[1400px] px-4 py-5">
+      <div className="flex flex-wrap items-center gap-3 text-[13px]">
+        <Link href="/admin" className="text-ops-dim hover:text-white">
+          ← Queue
+        </Link>
+        <span className="text-ops-line">/</span>
+        <span className="font-mono text-ops-dim">{incident.id}</span>
+      </div>
+
+      <header className="mt-3 flex flex-wrap items-center gap-3">
+        <h1 className="text-xl font-semibold text-white">{incident.title}</h1>
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${
+            open ? "bg-amber-500/10 text-amber-300 ring-amber-500/40" : "bg-emerald-500/10 text-emerald-300 ring-emerald-500/40"
+          }`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${open ? "bg-amber-400" : "bg-emerald-400"}`} />
+          {incident.status.replace("_", " ")}
+        </span>
+        {open && (
+          <div className="ml-auto">
+            <RepairButton incidentId={incident.id} />
+          </div>
+        )}
+      </header>
+
+      <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="space-y-4">
+          <Panel title="Linked reports" aside={`${reports.length} report${reports.length === 1 ? "" : "s"}`}>
+            {reports.length === 0 ? (
+              <p className="text-[13px] text-ops-dim">No reports linked yet.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
+                {reports.map((r) => {
+                  const photo = photos.find((p) => p.report_id === r.id);
+                  return (
+                    <Link key={r.id} href={`/admin/reports/${r.id}`} className="group overflow-hidden rounded-md border border-ops-line bg-ops-raised hover:border-zinc-500">
+                      <div className="relative aspect-[3/2] bg-black">
+                        {photo ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- resized by our image route
+                          <img src={`/api/images/${photo.id}?w=480`} alt={r.tracking_code} className="h-full w-full object-cover opacity-90 group-hover:opacity-100" />
+                        ) : (
+                          <span className="flex h-full items-center justify-center font-mono text-[11px] text-ops-dim">{r.channel.toUpperCase()}</span>
+                        )}
+                        {photo?.is_synthetic && (
+                          <span className="absolute left-1.5 top-1.5">
+                            <SyntheticBadge />
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-baseline justify-between gap-2 px-2 py-1.5">
+                        <span className="font-mono text-[11px] text-ops-text">{r.tracking_code}</span>
+                        <span className="text-[11px] text-ops-dim">{when(r.observed_at)}</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </Panel>
+
+          <Panel title="Location" aside={<span className="font-mono">{`${incident.lat.toFixed(5)}, ${incident.lng.toFixed(5)}`}</span>}>
+            <div className="-m-4 h-[320px] overflow-hidden rounded-b-lg">
+              <QueueMapLoader reports={mapReports} incidents={[incident, ...recurrences]} />
+            </div>
+          </Panel>
+        </div>
+
+        <div className="space-y-4">
+          <Panel title="Incident">
+            <Fact k="Category" v={incident.category.replace("_", " ")} />
+            <Fact k="Opened" v={when(incident.created_at)} />
+            <Fact k="Repair recorded" v={when(incident.resolved_at)} />
+            {incident.recurrence_of && (
+              <Fact
+                k="Recurrence of"
+                v={
+                  <Link href={`/admin/incidents/${incident.recurrence_of}`} className="font-mono text-rose-300 hover:underline">
+                    {incident.recurrence_of}
+                  </Link>
+                }
+              />
+            )}
+            {recurrences.length > 0 && (
+              <Fact
+                k="Came back as"
+                v={recurrences.map((r) => (
+                  <Link key={r.id} href={`/admin/incidents/${r.id}`} className="ml-2 font-mono text-rose-300 hover:underline">
+                    {r.id}
+                  </Link>
+                ))}
+              />
+            )}
+          </Panel>
+
+          <Panel title="Timeline">
+            <ol className="relative space-y-4 border-l border-ops-line pl-4">
+              {events.map((e) => (
+                <li key={e.id} className="relative">
+                  <span className={`absolute -left-[21px] top-1.5 h-2 w-2 rounded-full ring-2 ring-ops-panel ${EVENT_DOT[e.type] ?? "bg-ops-dim"}`} />
+                  <p className="text-[13px] text-ops-text">{e.summary}</p>
+                  <p className="mt-0.5 font-mono text-[11px] text-ops-dim">
+                    {when(e.created_at)} · {e.actor}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </Panel>
+        </div>
+      </div>
+    </main>
+  );
+}

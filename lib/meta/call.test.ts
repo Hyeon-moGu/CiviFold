@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type OpenAI from "openai";
 import { z } from "zod";
 import { cacheKey, memoryStore, setCacheStore } from "./cache";
-import { CacheMissError, metaCall, spent } from "./call";
+import { CacheMissError, defaultMode, LiveBudgetError, metaCall, metered, setLiveGate, spent } from "./call";
 import { MetaHttpError } from "./client";
 import { sparkCost } from "./pricing";
 import { isRetryable, RetryableError } from "./retry";
@@ -55,6 +55,84 @@ describe("metaCall", () => {
     expect(spent() - before).toBeCloseTo(0.02);
   });
 
+  it("makes one live call for identical concurrent requests", async () => {
+    let calls = 0;
+    const send = async () => {
+      calls += 1;
+      await new Promise((r) => setTimeout(r, 5));
+      return `answer ${calls}`;
+    };
+    const [a, b] = await Promise.all([call(send, "live"), call(send, "live")]);
+    expect(calls).toBe(1);
+    expect(a.response).toBe(b.response);
+    expect([a.call.cached, b.call.cached].sort()).toEqual([false, true]);
+  });
+
+  it("makes one live call for identical requests that arrive while the budget is being reserved", async () => {
+    let reserves = 0;
+    let sends = 0;
+    setLiveGate({
+      reserve: async (usd) => {
+        reserves += 1;
+        await new Promise((r) => setTimeout(r, 10)); // a database round trip, as on the web
+        return { usd, day: "d" };
+      },
+      settle: async () => {},
+    });
+    try {
+      const send = async () => `answer ${++sends}`;
+      const [a, b] = await Promise.all([call(send, "live"), call(send, "live")]);
+      expect([reserves, sends]).toEqual([1, 1]);
+      expect(a.response).toBe(b.response);
+    } finally {
+      setLiveGate(null);
+    }
+  });
+
+  it("shares a failure with concurrent duplicates and leaves nothing unhandled", async () => {
+    const send = async (): Promise<string> => {
+      await new Promise((r) => setTimeout(r, 5));
+      throw new MetaHttpError(400, "bad request");
+    };
+    const results = await Promise.allSettled([call(send, "live"), call(send, "live")]);
+    expect(results.map((r) => r.status)).toEqual(["rejected", "rejected"]);
+    await expect(call(send, "live")).rejects.toThrow("bad request");
+  });
+
+  it("meters concurrent work separately", async () => {
+    const live = (q: number) => metaCall({ model: "m", request: { q }, send: async () => "x", cost: () => 0.01 * q, mode: "live", retry });
+    const [a, b] = await Promise.all([metered(async () => { await live(1); await live(2); }), metered(() => live(4))]);
+    expect(a.usd).toBeCloseTo(0.03);
+    expect(b.usd).toBeCloseTo(0.04);
+  });
+
+  it("counts a nested meter toward the enclosing one", async () => {
+    const live = (q: number) => metaCall({ model: "m", request: { nested: q }, send: async () => "x", cost: () => 0.01, mode: "live", retry });
+    const outer = await metered(async () => {
+      await live(1);
+      const inner = await metered(() => live(2));
+      expect(inner.usd).toBeCloseTo(0.01);
+    });
+    expect(outer.usd).toBeCloseTo(0.02);
+  });
+
+  it("holds an estimate before a live call and settles it with the real cost", async () => {
+    let left = 0.015;
+    const settled: Array<[number, number]> = [];
+    setLiveGate({
+      reserve: async (usd) => (usd <= left ? ((left -= usd), { usd, day: "d" }) : null),
+      settle: async (hold, actual) => void (settled.push([hold.usd, actual]), (left += hold.usd - actual)),
+    });
+    try {
+      await metaCall({ model: "m", request: { q: 1 }, send: async () => "first", cost: () => 0.01, mode: "live", retry, reserve: 0.012 });
+      expect(settled).toEqual([[0.012, 0.01]]);
+      await call(async () => "second", "cached_then_live"); // a cache hit needs no permission
+      await expect(metaCall({ model: "m", request: { q: 2 }, send: async () => "x", cost: () => 0.01, mode: "live", retry, reserve: 0.012 })).rejects.toBeInstanceOf(LiveBudgetError);
+    } finally {
+      setLiveGate(null);
+    }
+  });
+
   it("does not retry client errors or cache failures", async () => {
     const send = vi.fn(async (): Promise<string> => {
       throw new MetaHttpError(400, "unknown field");
@@ -62,6 +140,28 @@ describe("metaCall", () => {
     await expect(call(send)).rejects.toThrow("unknown field");
     expect(send).toHaveBeenCalledTimes(1);
     await expect(call(async () => "x", "cached")).rejects.toBeInstanceOf(CacheMissError);
+  });
+});
+
+describe("defaultMode", () => {
+  it("is cache-only on a deployment unless CIVIFOLD_MODE says otherwise", () => {
+    vi.stubEnv("CIVIFOLD_MODE", undefined);
+    vi.stubEnv("VERCEL", "1");
+    expect(defaultMode()).toBe("cached");
+    vi.stubEnv("CIVIFOLD_MODE", "");
+    expect(defaultMode()).toBe("cached");
+    vi.stubEnv("CIVIFOLD_MODE", "cached_then_live");
+    expect(defaultMode()).toBe("cached_then_live");
+    vi.stubEnv("CIVIFOLD_MODE", "sometimes");
+    expect(() => defaultMode()).toThrow(/CIVIFOLD_MODE must be one of/);
+    vi.unstubAllEnvs();
+  });
+
+  it("falls back to cache first, live on a miss, locally", () => {
+    vi.stubEnv("CIVIFOLD_MODE", undefined);
+    vi.stubEnv("VERCEL", undefined);
+    expect(defaultMode()).toBe("cached_then_live");
+    vi.unstubAllEnvs();
   });
 });
 

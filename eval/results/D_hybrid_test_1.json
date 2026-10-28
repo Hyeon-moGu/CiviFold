@@ -1,0 +1,5014 @@
+{
+  "config": "D_hybrid",
+  "split": "test",
+  "run": 1,
+  "mode": "cached_then_live",
+  "prompt_hash": {
+    "triage": "c908b19d7fb4",
+    "compare": "6acad7ad8c9f",
+    "agent": "0bd864a62c94"
+  },
+  "code_hash": "3e1a3548c184",
+  "created_at": "2026-10-27T09:47:56.106Z",
+  "failed_cases": 0,
+  "summary": {
+    "cases": 78,
+    "outcomes": {
+      "correct": 69,
+      "deferred": 3,
+      "safe_error": 5,
+      "critical": 1
+    },
+    "critical_miss_rate": 0.030303030303030304,
+    "review_reduction": 0.4230769230769231,
+    "dup_precision": 0.9705882352941176,
+    "dup_recall": 0.8918918918918919,
+    "deferral_rate": 0.038461538461538464,
+    "staff_review_if_no_answer": 0.1794871794871795,
+    "question_rate": 0.16666666666666666,
+    "usd_per_report": 0.008251823717948718,
+    "seconds_per_report": 6.690884615384616,
+    "confusion": {
+      "DUPLICATE": {
+        "DUPLICATE": 23,
+        "HUMAN_REVIEW": 1,
+        "POSSIBLE_RECURRENCE": 1,
+        "NEW": 1
+      },
+      "NEW": {
+        "NEW": 22,
+        "HUMAN_REVIEW": 1,
+        "DUPLICATE": 1
+      },
+      "LATE_REPORT": {
+        "LATE_REPORT": 10,
+        "POSSIBLE_RECURRENCE": 1
+      },
+      "ALREADY_RESOLVED": {
+        "ALREADY_RESOLVED": 7,
+        "POSSIBLE_RECURRENCE": 1
+      },
+      "POSSIBLE_RECURRENCE": {
+        "POSSIBLE_RECURRENCE": 7,
+        "NEW": 1,
+        "HUMAN_REVIEW": 1
+      }
+    }
+  },
+  "stress_summary": {
+    "cases": 32,
+    "outcomes": {
+      "correct": 25,
+      "deferred": 5,
+      "safe_error": 0,
+      "critical": 2
+    },
+    "critical_miss_rate": 0.125,
+    "review_reduction": 0.4375,
+    "dup_precision": 1,
+    "dup_recall": 0.875,
+    "deferral_rate": 0.15625,
+    "staff_review_if_no_answer": 0.34375,
+    "question_rate": 0.3125,
+    "usd_per_report": 0.0103908828125,
+    "seconds_per_report": 8.13296875,
+    "confusion": {
+      "DUPLICATE": {
+        "DUPLICATE": 14,
+        "HUMAN_REVIEW": 2
+      },
+      "POSSIBLE_RECURRENCE": {
+        "POSSIBLE_RECURRENCE": 11,
+        "HUMAN_REVIEW": 3,
+        "ALREADY_RESOLVED": 2
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "H3-gps-small",
+      "asset_id": "H3",
+      "set": "base",
+      "kind": "gps-small",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1074
+    },
+    {
+      "case_id": "H3-t1",
+      "asset_id": "H3",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 145
+    },
+    {
+      "case_id": "H3-t2",
+      "asset_id": "H3",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1293
+    },
+    {
+      "case_id": "H3-t2-dark",
+      "asset_id": "H3",
+      "set": "stress",
+      "kind": "t2-dark",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1899
+    },
+    {
+      "case_id": "H3-t2-night",
+      "asset_id": "H3",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1168
+    },
+    {
+      "case_id": "H3-t3",
+      "asset_id": "H3",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.8
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.8
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.8
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1669
+    },
+    {
+      "case_id": "H3-t4",
+      "asset_id": "H3",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "H3/I1",
+        "rule_id": "R7a",
+        "confidence": 0.92
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1659
+    },
+    {
+      "case_id": "H3-t5",
+      "asset_id": "H3",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "ALREADY_RESOLVED",
+        "rule_id": "R7c",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "H3/I1",
+        "rule_id": "R7c",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1688
+    },
+    {
+      "case_id": "H3-t6",
+      "asset_id": "H3",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1481
+    },
+    {
+      "case_id": "H3-t6-blur",
+      "asset_id": "H3",
+      "set": "stress",
+      "kind": "t6-blur",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R0",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1815
+    },
+    {
+      "case_id": "H3-t6-night",
+      "asset_id": "H3",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H3/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1757
+    },
+    {
+      "case_id": "H3-t7",
+      "asset_id": "H3",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H3/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H3/I2",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I2",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1676
+    },
+    {
+      "case_id": "H4-closeup-late",
+      "asset_id": "H4",
+      "set": "base",
+      "kind": "closeup-late",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "H4/I1",
+        "rule_id": "R7a",
+        "confidence": 0.75
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.75
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2083
+    },
+    {
+      "case_id": "H4-t1",
+      "asset_id": "H4",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 130
+    },
+    {
+      "case_id": "H4-t2",
+      "asset_id": "H4",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2016
+    },
+    {
+      "case_id": "H4-t2-low_res",
+      "asset_id": "H4",
+      "set": "stress",
+      "kind": "t2-low_res",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R6d",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.75
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 3251
+    },
+    {
+      "case_id": "H4-t2-night",
+      "asset_id": "H4",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1503
+    },
+    {
+      "case_id": "H4-t3",
+      "asset_id": "H4",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.75
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.75
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2216
+    },
+    {
+      "case_id": "H4-t4",
+      "asset_id": "H4",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "H4/I1",
+        "rule_id": "R7a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2160
+    },
+    {
+      "case_id": "H4-t5",
+      "asset_id": "H4",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "ALREADY_RESOLVED",
+        "rule_id": "R7c",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "H4/I1",
+        "rule_id": "R7c",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1436
+    },
+    {
+      "case_id": "H4-t6",
+      "asset_id": "H4",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H4/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2275
+    },
+    {
+      "case_id": "H4-t6-jpeg",
+      "asset_id": "H4",
+      "set": "stress",
+      "kind": "t6-jpeg",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H4/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1818
+    },
+    {
+      "case_id": "H4-t6-night",
+      "asset_id": "H4",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H4/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H4/I1",
+        "rule_id": "R7d",
+        "confidence": 0.92
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2059
+    },
+    {
+      "case_id": "H4-t7",
+      "asset_id": "H4",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H4/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H4/I2",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "H4/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I2",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2315
+    },
+    {
+      "case_id": "H6-lookalike-after-fix",
+      "asset_id": "H6",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.92
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2422
+    },
+    {
+      "case_id": "H6-lookalike-open",
+      "asset_id": "H6",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H3/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H3/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1871
+    },
+    {
+      "case_id": "H8-lookalike-after-fix",
+      "asset_id": "H8",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 661
+    },
+    {
+      "case_id": "H8-lookalike-open",
+      "asset_id": "H8",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H4/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H4/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 856
+    },
+    {
+      "case_id": "P3-t1",
+      "asset_id": "P3",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 37
+    },
+    {
+      "case_id": "P3-t2",
+      "asset_id": "P3",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P3/I1"
+      },
+      "first": {
+        "label": "HUMAN_REVIEW",
+        "rule_id": "agent:budget_exceeded",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "agent:budget_exceeded",
+        "confidence": 0
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "budget_exceeded",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "segment_object",
+            "compare_images",
+            "segment_object",
+            "search_incidents"
+          ],
+          "blocked_rules": [],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.06595175
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.06595175,
+      "latency_ms": 42973
+    },
+    {
+      "case_id": "P3-t2-night",
+      "asset_id": "P3",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P3/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R6d",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.76
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1336
+    },
+    {
+      "case_id": "P3-t2-off_center",
+      "asset_id": "P3",
+      "set": "stress",
+      "kind": "t2-off_center",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P3/I1"
+      },
+      "first": {
+        "label": "HUMAN_REVIEW",
+        "rule_id": "agent:budget_exceeded",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "agent:budget_exceeded",
+        "confidence": 0
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "budget_exceeded",
+          "tools": [
+            "get_incident_timeline",
+            "compare_images",
+            "segment_object",
+            "search_incidents",
+            "segment_object",
+            "default.search_incidents"
+          ],
+          "blocked_rules": [],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.05793425000000001
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.05793425000000001,
+      "latency_ms": 37565
+    },
+    {
+      "case_id": "P3-t3",
+      "asset_id": "P3",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P3/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.76
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "budget_exceeded",
+          "tools": [
+            "get_incident_timeline",
+            "compare_images",
+            "search_incidents",
+            "compare_images",
+            "segment_object",
+            "default.compare_images"
+          ],
+          "blocked_rules": [],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.0708325
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.0708325,
+      "latency_ms": 44726
+    },
+    {
+      "case_id": "P3-t4",
+      "asset_id": "P3",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "P3/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "P3/I1",
+        "rule_id": "R7a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1351
+    },
+    {
+      "case_id": "P3-t5",
+      "asset_id": "P3",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "P3/I1"
+      },
+      "first": {
+        "label": "ALREADY_RESOLVED",
+        "rule_id": "R7c",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "P3/I1",
+        "rule_id": "R7c",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 731
+    },
+    {
+      "case_id": "P3-t6",
+      "asset_id": "P3",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P3/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1343
+    },
+    {
+      "case_id": "P3-t6-dark",
+      "asset_id": "P3",
+      "set": "stress",
+      "kind": "t6-dark",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P3/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1210
+    },
+    {
+      "case_id": "P3-t6-night",
+      "asset_id": "P3",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P3/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7e",
+        "missing_info": [
+          "observed_time"
+        ]
+      },
+      "asked": "observed_time",
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "agent:blocked",
+        "confidence": 0.85
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "blocked",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [
+            "G4"
+          ],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.046789
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.046789,
+      "latency_ms": 33418
+    },
+    {
+      "case_id": "P3-t7",
+      "asset_id": "P3",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P3/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P3/I2",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.8
+        },
+        {
+          "incident_id": "P3/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I2",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1543
+    },
+    {
+      "case_id": "P4-closeup-late",
+      "asset_id": "P4",
+      "set": "base",
+      "kind": "closeup-late",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "P4/I1",
+        "rule_id": "R7a",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 99
+    },
+    {
+      "case_id": "P4-t1",
+      "asset_id": "P4",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 22
+    },
+    {
+      "case_id": "P4-t2",
+      "asset_id": "P4",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 358
+    },
+    {
+      "case_id": "P4-t2-blur",
+      "asset_id": "P4",
+      "set": "stress",
+      "kind": "t2-blur",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R0",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 102
+    },
+    {
+      "case_id": "P4-t2-night",
+      "asset_id": "P4",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 128
+    },
+    {
+      "case_id": "P4-t3",
+      "asset_id": "P4",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 112
+    },
+    {
+      "case_id": "P4-t4",
+      "asset_id": "P4",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "P4/I1",
+        "rule_id": "R7a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 224
+    },
+    {
+      "case_id": "P4-t5",
+      "asset_id": "P4",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7g",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "P4/I1",
+        "rule_id": "R7c",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 567
+    },
+    {
+      "case_id": "P4-t6",
+      "asset_id": "P4",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P4/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 250
+    },
+    {
+      "case_id": "P4-t6-low_res",
+      "asset_id": "P4",
+      "set": "stress",
+      "kind": "t6-low_res",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7e",
+        "missing_info": [
+          "observed_time"
+        ]
+      },
+      "asked": "observed_time",
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "agent:blocked",
+        "confidence": 0.88
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "blocked",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [
+            "G4"
+          ],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.032240500000000005
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.032240500000000005,
+      "latency_ms": 22371
+    },
+    {
+      "case_id": "P4-t6-night",
+      "asset_id": "P4",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P4/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P4/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 121
+    },
+    {
+      "case_id": "P4-t7",
+      "asset_id": "P4",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P4/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P4/I2",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 358
+    },
+    {
+      "case_id": "P6-lookalike-after-fix",
+      "asset_id": "P6",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.85
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.92
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.85
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1183
+    },
+    {
+      "case_id": "P6-lookalike-open",
+      "asset_id": "P6",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P3/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P3/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1729
+    },
+    {
+      "case_id": "P8-lookalike-after-fix",
+      "asset_id": "P8",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 94
+    },
+    {
+      "case_id": "P8-lookalike-open",
+      "asset_id": "P8",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P4/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 97
+    },
+    {
+      "case_id": "S2-t1",
+      "asset_id": "S2",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 87
+    },
+    {
+      "case_id": "S2-t2",
+      "asset_id": "S2",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R6d",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S2/I1",
+        "rule_id": "R6a",
+        "confidence": 0.76
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 3949
+    },
+    {
+      "case_id": "S2-t2-blur",
+      "asset_id": "S2",
+      "set": "stress",
+      "kind": "t2-blur",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R0",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "agent:budget_exceeded",
+        "confidence": 0
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "budget_exceeded",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "segment_object",
+            "segment_object",
+            "compare_images"
+          ],
+          "blocked_rules": [],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.055601000000000005
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.055601000000000005,
+      "latency_ms": 35510
+    },
+    {
+      "case_id": "S2-t2-night",
+      "asset_id": "S2",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S2/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1796
+    },
+    {
+      "case_id": "S2-t3",
+      "asset_id": "S2",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "agent:asked_resident",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S2/I1",
+        "rule_id": "R6a",
+        "confidence": 0.784
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.97
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.98
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "asked_resident",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "segment_object",
+            "ask_resident"
+          ],
+          "blocked_rules": [],
+          "final_label": "NEEDS_INFO",
+          "cost_usd": 0.079455
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.079455,
+      "latency_ms": 51596
+    },
+    {
+      "case_id": "S2-t4",
+      "asset_id": "S2",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "S2/I1",
+        "rule_id": "R7a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2298
+    },
+    {
+      "case_id": "S2-t5",
+      "asset_id": "S2",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "ALREADY_RESOLVED",
+        "rule_id": "R7c",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "S2/I1",
+        "rule_id": "R7c",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1913
+    },
+    {
+      "case_id": "S2-t6",
+      "asset_id": "S2",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S2/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2260
+    },
+    {
+      "case_id": "S2-t6-low_res",
+      "asset_id": "S2",
+      "set": "stress",
+      "kind": "t6-low_res",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "ALREADY_RESOLVED",
+        "rule_id": "R7c",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "S2/I1",
+        "rule_id": "R7c",
+        "confidence": 0.95
+      },
+      "outcome": "critical",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 836
+    },
+    {
+      "case_id": "S2-t6-night",
+      "asset_id": "S2",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "ALREADY_RESOLVED",
+        "rule_id": "R7c",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "S2/I1",
+        "rule_id": "R7c",
+        "confidence": 0.95
+      },
+      "outcome": "critical",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1690
+    },
+    {
+      "case_id": "S2-t7",
+      "asset_id": "S2",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S2/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S2/I2",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I2",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2271
+    },
+    {
+      "case_id": "S2-time-conflict",
+      "asset_id": "S2",
+      "set": "base",
+      "kind": "time-conflict",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "S2/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7g",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S2/I1",
+        "rule_id": "R7f",
+        "confidence": 0.76
+      },
+      "outcome": "safe_error",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 3153
+    },
+    {
+      "case_id": "S3-t1",
+      "asset_id": "S3",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 16
+    },
+    {
+      "case_id": "S3-t2",
+      "asset_id": "S3",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 793
+    },
+    {
+      "case_id": "S3-t2-jpeg",
+      "asset_id": "S3",
+      "set": "stress",
+      "kind": "t2-jpeg",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 49
+    },
+    {
+      "case_id": "S3-t2-night",
+      "asset_id": "S3",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 501
+    },
+    {
+      "case_id": "S3-t3",
+      "asset_id": "S3",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S3/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context",
+          "close_up"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.784
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.98
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.98
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1386
+    },
+    {
+      "case_id": "S3-t4",
+      "asset_id": "S3",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "S3/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "S3/I1",
+        "rule_id": "R7a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 110
+    },
+    {
+      "case_id": "S3-t5",
+      "asset_id": "S3",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "S3/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7g",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "S3/I1",
+        "rule_id": "R7c",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1460
+    },
+    {
+      "case_id": "S3-t6",
+      "asset_id": "S3",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S3/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 557
+    },
+    {
+      "case_id": "S3-t6-night",
+      "asset_id": "S3",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S3/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 440
+    },
+    {
+      "case_id": "S3-t6-off_center",
+      "asset_id": "S3",
+      "set": "stress",
+      "kind": "t6-off_center",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S3/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7g",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 271
+    },
+    {
+      "case_id": "S3-t7",
+      "asset_id": "S3",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S3/I2"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "safe_error",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S3/I2",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 826
+    },
+    {
+      "case_id": "S6-lookalike-after-fix",
+      "asset_id": "S6",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7e",
+        "missing_info": [
+          "observed_time"
+        ]
+      },
+      "asked": "observed_time",
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "agent:budget_exceeded",
+        "confidence": 0
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.8
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.8
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "budget_exceeded",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images"
+          ],
+          "blocked_rules": [],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.02786675
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.02786675,
+      "latency_ms": 60524
+    },
+    {
+      "case_id": "S6-lookalike-open",
+      "asset_id": "S6",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.8
+      },
+      "outcome": "critical",
+      "comparisons": [
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.8
+        },
+        {
+          "incident_id": "S3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.8
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "budget_exceeded",
+          "tools": [
+            "get_incident_timeline",
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "search_incidents"
+          ],
+          "blocked_rules": [],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.08158
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.08158,
+      "latency_ms": 48940
+    },
+    {
+      "case_id": "S7-lookalike-after-fix",
+      "asset_id": "S7",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 760
+    },
+    {
+      "case_id": "S7-lookalike-open",
+      "asset_id": "S7",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S2/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S2/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1045
+    },
+    {
+      "case_id": "W3-t1",
+      "asset_id": "W3",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 22
+    },
+    {
+      "case_id": "W3-t2",
+      "asset_id": "W3",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 658
+    },
+    {
+      "case_id": "W3-t2-blur",
+      "asset_id": "W3",
+      "set": "stress",
+      "kind": "t2-blur",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W3/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R0",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 661
+    },
+    {
+      "case_id": "W3-t2-night",
+      "asset_id": "W3",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.85
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.85
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 635
+    },
+    {
+      "case_id": "W3-t3",
+      "asset_id": "W3",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W3/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W3/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 664
+    },
+    {
+      "case_id": "W3-t4",
+      "asset_id": "W3",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "W3/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "W3/I1",
+        "rule_id": "R7a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 839
+    },
+    {
+      "case_id": "W3-t5",
+      "asset_id": "W3",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "W3/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R0",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "W3/I1",
+        "rule_id": "R7c",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 514
+    },
+    {
+      "case_id": "W3-t6",
+      "asset_id": "W3",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W3/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 509
+    },
+    {
+      "case_id": "W3-t6-low_res",
+      "asset_id": "W3",
+      "set": "stress",
+      "kind": "t6-low_res",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W3/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 469
+    },
+    {
+      "case_id": "W3-t6-night",
+      "asset_id": "W3",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W3/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W3/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 507
+    },
+    {
+      "case_id": "W3-t7",
+      "asset_id": "W3",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W3/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W3/I2",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 546
+    },
+    {
+      "case_id": "W4-gps-large-t2",
+      "asset_id": "W4",
+      "set": "base",
+      "kind": "gps-large-t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 14
+    },
+    {
+      "case_id": "W4-gps-large-t6",
+      "asset_id": "W4",
+      "set": "base",
+      "kind": "gps-large-t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 24
+    },
+    {
+      "case_id": "W4-t1",
+      "asset_id": "W4",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 16
+    },
+    {
+      "case_id": "W4-t2",
+      "asset_id": "W4",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.76
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 522
+    },
+    {
+      "case_id": "W4-t2-jpeg",
+      "asset_id": "W4",
+      "set": "stress",
+      "kind": "t2-jpeg",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 381
+    },
+    {
+      "case_id": "W4-t2-night",
+      "asset_id": "W4",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.76
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 457
+    },
+    {
+      "case_id": "W4-t3",
+      "asset_id": "W4",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W4/I1",
+        "rule_id": "R6a",
+        "confidence": 0.72
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 846
+    },
+    {
+      "case_id": "W4-t4",
+      "asset_id": "W4",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "W4/I1",
+        "rule_id": "R7a",
+        "confidence": 0.76
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 606
+    },
+    {
+      "case_id": "W4-t5",
+      "asset_id": "W4",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W4/I1",
+        "rule_id": "R7d",
+        "confidence": 0.92
+      },
+      "outcome": "safe_error",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "budget_exceeded",
+          "tools": [
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images"
+          ],
+          "blocked_rules": [],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.08834975
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.08834975,
+      "latency_ms": 60864
+    },
+    {
+      "case_id": "W4-t6",
+      "asset_id": "W4",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "agent:blocked",
+        "confidence": 0.85
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.75
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "blocked",
+          "tools": [
+            "get_incident_timeline",
+            "search_incidents",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [
+            "G4"
+          ],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.0688585
+        },
+        {
+          "status": "blocked",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [
+            "G4"
+          ],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.071604
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.1404625,
+      "latency_ms": 86511
+    },
+    {
+      "case_id": "W4-t6-night",
+      "asset_id": "W4",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W4/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 510
+    },
+    {
+      "case_id": "W4-t6-off_center",
+      "asset_id": "W4",
+      "set": "stress",
+      "kind": "t6-off_center",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W4/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "agent:blocked",
+        "confidence": 0.85
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.92
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "budget_exceeded",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "compare_images"
+          ],
+          "blocked_rules": [],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.0723315
+        },
+        {
+          "status": "blocked",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [
+            "G4"
+          ],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.06761199999999999
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.1399435,
+      "latency_ms": 104021
+    },
+    {
+      "case_id": "W4-t7",
+      "asset_id": "W4",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W4/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W4/I2",
+        "rule_id": "R6a",
+        "confidence": 0.9
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I2",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 656
+    },
+    {
+      "case_id": "W6-lookalike-after-fix",
+      "asset_id": "W6",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 655
+    },
+    {
+      "case_id": "W6-lookalike-open",
+      "asset_id": "W6",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W3/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W3/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 948
+    },
+    {
+      "case_id": "W8-lookalike-after-fix",
+      "asset_id": "W8",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 504
+    },
+    {
+      "case_id": "W8-lookalike-open",
+      "asset_id": "W8",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W4/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "blocked",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "propose_decision",
+            "propose_decision"
+          ],
+          "blocked_rules": [
+            "G4"
+          ],
+          "final_label": "HUMAN_REVIEW",
+          "cost_usd": 0.08914400000000001
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.08914400000000001,
+      "latency_ms": 53104
+    }
+  ]
+}

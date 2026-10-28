@@ -16,7 +16,7 @@ type SamResponse = {
  * Mask rasters of large objects come back downscaled: map a mask to the frame with
  * scale(bounds width / mask.width, bounds height / mask.height), then translate(bounds.left, bounds.top).
  */
-export async function segment(image: string, phrase: string, opts: { mode?: Mode } = {}) {
+export async function segment(image: string, phrase: string, opts: { mode?: Mode; signal?: AbortSignal } = {}) {
   // SAM takes one noun phrase; a list ("hydrant and pole") is not split into two prompts.
   if (/,|\b(and|or)\b/i.test(phrase)) throw new Error(`SAM phrase must be a single noun phrase, got "${phrase}"`);
   // Image requests must be unary: a streaming image request fails upstream.
@@ -39,7 +39,7 @@ export async function segment(image: string, phrase: string, opts: { mode?: Mode
     model: MODELS.sam,
     request,
     mode: opts.mode,
-    send: () => metaPost<SamResponse>("responses", request),
+    send: () => metaPost<SamResponse>("responses", request, opts.signal),
     cost: () => SAM_PER_IMAGE,
   });
   const result = await parseImageStream(toEvents(response)).finalResult;

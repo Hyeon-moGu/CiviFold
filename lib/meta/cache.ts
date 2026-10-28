@@ -18,7 +18,7 @@ export function cacheKey(request: unknown): string {
   return createHash("sha256").update(stableJson(request)).digest("hex");
 }
 
-function stableJson(value: unknown): string {
+export function stableJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
   if (value !== null && typeof value === "object") {
     const entries = Object.entries(value).filter(([, v]) => v !== undefined);

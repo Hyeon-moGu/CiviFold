@@ -84,9 +84,84 @@ const DECIDE_CASES: Case[] = [
   ),
   c(
     "D-13",
-    "crops say different, full photo ignored",
+    "crops and full photo sure of opposite answers",
     input({ candidates: [cand("I1", "open")], comparisons: [cmp("I1", "same", 0.9, { stage: 1 }), cmp("I1", "different", 0.7)] }),
+    { label: "NEEDS_INFO", rule_id: "R5", missing_info: ["wider_context"] },
+  ),
+  c(
+    "D-13b",
+    "full photo sure, crops unsure: identity from full photos alone does not group (R2w)",
+    input({ candidates: [cand("I1", "open")], comparisons: [cmp("I1", "same", 0.9, { stage: 1 }), cmp("I1", "different", 0.5)] }),
+    { label: "NEEDS_INFO", rule_id: "R2w", missing_info: ["different_angle"], via: "R6a" },
+  ),
+  c(
+    "D-13g",
+    "full photos of two different photos both match: grouped",
+    input({
+      candidates: [cand("I1", "open")],
+      asked: true,
+      comparisons: [cmp("I1", "same", 0.9, { stage: 1 }), cmp("I1", "uncertain", 0.5), cmp("I1", "same", 0.85, { stage: 1, photo: "img_wide" })],
+    }),
+    { label: "DUPLICATE", incident_id: "I1", rule_id: "R6a" },
+  ),
+  c(
+    "D-13i",
+    "a look-alike: the first photo's crops say same, its full photo is sure it differs, the answer photo matches (R2v)",
+    input({
+      candidates: [cand("I1", "open")],
+      asked: true,
+      comparisons: [
+        cmp("I1", "different", 0.9, { stage: 1 }),
+        cmp("I1", "same", 0.9),
+        cmp("I1", "same", 0.9, { stage: 1, photo: "img_wide" }),
+        cmp("I1", "same", 0.92, { photo: "img_wide" }),
+      ],
+    }),
+    { label: "HUMAN_REVIEW", rule_id: "P1", via: "R2v" },
+  ),
+  c(
+    "D-13j",
+    "the same contradiction does not hold back a recurrence (not a burying label)",
+    input({
+      candidates: repaired(),
+      observed: at("+17d"),
+      comparisons: [cmp("I1", "different", 0.9, { stage: 1 }), cmp("I1", "same", 0.9, { sig: "different" }), cmp("I1", "same", 0.92, { photo: "img_wide", sig: "different" })],
+    }),
+    { label: "POSSIBLE_RECURRENCE", incident_id: "I1", rule_id: "R7d" },
+  ),
+  c(
+    "D-13h",
+    "a crop fallback repeats the full photo: still one observation, and after asking → staff",
+    input({
+      candidates: [cand("I1", "open")],
+      asked: true,
+      comparisons: [cmp("I1", "same", 0.8, { stage: 1 }), { ...cmp("I1", "same", 0.8, { stage: 1 }), fallback: true }],
+    }),
+    { label: "HUMAN_REVIEW", rule_id: "P1", via: "R2w" },
+  ),
+  c(
+    "D-13e",
+    "full photo sure of a different place, crops unsure",
+    input({ candidates: [cand("I1", "open")], comparisons: [cmp("I1", "different", 0.8, { stage: 1 }), cmp("I1", "uncertain", 0.5)] }),
     { label: "NEW", rule_id: "R3" },
+  ),
+  c(
+    "D-13f",
+    "neither stage sure",
+    input({ candidates: [cand("I1", "open")], comparisons: [cmp("I1", "uncertain", 0.5, { stage: 1, missing: ["different_angle"] }), cmp("I1", "uncertain", 0.4, { missing: ["close_up"] })] }),
+    { label: "NEEDS_INFO", rule_id: "R5", missing_info: ["close_up"] },
+  ),
+  c(
+    "D-13c",
+    "crops say different, full photo unsure: crops decide",
+    input({ candidates: [cand("I1", "open")], comparisons: [cmp("I1", "uncertain", 0.5, { stage: 1 }), cmp("I1", "different", 0.8)] }),
+    { label: "NEW", rule_id: "R3" },
+  ),
+  c(
+    "D-13d",
+    "opposite answers, already asked",
+    input({ asked: true, candidates: [cand("I1", "open")], comparisons: [cmp("I1", "different", 0.9, { stage: 1 }), cmp("I1", "same", 0.9)] }),
+    { label: "HUMAN_REVIEW", rule_id: "R5" },
   ),
   c(
     "D-14",
@@ -130,13 +205,23 @@ const DECIDE_CASES: Case[] = [
   ),
   c(
     "D-19",
-    "chain: observation outside every interval → most recent",
+    "chain: observation before the first incident → staff",
     input({
       candidates: chain(),
       observed: at("-5d"),
       comparisons: [cmp("I1", "same", 0.85, { sig: "different" }), cmp("I2", "same", 0.9)],
     }),
-    { label: "DUPLICATE", incident_id: "I2", rule_id: "R6a", via: "R4c" },
+    { label: "HUMAN_REVIEW", rule_id: "R4g" },
+  ),
+  c(
+    "D-19b",
+    "chain: observation between the repair and the recurrence → staff",
+    input({
+      candidates: chain(),
+      observed: at("+5d"),
+      comparisons: [cmp("I1", "same", 0.85, { sig: "different" }), cmp("I2", "same", 0.9)],
+    }),
+    { label: "HUMAN_REVIEW", rule_id: "R4g" },
   ),
 
   // R5 uncertain
@@ -222,9 +307,26 @@ const DECIDE_CASES: Case[] = [
   ),
   c(
     "D-31",
-    "photo of the repaired state",
+    "photo of the repaired state: one photo of a fix is confirmed with a close-up (R7r)",
     input({ candidates: repaired(), observed: at("+2d"), comparisons: [cmp("I1", "same", 0.9, { dmg: false, rep: true })] }),
+    { label: "NEEDS_INFO", rule_id: "R7r", missing_info: ["close_up"], via: "R7c" },
+  ),
+  c(
+    "D-31b",
+    "two photos show the fix: already fixed",
+    input({
+      candidates: repaired(),
+      observed: at("+2d"),
+      asked: true,
+      comparisons: [cmp("I1", "same", 0.9, { dmg: false, rep: true }), cmp("I1", "uncertain", 0.5, { photo: "img_close", dmg: false, rep: true })],
+    }),
     { label: "ALREADY_RESOLVED", incident_id: "I1", rule_id: "R7c" },
+  ),
+  c(
+    "D-31c",
+    "one photo shows the fix and the resident was already asked → staff, never already fixed",
+    input({ candidates: repaired(), observed: at("+2d"), asked: true, comparisons: [cmp("I1", "same", 0.9, { dmg: false, rep: true })] }),
+    { label: "HUMAN_REVIEW", rule_id: "P1", via: "R7r" },
   ),
   c(
     "D-32",
@@ -291,12 +393,12 @@ const DECIDE_CASES: Case[] = [
   ),
   c(
     "D-43",
-    "recurrence_of cycle in bad data does not loop",
+    "recurrence_of cycle in bad data does not loop; both open overlap → staff",
     input({
       candidates: [cand("I1", "open", { recurrence_of: "I2" }), cand("I2", "open", { recurrence_of: "I1", created_at: at("-1d") })],
       comparisons: [cmp("I1", "same", 0.9), cmp("I2", "same", 0.9)],
     }),
-    { label: "DUPLICATE", incident_id: "I2", rule_id: "R6a", via: "R4c" },
+    { label: "HUMAN_REVIEW", rule_id: "R4g" },
   ),
   c(
     "D-44",
@@ -341,6 +443,198 @@ const DECIDE_CASES: Case[] = [
     input({ quality: "too_far", candidates: [cand("I1", "open")], comparisons: [cmp("I1", "different", 0.9)] }),
     { label: "NEW", rule_id: "R3" },
   ),
+
+  // A report with several photos: identity from one, the problem from another (R2d)
+  c(
+    "D-53",
+    "wide photo identifies, close-up shows the problem",
+    input({
+      candidates: [cand("I1", "open")],
+      comparisons: [cmp("I1", "same", 0.9, { dmg: false }), cmp("I1", "uncertain", 0.5, { photo: "img_close", dmg: true, sig: "same" })],
+    }),
+    { label: "DUPLICATE", incident_id: "I1", rule_id: "R6a", via: "R2d" },
+  ),
+  c(
+    "D-54",
+    "after a repair the wide photo looks fixed, the close-up shows a new problem",
+    input({
+      candidates: repaired(),
+      observed: at("+2d"),
+      comparisons: [cmp("I1", "same", 0.9, { dmg: false, rep: true }), cmp("I1", "uncertain", 0.5, { photo: "img_close", dmg: true, sig: "different" })],
+    }),
+    { label: "POSSIBLE_RECURRENCE", incident_id: "I1", rule_id: "R7d", via: "R2d" },
+  ),
+  c(
+    "D-55",
+    "no photo shows the problem",
+    input({
+      candidates: [cand("I1", "open")],
+      comparisons: [cmp("I1", "same", 0.9, { dmg: false }), cmp("I1", "uncertain", 0.5, { photo: "img_close", dmg: false })],
+    }),
+    { label: "NEEDS_INFO", rule_id: "R6d", missing_info: ["close_up"] },
+  ),
+  c(
+    "D-55b",
+    "photos that show the problem disagree: the more cautious reading wins, whatever the order or id",
+    input({
+      candidates: [cand("I1", "open")],
+      comparisons: [
+        cmp("I1", "same", 0.9, { dmg: false }),
+        cmp("I1", "uncertain", 0.5, { photo: "img_b", sig: "same" }),
+        cmp("I1", "uncertain", 0.5, { photo: "img_a", sig: "different" }),
+      ],
+    }),
+    { label: "HUMAN_REVIEW", incident_id: "I1", rule_id: "R6b", via: "R2d" },
+  ),
+  c(
+    "D-55c",
+    "same disagreement with the ids swapped",
+    input({
+      candidates: [cand("I1", "open")],
+      comparisons: [
+        cmp("I1", "same", 0.9, { dmg: false }),
+        cmp("I1", "uncertain", 0.5, { photo: "img_a", sig: "same" }),
+        cmp("I1", "uncertain", 0.5, { photo: "img_b", sig: "different" }),
+      ],
+    }),
+    { label: "HUMAN_REVIEW", incident_id: "I1", rule_id: "R6b", via: "R2d" },
+  ),
+  c(
+    "D-57",
+    "a photo judged a different asset never lends its problem",
+    input({
+      candidates: [cand("I1", "open")],
+      comparisons: [cmp("I1", "same", 0.95, { dmg: false }), cmp("I1", "different", 0.5, { photo: "img_other", dmg: true, sig: "uncertain" })],
+    }),
+    { label: "NEEDS_INFO", rule_id: "R6d", missing_info: ["close_up"] },
+  ),
+  c(
+    "D-58",
+    "two photos sure of opposite assets → uncertain, not the higher confidence",
+    input({
+      candidates: [cand("I1", "open")],
+      comparisons: [cmp("I1", "same", 0.95, { dmg: false }), cmp("I1", "different", 0.8, { photo: "img_other", dmg: true, sig: "uncertain" })],
+    }),
+    { label: "NEEDS_INFO", rule_id: "R5", missing_info: ["wider_context"] },
+  ),
+  c(
+    "D-59",
+    "both matching photos show a problem; the one showing a different problem is not ignored",
+    input({
+      candidates: [cand("I1", "open")],
+      comparisons: [cmp("I1", "same", 0.95, { sig: "same" }), cmp("I1", "same", 0.9, { photo: "img_b", sig: "different" })],
+    }),
+    { label: "HUMAN_REVIEW", incident_id: "I1", rule_id: "R6b", via: "R2d" },
+  ),
+  c(
+    "D-60",
+    "one photo compared twice in a stage with opposite sure answers is unsure",
+    input({
+      candidates: [cand("I1", "open")],
+      comparisons: [cmp("I1", "same", 0.8), cmp("I1", "different", 0.7)],
+    }),
+    { label: "NEEDS_INFO", rule_id: "R5", missing_info: ["wider_context"] },
+  ),
+  c(
+    "D-61",
+    "after R7t the close-up shows the problem, not the distant photo",
+    input({
+      quality: "too_far",
+      asked: true,
+      closeUps: ["img_close"],
+      candidates: repaired(),
+      observed: at("+2d"),
+      comparisons: [cmp("I1", "same", 0.9, { sig: "same" }), cmp("I1", "uncertain", 0.5, { photo: "img_close", sig: "different" })],
+    }),
+    { label: "POSSIBLE_RECURRENCE", incident_id: "I1", rule_id: "R7d", via: "R2d" },
+  ),
+  c(
+    "D-62",
+    "after R7t the close-up shows the fix while the distant photo shows damage → staff, never already fixed",
+    input({
+      quality: "too_far",
+      asked: true,
+      closeUps: ["img_close"],
+      candidates: repaired(),
+      observed: at("+2d"),
+      comparisons: [cmp("I1", "same", 0.9, { sig: "same" }), cmp("I1", "uncertain", 0.5, { photo: "img_close", dmg: false, rep: true })],
+    }),
+    { label: "HUMAN_REVIEW", incident_id: "I1", rule_id: "R2c" },
+  ),
+  c(
+    "D-62b",
+    "after R7t a close-up showing the fix, and no photo showing damage → already fixed",
+    input({
+      quality: "too_far",
+      asked: true,
+      closeUps: ["img_close"],
+      candidates: repaired(),
+      observed: at("+2d"),
+      comparisons: [cmp("I1", "same", 0.9, { dmg: false }), cmp("I1", "uncertain", 0.5, { photo: "img_close", dmg: false, rep: true })],
+    }),
+    { label: "ALREADY_RESOLVED", incident_id: "I1", rule_id: "R7c", via: "R2d" },
+  ),
+  c(
+    "D-62c",
+    "a requested close-up shows no problem, the first photo shows the fix → already fixed",
+    input({
+      asked: true,
+      closeUps: ["img_close"],
+      candidates: repaired(),
+      observed: at("+2d"),
+      comparisons: [cmp("I1", "same", 0.9, { dmg: false, rep: true }), cmp("I1", "uncertain", 0.5, { photo: "img_close", dmg: false, rep: false })],
+    }),
+    { label: "ALREADY_RESOLVED", incident_id: "I1", rule_id: "R7c", via: "R2d" },
+  ),
+  c(
+    "D-65",
+    "after a fix the full photos look fixed but the zoomed check finds a problem (R7z)",
+    {
+      ...input({ candidates: repaired(), observed: at("+2d"), comparisons: [cmp("I1", "same", 0.9, { dmg: false, rep: true })] }),
+      after_fix: { img_new: { problem_found: true } },
+    },
+    { label: "POSSIBLE_RECURRENCE", incident_id: "I1", rule_id: "R7z" },
+  ),
+  c(
+    "D-65b",
+    "the zoomed check finds nothing: the fix still needs its second look (R7r)",
+    {
+      ...input({ candidates: repaired(), observed: at("+2d"), comparisons: [cmp("I1", "same", 0.9, { dmg: false, rep: true })] }),
+      after_fix: { img_new: { problem_found: false } },
+    },
+    { label: "NEEDS_INFO", rule_id: "R7r", missing_info: ["close_up"] },
+  ),
+  c(
+    "D-63",
+    "after R7t a close-up whose comparisons failed answers nothing → staff",
+    input({
+      quality: "too_far",
+      asked: true,
+      closeUps: ["img_close"],
+      candidates: repaired(),
+      observed: at("+2d"),
+      comparisons: [cmp("I1", "same", 0.9, { dmg: false, rep: true }), failed("I1", 1, "img_close"), failed("I1", 2, "img_close")],
+    }),
+    { label: "HUMAN_REVIEW", rule_id: "P1", via: "R7t" },
+  ),
+  c(
+    "D-56",
+    "a full photo shows the problem its crop missed",
+    input({
+      candidates: [cand("I1", "open")],
+      comparisons: [cmp("I1", "same", 0.8, { stage: 1, dmg: true }), cmp("I1", "same", 0.9, { dmg: false })],
+    }),
+    { label: "DUPLICATE", incident_id: "I1", rule_id: "R6a", via: "R2d" },
+  ),
+
+  // Out of scope: people or behavior
+  c(
+    "D-51",
+    "about people, even with a matching incident nearby",
+    input({ outOfScope: true, candidates: [cand("I1", "open")], comparisons: [cmp("I1", "same", 0.95)] }),
+    { label: "HUMAN_REVIEW", rule_id: "R0s" },
+  ),
+  c("D-52", "out of scope beats photo quality", input({ outOfScope: true, quality: "blurry" }), { label: "HUMAN_REVIEW", rule_id: "R0s" }),
 ];
 
 // Timeline scenarios with ideal model outputs: rules alone must produce the answer.
@@ -365,7 +659,7 @@ const SCENARIOS: Case[] = [
     "S-5",
     "repaired state",
     input({ candidates: repaired(), observed: at("+2d"), comparisons: [cmp("I1", "same", 0.9, { dmg: false, rep: true })] }),
-    { label: "ALREADY_RESOLVED", incident_id: "I1", rule_id: "R7c" },
+    { label: "NEEDS_INFO", rule_id: "R7r", missing_info: ["close_up"] },
   ),
   c(
     "S-6",
@@ -435,3 +729,23 @@ describe("decide", () => {
 describe("scenarios", () => {
   it.each(SCENARIOS)("$id $desc", check);
 });
+
+describe("order independence", () => {
+  // The same pair compared twice (a guardrail merging an agent's re-comparison after re-segmenting):
+  // same key, same confidence, only the repair signs differ.
+  const twin = (rep: boolean) => ({ ...cmp("I1", "same", 0.9, { dmg: false, rep }), candidate_image_id: "img_I1_shared" });
+  const twins = (first: boolean) =>
+    input({ candidates: repaired(), observed: at("+2d"), comparisons: [twin(first), twin(!first)] });
+
+  it("D-64 same key, same confidence: the reading without a fix wins either way", () => {
+    for (const first of [true, false]) expect(decide(twins(first))).toMatchObject({ label: "NEEDS_INFO", rule_id: "R7g", missing_info: ["close_up"] });
+  });
+
+  it("D-64b same, after the resident was asked: staff either way", () => {
+    for (const first of [true, false]) {
+      const i = twins(first);
+      expect(decide({ ...i, report: { ...i.report, already_asked: true } })).toMatchObject({ label: "HUMAN_REVIEW", rule_id: "P1" });
+    }
+  });
+});
+

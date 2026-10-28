@@ -19,6 +19,7 @@ export async function sparkJson<S extends z.ZodType>(opts: {
   model?: string;
   temperature?: number;
   mode?: Mode;
+  signal?: AbortSignal;
 }): Promise<{ data: z.infer<S>; call: CallInfo }> {
   const model = opts.model ?? MODELS.spark;
   const request = {
@@ -31,7 +32,7 @@ export async function sparkJson<S extends z.ZodType>(opts: {
     model,
     request,
     mode: opts.mode,
-    send: () => meta().chat.completions.create(request),
+    send: () => meta().chat.completions.create(request, { signal: opts.signal }),
     cost: (res) => sparkCost(model, res.usage ? { input: res.usage.prompt_tokens, output: res.usage.completion_tokens } : null),
     validate: (res) => void parseCompletion(res, opts.schema),
   });

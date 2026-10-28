@@ -107,7 +107,7 @@ async function main() {
       continue;
     }
     const { same_asset, confidence, evidence } = parsed.data;
-    console.log(`  ${r.name}: ${same_asset} (${confidence}) — ${evidence.join(" | ")}`);
+    console.log(`  ${r.name}: ${same_asset} (${confidence}): ${evidence.join(" | ")}`);
   }
 }
 

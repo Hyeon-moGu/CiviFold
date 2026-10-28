@@ -5,9 +5,22 @@
 // tools, so everything that crosses a tool boundary is defined here once.
 import { z } from "zod";
 import type { ToolData } from "./data";
+import type { DecideInput } from "../pipeline/decide";
+import type { GuardStep } from "../pipeline/guard";
 import type { ImageStore } from "./images";
 
-export const Category = z.enum(["fire_hydrant", "streetlight", "traffic_sign", "bench", "other"]);
+// Fixed assets (hydrant, light, sign, bench) and problems tied to a place (road damage, trash, graffiti).
+// Reports about people or behavior are out of scope: triage flags them and staff handle them directly.
+export const Category = z.enum([
+  "fire_hydrant",
+  "streetlight",
+  "traffic_sign",
+  "bench",
+  "road_damage",
+  "trash",
+  "graffiti",
+  "other",
+]);
 export const IncidentStatus = z.enum(["open", "in_progress", "resolved", "closed"]);
 export const IncidentEventType = z.enum([
   "created",
@@ -27,6 +40,11 @@ export const Label = z.enum([
   "HUMAN_REVIEW",
 ]);
 export const MissingItem = z.enum(["close_up", "wider_context", "different_angle", "observed_time"]);
+// What a resident can be asked for. "photo" serves reports sent without one; it stays out of MissingItem,
+// which is part of the comparison schema the model answers in.
+export const RequestItem = z.enum([...MissingItem.options, "photo"]);
+// How a report arrived, read from what was attached (never from a model).
+export const Channel = z.enum(["photo", "photo_text", "text", "voice", "voice_photo"]);
 export const ImageId = z.string().describe("Image id (original photo or crop), e.g. img_8f2c");
 export const IncidentId = z.string().describe("Incident id, e.g. inc_31a0");
 export const Box = z
@@ -71,6 +89,8 @@ export type IncidentStatus = z.infer<typeof IncidentStatus>;
 export type IncidentEventType = z.infer<typeof IncidentEventType>;
 export type Label = z.infer<typeof Label>;
 export type MissingItem = z.infer<typeof MissingItem>;
+export type RequestItem = z.infer<typeof RequestItem>;
+export type Channel = z.infer<typeof Channel>;
 export type Box = z.infer<typeof Box>;
 export type CompareResult = z.infer<typeof CompareResult>;
 
@@ -81,6 +101,10 @@ export type ToolContext = {
   budget: { usdLeft: number; deadline: number };
   data: ToolData;
   images: ImageStore;
+  investigation?: Investigation; // set while the agent runs; the terminal tools read it
+  signal?: AbortSignal; // set while the agent runs: model calls inside tools stop at its deadline
+  compareModel?: string; // set while the agent runs: its comparisons may use another model than the fast path's
+
 };
 
 export type Tool<I extends z.ZodType, O extends z.ZodType> = {
@@ -91,6 +115,9 @@ export type Tool<I extends z.ZodType, O extends z.ZodType> = {
   terminal?: boolean; // the agent run ends after this tool
   run: (input: z.infer<I>, ctx: ToolContext) => Promise<z.infer<O>>;
 };
+
+/** The agent run so far: its recorded steps and the fast path's input it started from. */
+export type Investigation = { steps: GuardStep[]; base: DecideInput };
 
 // What the agent sees for each tool call. `ref` is the agent_runs.steps id that
 // propose_decision must cite in evidence_refs.

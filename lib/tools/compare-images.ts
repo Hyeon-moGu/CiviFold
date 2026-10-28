@@ -38,6 +38,11 @@ export const compareImages: Tool<typeof CompareImagesIn, typeof CompareImagesOut
     const [fresh, candidate] = await Promise.all([ctx.images.get(input.new_image_id), ctx.images.get(input.candidate_image_id)]);
     if (!fresh) throw new Error(`Unknown image ${input.new_image_id}`);
     if (!candidate) throw new Error(`Unknown image ${input.candidate_image_id}`);
+    // The result becomes evidence about this report, so the new side must be this report's photo (or its crop)
+    // and the two sides must come from different photos.
+    if (fresh.report_id !== ctx.reportId) throw new Error(`Image ${fresh.id} is not a photo of the report being investigated`);
+    if (candidate.report_id === ctx.reportId) throw new Error(`Image ${candidate.id} is a photo of this report, not of an incident`);
+    if ((fresh.source_image_id ?? fresh.id) === (candidate.source_image_id ?? candidate.id)) throw new Error("Both images come from the same photo");
     const incidentId = await ctx.images.incidentOf(candidate.id);
     if (!incidentId) throw new Error(`Image ${candidate.id} does not belong to an incident`);
     const category = (await ctx.images.triageOf(fresh.report_id))?.category ?? "other";
@@ -77,6 +82,8 @@ export const compareImages: Tool<typeof CompareImagesIn, typeof CompareImagesOut
       name: "compare",
       schema: CompareResult,
       mode: ctx.mode,
+      signal: ctx.signal,
+      model: ctx.compareModel,
       messages: [
         { role: "system", content: prompt.text },
         { role: "user", content: parts },

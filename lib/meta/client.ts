@@ -10,6 +10,7 @@ export const MODELS = {
   spark: "muse-spark-1.3",
   sam: "sam-3.1",
   image: "muse-image-1.0",
+  voice: "muse-voice-transcribe-1.0",
 } as const;
 
 export class MetaHttpError extends Error {
@@ -36,15 +37,21 @@ export function meta(): OpenAI {
 }
 
 /** Raw JSON POST for endpoints whose request shape the SDK types do not cover. */
-export async function metaPost<T>(path: string, body: unknown): Promise<T> {
+export async function metaPost<T>(path: string, body: unknown, signal?: AbortSignal): Promise<T> {
+  return send<T>(path, JSON.stringify(body), { "Content-Type": "application/json" }, signal);
+}
+
+/** Multipart POST (fetch sets the boundary header itself). */
+export async function metaPostForm<T>(path: string, form: FormData): Promise<T> {
+  return send<T>(path, form, {});
+}
+
+async function send<T>(path: string, body: string | FormData, headers: Record<string, string>, signal?: AbortSignal): Promise<T> {
   const res = await fetch(`${META_BASE_URL}/${path}`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey()}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify(body),
+    headers: { Authorization: `Bearer ${apiKey()}`, Accept: "application/json", ...headers },
+    body,
+    signal,
   });
   const text = await res.text();
   if (!res.ok) throw new MetaHttpError(res.status, `${path} → HTTP ${res.status}: ${text.slice(0, 800)}`);

@@ -1,0 +1,4192 @@
+{
+  "config": "D_hybrid",
+  "split": "dev",
+  "run": 23,
+  "mode": "cached_then_live",
+  "prompt_hash": {
+    "triage": "c908b19d7fb4",
+    "compare": "6acad7ad8c9f",
+    "agent": "9d15ac78a9ac"
+  },
+  "code_hash": "72e9feeb579c",
+  "created_at": "2026-10-28T05:39:53.546Z",
+  "failed_cases": 0,
+  "summary": {
+    "cases": 40,
+    "outcomes": {
+      "correct": 37,
+      "deferred": 1,
+      "safe_error": 2,
+      "critical": 0
+    },
+    "critical_miss_rate": 0,
+    "review_reduction": 0.475,
+    "dup_precision": 1,
+    "dup_recall": 0.95,
+    "deferral_rate": 0.025,
+    "staff_review_if_no_answer": 0.3,
+    "question_rate": 0.3,
+    "usd_per_report": 0.020535375,
+    "seconds_per_report": 15.03115,
+    "confusion": {
+      "NEW": {
+        "NEW": 12
+      },
+      "DUPLICATE": {
+        "DUPLICATE": 13
+      },
+      "LATE_REPORT": {
+        "LATE_REPORT": 6,
+        "HUMAN_REVIEW": 1
+      },
+      "ALREADY_RESOLVED": {
+        "ALREADY_RESOLVED": 2,
+        "POSSIBLE_RECURRENCE": 2
+      },
+      "POSSIBLE_RECURRENCE": {
+        "POSSIBLE_RECURRENCE": 4
+      }
+    },
+    "stages": {
+      "first_or_no_answer": {
+        "correct": 28,
+        "deferred": 12,
+        "safe_error": 0,
+        "critical": 0,
+        "critical_miss_rate": 0
+      },
+      "after_answer": {
+        "correct": 37,
+        "deferred": 1,
+        "safe_error": 2,
+        "critical": 0,
+        "critical_miss_rate": 0
+      },
+      "asked": 12,
+      "answer_effect": {
+        "correct": 9,
+        "still_deferred": 1,
+        "safe_error": 2,
+        "critical": 0
+      }
+    }
+  },
+  "stress_summary": {
+    "cases": 16,
+    "outcomes": {
+      "correct": 14,
+      "deferred": 2,
+      "safe_error": 0,
+      "critical": 0
+    },
+    "critical_miss_rate": 0,
+    "review_reduction": 0.375,
+    "dup_precision": 1,
+    "dup_recall": 0.75,
+    "deferral_rate": 0.125,
+    "staff_review_if_no_answer": 0.3125,
+    "question_rate": 0.25,
+    "usd_per_report": 0.022040296874999997,
+    "seconds_per_report": 16.6670625,
+    "confusion": {
+      "DUPLICATE": {
+        "DUPLICATE": 6,
+        "HUMAN_REVIEW": 2
+      },
+      "POSSIBLE_RECURRENCE": {
+        "POSSIBLE_RECURRENCE": 8
+      }
+    },
+    "stages": {
+      "first_or_no_answer": {
+        "correct": 11,
+        "deferred": 5,
+        "safe_error": 0,
+        "critical": 0,
+        "critical_miss_rate": 0
+      },
+      "after_answer": {
+        "correct": 14,
+        "deferred": 2,
+        "safe_error": 0,
+        "critical": 0,
+        "critical_miss_rate": 0
+      },
+      "asked": 4,
+      "answer_effect": {
+        "correct": 3,
+        "still_deferred": 1,
+        "safe_error": 0,
+        "critical": 0
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "H1-t1",
+      "asset_id": "H1",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1,
+        "rules": [
+          "R1"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 256
+    },
+    {
+      "case_id": "H1-t2",
+      "asset_id": "H1",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.94,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.02367425,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "H1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_H1_damaged_v1_across@H1-t2",
+              "candidate_image_id": "syn_H1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_across@H1-t2",
+              "candidate_image_id": "syn_H1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.9,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.02367425,
+      "latency_ms": 17719
+    },
+    {
+      "case_id": "H1-t2-blur",
+      "asset_id": "H1",
+      "set": "stress",
+      "kind": "t2-blur",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R0",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9,
+        "rules": [
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.8
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "get_incident_timeline",
+            "search_incidents",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.035617750000000004,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "H1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_H1_damaged_v1_closeup@H1-t2-blur:close",
+              "candidate_image_id": "syn_H1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.8,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_closeup@H1-t2-blur:close",
+              "candidate_image_id": "syn_H1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.9,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.035617750000000004,
+      "latency_ms": 31785
+    },
+    {
+      "case_id": "H1-t2-night",
+      "asset_id": "H1",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.06635975,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "H1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_H1_damaged_v1_across_night@H1-t2-night",
+              "candidate_image_id": "syn_H1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_across_night@H1-t2-night",
+              "candidate_image_id": "syn_H1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.92,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_across_night@H1-t2-night",
+              "candidate_image_id": "syn_H2_damaged_v1_front",
+              "mode": "full",
+              "verdict": "different",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_across_night@H1-t2-night",
+              "candidate_image_id": "syn_H3_damaged_v1_front",
+              "mode": "full",
+              "verdict": "different",
+              "confidence": 0.95,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.06635975,
+      "latency_ms": 43768
+    },
+    {
+      "case_id": "H1-t3",
+      "asset_id": "H1",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9,
+        "rules": [
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.8
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.01827,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "H1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_H1_damaged_v1_closeup@H1-t3",
+              "candidate_image_id": "syn_H1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.75,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_closeup@H1-t3",
+              "candidate_image_id": "syn_H1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.8,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.01827,
+      "latency_ms": 14709
+    },
+    {
+      "case_id": "H1-t4",
+      "asset_id": "H1",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "H1/I1",
+        "rule_id": "R7a",
+        "confidence": 0.93,
+        "rules": [
+          "R2d",
+          "R7a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "LATE_REPORT",
+          "error": null,
+          "cost_usd": 0.02171825,
+          "proposal": {
+            "label": "LATE_REPORT",
+            "incident_id": "H1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_H1_damaged_v1_sidewalk@H1-t4",
+              "candidate_image_id": "syn_H1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_sidewalk@H1-t4",
+              "candidate_image_id": "syn_H1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_sidewalk@H1-t4",
+              "candidate_image_id": "syn_H1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.85,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_sidewalk@H1-t4",
+              "candidate_image_id": "syn_H1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.02171825,
+      "latency_ms": 17601
+    },
+    {
+      "case_id": "H1-t5",
+      "asset_id": "H1",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7r",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "H1/I1",
+        "rule_id": "R7c",
+        "confidence": 0.92,
+        "rules": [
+          "R7c"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "ALREADY_RESOLVED",
+          "error": null,
+          "cost_usd": 0.054632749999999994,
+          "proposal": {
+            "label": "ALREADY_RESOLVED",
+            "incident_id": "H1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_H1_repaired_across@H1-t5",
+              "candidate_image_id": "syn_H1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_H1_repaired_across@H1-t5",
+              "candidate_image_id": "syn_H1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.85,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_H1_repaired_front@H1-t5:close",
+              "candidate_image_id": "syn_H1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.9,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_H1_repaired_front@H1-t5:close",
+              "candidate_image_id": "syn_H1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.85,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_H1_repaired_across@H1-t5",
+              "candidate_image_id": "syn_H1_damaged_v1_sidewalk",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.8,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_H1_repaired_front@H1-t5:close",
+              "candidate_image_id": "syn_H1_damaged_v1_sidewalk",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.9,
+              "problem_visible": false
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.054632749999999994,
+      "latency_ms": 46185
+    },
+    {
+      "case_id": "H1-t6",
+      "asset_id": "H1",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1762
+    },
+    {
+      "case_id": "H1-t6-low_res",
+      "asset_id": "H1",
+      "set": "stress",
+      "kind": "t6-low_res",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95,
+        "rules": [
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 487
+    },
+    {
+      "case_id": "H1-t6-night",
+      "asset_id": "H1",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 847
+    },
+    {
+      "case_id": "H1-t7",
+      "asset_id": "H1",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H1/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H1/I2",
+        "rule_id": "R6a",
+        "confidence": 0.92,
+        "rules": [
+          "R4c",
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "H1/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I2",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "get_incident_timeline",
+            "get_incident_timeline",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.06976775,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "H1/I2"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_H1_damaged_v2_sidewalk@H1-t7",
+              "candidate_image_id": "syn_H1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.75,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v2_sidewalk@H1-t7",
+              "candidate_image_id": "syn_H1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.75,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v2_sidewalk@H1-t7",
+              "candidate_image_id": "syn_H1_damaged_v1_sidewalk",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v2_sidewalk@H1-t7",
+              "candidate_image_id": "syn_H1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v2_sidewalk@H1-t7",
+              "candidate_image_id": "syn_H1_damaged_v2_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.06976775,
+      "latency_ms": 51840
+    },
+    {
+      "case_id": "H1-time-conflict",
+      "asset_id": "H1",
+      "set": "base",
+      "kind": "time-conflict",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "H1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7e",
+        "missing_info": [
+          "observed_time"
+        ]
+      },
+      "asked": "observed_time",
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "H1/I1",
+        "rule_id": "R7a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R7a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "LATE_REPORT",
+          "error": null,
+          "cost_usd": 0.04206025,
+          "proposal": {
+            "label": "LATE_REPORT",
+            "incident_id": "H1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_H1_damaged_v1_across@H1-time-conflict",
+              "candidate_image_id": "syn_H1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_across@H1-time-conflict",
+              "candidate_image_id": "syn_H1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_across@H1-time-conflict",
+              "candidate_image_id": "syn_H1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.8,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_H1_damaged_v1_across@H1-time-conflict",
+              "candidate_image_id": "syn_H1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.9,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.04206025,
+      "latency_ms": 36359
+    },
+    {
+      "case_id": "H5-lookalike-after-fix",
+      "asset_id": "H5",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95,
+        "rules": [
+          "R3"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 643
+    },
+    {
+      "case_id": "H5-lookalike-open",
+      "asset_id": "H5",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95,
+        "rules": [
+          "R3"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "H1/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "H1/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 875
+    },
+    {
+      "case_id": "P1-t1",
+      "asset_id": "P1",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1,
+        "rules": [
+          "R1"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 22
+    },
+    {
+      "case_id": "P1-t2",
+      "asset_id": "P1",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R2w",
+        "missing_info": [
+          "different_angle"
+        ]
+      },
+      "asked": "different_angle",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "get_incident_timeline",
+            "search_incidents",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.03813025,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "P1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_P1_damaged_v1_across@P1-t2",
+              "candidate_image_id": "syn_P1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_sidewalk@P1-t2:wide",
+              "candidate_image_id": "syn_P1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_sidewalk@P1-t2:wide",
+              "candidate_image_id": "syn_P1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_across@P1-t2",
+              "candidate_image_id": "syn_P1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": false
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.03813025,
+      "latency_ms": 26611
+    },
+    {
+      "case_id": "P1-t2-dark",
+      "asset_id": "P1",
+      "set": "stress",
+      "kind": "t2-dark",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.9,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "get_incident_timeline",
+            "search_incidents",
+            "segment_object",
+            "compare_images",
+            "compare_images",
+            "segment_object",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.09629650000000001,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "P1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_P1_damaged_v1_across@P1-t2-dark",
+              "candidate_image_id": "syn_P1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_across@P1-t2-dark",
+              "candidate_image_id": "syn_P1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.92,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_across@P1-t2-dark",
+              "candidate_image_id": "syn_P1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": false
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.09629650000000001,
+      "latency_ms": 77314
+    },
+    {
+      "case_id": "P1-t2-night",
+      "asset_id": "P1",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "P1",
+        "confidence": 0.95,
+        "rules": [
+          "R6a",
+          "R2v",
+          "P1"
+        ]
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.85
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1267
+    },
+    {
+      "case_id": "P1-t3",
+      "asset_id": "P1",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.03450975,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "P1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_P1_damaged_v1_closeup@P1-t3",
+              "candidate_image_id": "syn_P1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_closeup@P1-t3",
+              "candidate_image_id": "syn_P1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_sidewalk@P1-t3:wide",
+              "candidate_image_id": "syn_P1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_sidewalk@P1-t3:wide",
+              "candidate_image_id": "syn_P1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.03450975,
+      "latency_ms": 22291
+    },
+    {
+      "case_id": "P1-t4",
+      "asset_id": "P1",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "P1/I1",
+        "rule_id": "R7a",
+        "confidence": 0.9,
+        "rules": [
+          "R2d",
+          "R7a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "get_incident_timeline",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "LATE_REPORT",
+          "error": null,
+          "cost_usd": 0.036305250000000004,
+          "proposal": {
+            "label": "LATE_REPORT",
+            "incident_id": "P1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_P1_damaged_v1_sidewalk@P1-t4",
+              "candidate_image_id": "syn_P1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_sidewalk@P1-t4",
+              "candidate_image_id": "syn_P1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_sidewalk@P1-t4",
+              "candidate_image_id": "syn_P1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v1_sidewalk@P1-t4",
+              "candidate_image_id": "syn_P1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.036305250000000004,
+      "latency_ms": 23285
+    },
+    {
+      "case_id": "P1-t5",
+      "asset_id": "P1",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R2w",
+        "missing_info": [
+          "different_angle"
+        ]
+      },
+      "asked": "different_angle",
+      "predicted": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "P1/I1",
+        "rule_id": "R7c",
+        "confidence": 0.95,
+        "rules": [
+          "R7c"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "ALREADY_RESOLVED",
+          "error": null,
+          "cost_usd": 0.05613075,
+          "proposal": {
+            "label": "ALREADY_RESOLVED",
+            "incident_id": "P1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_P1_repaired_across@P1-t5",
+              "candidate_image_id": "syn_P1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_P1_repaired_across@P1-t5",
+              "candidate_image_id": "syn_P1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_P1_repaired_front@P1-t5:wide",
+              "candidate_image_id": "syn_P1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_P1_repaired_front@P1-t5:wide",
+              "candidate_image_id": "syn_P1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_P1_repaired_across@P1-t5",
+              "candidate_image_id": "syn_P1_damaged_v1_sidewalk",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_P1_repaired_front@P1-t5:wide",
+              "candidate_image_id": "syn_P1_damaged_v1_sidewalk",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": false
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.05613075,
+      "latency_ms": 41337
+    },
+    {
+      "case_id": "P1-t6",
+      "asset_id": "P1",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95,
+        "rules": [
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 691
+    },
+    {
+      "case_id": "P1-t6-blur",
+      "asset_id": "P1",
+      "set": "stress",
+      "kind": "t6-blur",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R0",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P1/I1",
+        "rule_id": "R7f",
+        "confidence": 0.6,
+        "rules": [
+          "R7f"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.75
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.75
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 679
+    },
+    {
+      "case_id": "P1-t6-night",
+      "asset_id": "P1",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95,
+        "rules": [
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1001
+    },
+    {
+      "case_id": "P1-t7",
+      "asset_id": "P1",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P1/I2"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R2w",
+        "missing_info": [
+          "different_angle"
+        ]
+      },
+      "asked": "different_angle",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P1/I2",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R4c",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "get_incident_timeline",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.054124,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "P1/I2"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_P1_damaged_v2_sidewalk@P1-t7",
+              "candidate_image_id": "syn_P1_damaged_v2_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v2_front_night@P1-t7:wide",
+              "candidate_image_id": "syn_P1_damaged_v2_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v2_sidewalk@P1-t7",
+              "candidate_image_id": "syn_P1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_P1_damaged_v2_front_night@P1-t7:wide",
+              "candidate_image_id": "syn_P1_damaged_v1_sidewalk",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.054124,
+      "latency_ms": 37718
+    },
+    {
+      "case_id": "P1-time-conflict",
+      "asset_id": "P1",
+      "set": "base",
+      "kind": "time-conflict",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "P1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7e",
+        "missing_info": [
+          "observed_time"
+        ]
+      },
+      "asked": "observed_time",
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": null,
+        "rule_id": "P1",
+        "confidence": 0.95,
+        "rules": [
+          "R7a",
+          "R2w",
+          "P1"
+        ]
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1000
+    },
+    {
+      "case_id": "P5-lookalike-after-fix",
+      "asset_id": "P5",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.9,
+        "rules": [
+          "R3"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 821
+    },
+    {
+      "case_id": "P5-lookalike-open",
+      "asset_id": "P5",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95,
+        "rules": [
+          "R3"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "P1/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "P1/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1212
+    },
+    {
+      "case_id": "S1-gps-small",
+      "asset_id": "S1",
+      "set": "base",
+      "kind": "gps-small",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.8
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "segment_object",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.062983,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "S1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_S1_damaged_v1_across@S1-gps-small",
+              "candidate_image_id": "syn_S1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_across@S1-gps-small",
+              "candidate_image_id": "syn_S1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.8,
+              "problem_visible": false
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_across@S1-gps-small",
+              "candidate_image_id": "syn_S2_damaged_v1_front",
+              "mode": "full",
+              "verdict": "different",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_across@S1-gps-small",
+              "candidate_image_id": "syn_S3_damaged_v1_front",
+              "mode": "full",
+              "verdict": "different",
+              "confidence": 0.95,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.062983,
+      "latency_ms": 40750
+    },
+    {
+      "case_id": "S1-t1",
+      "asset_id": "S1",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1,
+        "rules": [
+          "R1"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 11
+    },
+    {
+      "case_id": "S1-t2",
+      "asset_id": "S1",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.8
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "segment_object",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.048370250000000004,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "S1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_S1_damaged_v1_across@S1-t2",
+              "candidate_image_id": "syn_S1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_across@S1-t2",
+              "candidate_image_id": "syn_S1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.8,
+              "problem_visible": false
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.048370250000000004,
+      "latency_ms": 31850
+    },
+    {
+      "case_id": "S1-t2-night",
+      "asset_id": "S1",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "HUMAN_REVIEW",
+        "rule_id": "agent:proposed",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "HUMAN_REVIEW",
+        "incident": "null",
+        "rule_id": "agent:proposed",
+        "confidence": 0.5,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "deferred",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.8
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "segment_object",
+            "segment_object",
+            "segment_object",
+            "segment_object",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "HUMAN_REVIEW",
+          "error": null,
+          "cost_usd": 0.05430575,
+          "proposal": {
+            "label": "HUMAN_REVIEW",
+            "incident_id": "null"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_S1_damaged_v1_across_night@S1-t2-night",
+              "candidate_image_id": "syn_S1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_across_night@S1-t2-night",
+              "candidate_image_id": "syn_S1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.8,
+              "problem_visible": false
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.05430575,
+      "latency_ms": 39374
+    },
+    {
+      "case_id": "S1-t2-off_center",
+      "asset_id": "S1",
+      "set": "stress",
+      "kind": "t2-off_center",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "segment_object",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.049692499999999994,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "S1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_S1_damaged_v1_across@S1-t2-off_center",
+              "candidate_image_id": "syn_S1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_across@S1-t2-off_center",
+              "candidate_image_id": "syn_S1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.049692499999999994,
+      "latency_ms": 32922
+    },
+    {
+      "case_id": "S1-t3",
+      "asset_id": "S1",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.02222075,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "S1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_S1_damaged_v1_closeup@S1-t3",
+              "candidate_image_id": "syn_S1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_closeup@S1-t3",
+              "candidate_image_id": "syn_S1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_sidewalk@S1-t3:wide",
+              "candidate_image_id": "syn_S1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_sidewalk@S1-t3:wide",
+              "candidate_image_id": "syn_S1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.02222075,
+      "latency_ms": 14223
+    },
+    {
+      "case_id": "S1-t4",
+      "asset_id": "S1",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "S1/I1",
+        "rule_id": "R7a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R7a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "LATE_REPORT",
+          "error": null,
+          "cost_usd": 0.03235299999999999,
+          "proposal": {
+            "label": "LATE_REPORT",
+            "incident_id": "S1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_S1_damaged_v1_sidewalk@S1-t4",
+              "candidate_image_id": "syn_S1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_sidewalk@S1-t4",
+              "candidate_image_id": "syn_S1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_sidewalk@S1-t4",
+              "candidate_image_id": "syn_S1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v1_sidewalk@S1-t4",
+              "candidate_image_id": "syn_S1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.03235299999999999,
+      "latency_ms": 21722
+    },
+    {
+      "case_id": "S1-t5",
+      "asset_id": "S1",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7g",
+        "missing_info": [
+          "close_up"
+        ]
+      },
+      "asked": "close_up",
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S1/I1",
+        "rule_id": "R7z",
+        "confidence": 0.95,
+        "rules": [
+          "R7z"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.92
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.8
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 2314
+    },
+    {
+      "case_id": "S1-t6",
+      "asset_id": "S1",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95,
+        "rules": [
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1116
+    },
+    {
+      "case_id": "S1-t6-dark",
+      "asset_id": "S1",
+      "set": "stress",
+      "kind": "t6-dark",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1341
+    },
+    {
+      "case_id": "S1-t6-night",
+      "asset_id": "S1",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.9,
+        "rules": [
+          "R2d",
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 945
+    },
+    {
+      "case_id": "S1-t7",
+      "asset_id": "S1",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S1/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S1/I2",
+        "rule_id": "R6a",
+        "confidence": 0.9,
+        "rules": [
+          "R4c",
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I2",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "blocked",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "get_incident_timeline",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [
+            "G1"
+          ],
+          "final_label": "HUMAN_REVIEW",
+          "error": null,
+          "cost_usd": 0.054702499999999994,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "S1/I2"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_S1_damaged_v2_sidewalk@S1-t7",
+              "candidate_image_id": "syn_S1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v2_sidewalk@S1-t7",
+              "candidate_image_id": "syn_S1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v2_sidewalk@S1-t7",
+              "candidate_image_id": "syn_S1_damaged_v1_sidewalk",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v2_sidewalk@S1-t7",
+              "candidate_image_id": "syn_S1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_S1_damaged_v2_sidewalk@S1-t7",
+              "candidate_image_id": "syn_S1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.054702499999999994,
+      "latency_ms": 41146
+    },
+    {
+      "case_id": "S5-lookalike-after-fix",
+      "asset_id": "S5",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1,
+        "rules": [
+          "R1"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 20
+    },
+    {
+      "case_id": "S5-lookalike-open",
+      "asset_id": "S5",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95,
+        "rules": [
+          "R3"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "S1/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "S1/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1687
+    },
+    {
+      "case_id": "W1-t1",
+      "asset_id": "W1",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R1",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R1",
+        "confidence": 1,
+        "rules": [
+          "R1"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 26
+    },
+    {
+      "case_id": "W1-t2",
+      "asset_id": "W1",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "search_incidents",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.02420725,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "W1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_W1_damaged_v1_across@W1-t2",
+              "candidate_image_id": "syn_W1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_across@W1-t2",
+              "candidate_image_id": "syn_W1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.92,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.02420725,
+      "latency_ms": 16201
+    },
+    {
+      "case_id": "W1-t2-low_res",
+      "asset_id": "W1",
+      "set": "stress",
+      "kind": "t2-low_res",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.8
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "search_incidents",
+            "segment_object",
+            "compare_images",
+            "compare_images",
+            "get_incident_timeline",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.028886999999999996,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "W1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_W1_damaged_v1_across@W1-t2-low_res",
+              "candidate_image_id": "syn_W1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_across@W1-t2-low_res",
+              "candidate_image_id": "syn_W1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.8,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.028886999999999996,
+      "latency_ms": 22173
+    },
+    {
+      "case_id": "W1-t2-night",
+      "asset_id": "W1",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.021485499999999998,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "W1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_W1_damaged_v1_across_night@W1-t2-night",
+              "candidate_image_id": "syn_W1_damaged_v1_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_across_night@W1-t2-night",
+              "candidate_image_id": "syn_W1_damaged_v1_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.92,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.021485499999999998,
+      "latency_ms": 11250
+    },
+    {
+      "case_id": "W1-t3",
+      "asset_id": "W1",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R2w",
+        "missing_info": [
+          "different_angle"
+        ]
+      },
+      "asked": "different_angle",
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W1/I1",
+        "rule_id": "R6a",
+        "confidence": 0.92,
+        "rules": [
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.75
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.021015,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "W1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_W1_damaged_v1_closeup@W1-t3",
+              "candidate_image_id": "syn_W1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.9,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_closeup@W1-t3",
+              "candidate_image_id": "syn_W1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_sidewalk@W1-t3:wide",
+              "candidate_image_id": "syn_W1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_sidewalk@W1-t3:wide",
+              "candidate_image_id": "syn_W1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.92,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.021015,
+      "latency_ms": 16407
+    },
+    {
+      "case_id": "W1-t4",
+      "asset_id": "W1",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "LATE_REPORT",
+        "rule_id": "R7a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "W1/I1",
+        "rule_id": "R7a",
+        "confidence": 0.94,
+        "rules": [
+          "R2d",
+          "R7a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.75
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "LATE_REPORT",
+          "error": null,
+          "cost_usd": 0.0359545,
+          "proposal": {
+            "label": "LATE_REPORT",
+            "incident_id": "W1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_W1_damaged_v1_sidewalk@W1-t4",
+              "candidate_image_id": "syn_W1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_sidewalk@W1-t4",
+              "candidate_image_id": "syn_W1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.92,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_sidewalk@W1-t4",
+              "candidate_image_id": "syn_W1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.92,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_sidewalk@W1-t4",
+              "candidate_image_id": "syn_W1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.0359545,
+      "latency_ms": 23016
+    },
+    {
+      "case_id": "W1-t5",
+      "asset_id": "W1",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R2w",
+        "missing_info": [
+          "different_angle"
+        ]
+      },
+      "asked": "different_angle",
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W1/I1",
+        "rule_id": "R7z",
+        "confidence": 0.76,
+        "rules": [
+          "R7z"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.75
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1843
+    },
+    {
+      "case_id": "W1-t6",
+      "asset_id": "W1",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.92,
+        "rules": [
+          "R2d",
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 890
+    },
+    {
+      "case_id": "W1-t6-jpeg",
+      "asset_id": "W1",
+      "set": "stress",
+      "kind": "t6-jpeg",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "POSSIBLE_RECURRENCE",
+        "rule_id": "R7d",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95,
+        "rules": [
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 508
+    },
+    {
+      "case_id": "W1-t6-night",
+      "asset_id": "W1",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R5",
+        "missing_info": [
+          "wider_context"
+        ]
+      },
+      "asked": "wider_context",
+      "predicted": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W1/I1",
+        "rule_id": "R7d",
+        "confidence": 0.95,
+        "rules": [
+          "R7d"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.9
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1012
+    },
+    {
+      "case_id": "W1-t7",
+      "asset_id": "W1",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W1/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "R6a",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W1/I2",
+        "rule_id": "R6a",
+        "confidence": 0.95,
+        "rules": [
+          "R4c",
+          "R2d",
+          "R6a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "uncertain",
+          "confidence": 0.5
+        },
+        {
+          "incident_id": "W1/I2",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I2",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.9
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "get_incident_timeline",
+            "get_incident_timeline",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "DUPLICATE",
+          "error": null,
+          "cost_usd": 0.049125499999999996,
+          "proposal": {
+            "label": "DUPLICATE",
+            "incident_id": "W1/I2"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_W1_damaged_v2_sidewalk@W1-t7",
+              "candidate_image_id": "syn_W1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.9,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v2_sidewalk@W1-t7",
+              "candidate_image_id": "syn_W1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v2_sidewalk@W1-t7",
+              "candidate_image_id": "syn_W1_damaged_v2_front",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v2_sidewalk@W1-t7",
+              "candidate_image_id": "syn_W1_damaged_v2_front",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.9,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.049125499999999996,
+      "latency_ms": 30125
+    },
+    {
+      "case_id": "W1-time-conflict",
+      "asset_id": "W1",
+      "set": "base",
+      "kind": "time-conflict",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "W1/I1"
+      },
+      "first": {
+        "label": "NEEDS_INFO",
+        "rule_id": "R7e",
+        "missing_info": [
+          "observed_time"
+        ]
+      },
+      "asked": "observed_time",
+      "predicted": {
+        "label": "LATE_REPORT",
+        "incident": "W1/I1",
+        "rule_id": "R7a",
+        "confidence": 0.94,
+        "rules": [
+          "R2d",
+          "R7a"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "same",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "same",
+          "confidence": 0.92
+        }
+      ],
+      "agent_runs": [
+        {
+          "status": "proposed",
+          "tools": [
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "compare_images",
+            "propose_decision"
+          ],
+          "blocked_rules": [],
+          "final_label": "LATE_REPORT",
+          "error": null,
+          "cost_usd": 0.021159999999999998,
+          "proposal": {
+            "label": "LATE_REPORT",
+            "incident_id": "W1/I1"
+          },
+          "compares": [
+            {
+              "new_image_id": "syn_W1_damaged_v1_across@W1-time-conflict",
+              "candidate_image_id": "syn_W1_damaged_v1_across",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_across@W1-time-conflict",
+              "candidate_image_id": "syn_W1_damaged_v1_across",
+              "mode": "crops",
+              "verdict": "same",
+              "confidence": 0.95,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_across@W1-time-conflict",
+              "candidate_image_id": "syn_W1_damaged_v1_closeup",
+              "mode": "full",
+              "verdict": "same",
+              "confidence": 0.85,
+              "problem_visible": true
+            },
+            {
+              "new_image_id": "syn_W1_damaged_v1_across@W1-time-conflict",
+              "candidate_image_id": "syn_W1_damaged_v1_closeup",
+              "mode": "crops",
+              "verdict": "uncertain",
+              "confidence": 0.5,
+              "problem_visible": true
+            }
+          ]
+        }
+      ],
+      "errors": [],
+      "cost_usd": 0.021159999999999998,
+      "latency_ms": 13536
+    },
+    {
+      "case_id": "W5-lookalike-after-fix",
+      "asset_id": "W5",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95,
+        "rules": [
+          "R3"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 686
+    },
+    {
+      "case_id": "W5-lookalike-open",
+      "asset_id": "W5",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "R3",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "R3",
+        "confidence": 0.95,
+        "rules": [
+          "R3"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [
+        {
+          "incident_id": "W1/I1",
+          "stage": 1,
+          "verdict": "different",
+          "confidence": 0.95
+        },
+        {
+          "incident_id": "W1/I1",
+          "stage": 2,
+          "verdict": "different",
+          "confidence": 0.95
+        }
+      ],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 740
+    }
+  ]
+}

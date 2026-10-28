@@ -2,7 +2,7 @@
 // Created: 2026-10-27
 
 // Runs the fast path on local photos against a small JSON world of existing incidents.
-// Usage: npm run analyze -- <photo> [<photo> ...] [--world scripts/worlds/smoke.json] [--observed ISO] [--asked]
+// Usage: npm run analyze -- <photo> [<photo> ...] [--world scripts/worlds/smoke.json] [--observed ISO] [--category trash] [--asked]
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
@@ -50,6 +50,7 @@ async function main() {
     options: {
       world: { type: "string", default: "scripts/worlds/smoke.json" },
       observed: { type: "string" },
+      category: { type: "string" },
       asked: { type: "boolean", default: false },
     },
   });
@@ -66,7 +67,8 @@ async function main() {
       incidentByReport[p.report_id] = inc.id;
     }
   }
-  const newPhotos = await Promise.all(positionals.map((file) => loadImage(file, imageId(file), `r_new_${path.basename(file)}`)));
+  // New photos get their own ids, so a world photo can also be submitted as a new report.
+  const newPhotos = await Promise.all(positionals.map((file) => loadImage(file, `${imageId(file)}_new`, `r_new_${path.basename(file)}`)));
   const ctx: ToolContext = {
     reportId: "cli",
     runId: null,
@@ -91,7 +93,7 @@ async function main() {
         ...world.report_at,
         observed_at: values.observed ?? world.asOf,
         description: null,
-        category_hint: null,
+        category_hint: values.category ?? null,
         already_asked: values.asked,
       },
       ctx,
@@ -102,7 +104,7 @@ async function main() {
     console.log(`  search   ${a.candidates.map((c) => `${c.incident_id}(${c.status}, ${c.distance_m}m)`).join(", ") || "none"}`);
     for (const c of a.comparisons) {
       const r = c.result?.asset_match;
-      console.log(`  stage ${c.stage}  ${c.incident_id}: ${r ? `${r.verdict} ${r.confidence}` : "failed"}${r?.evidence.length ? ` — ${r.evidence.join(" | ")}` : ""}`);
+      console.log(`  stage ${c.stage}  ${c.incident_id}: ${r ? `${r.verdict} ${r.confidence}` : "failed"}${r?.evidence.length ? `: ${r.evidence.join(" | ")}` : ""}`);
     }
     for (const e of a.errors) console.log(`  error    ${e}`);
     console.log(`  → ${d.label}${d.incident_id ? ` ${d.incident_id}` : ""} [${d.rule_id}] conf=${d.confidence}${d.missing_info.length ? ` ask=${d.missing_info.join(",")}` : ""}`);

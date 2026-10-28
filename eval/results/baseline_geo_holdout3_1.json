@@ -1,0 +1,3598 @@
+{
+  "config": "baseline_geo",
+  "split": "holdout3",
+  "run": 1,
+  "mode": "cached_then_live",
+  "prompt_hash": {
+    "triage": "c908b19d7fb4",
+    "compare": "6acad7ad8c9f",
+    "agent": "70c41c2d971e"
+  },
+  "code_hash": "2ded5a1732b8",
+  "created_at": "2026-10-28T00:00:05.362Z",
+  "failed_cases": 0,
+  "summary": {
+    "cases": 80,
+    "outcomes": {
+      "correct": 26,
+      "deferred": 0,
+      "safe_error": 22,
+      "critical": 32
+    },
+    "critical_miss_rate": 0.7272727272727273,
+    "review_reduction": 0.225,
+    "dup_precision": 0.2571428571428571,
+    "dup_recall": 0.46153846153846156,
+    "deferral_rate": 0,
+    "staff_review_if_no_answer": 0,
+    "question_rate": 0,
+    "usd_per_report": 0,
+    "seconds_per_report": 0.0005625,
+    "confusion": {
+      "NEW": {
+        "NEW": 8,
+        "DUPLICATE": 16
+      },
+      "DUPLICATE": {
+        "DUPLICATE": 26,
+        "NEW": 1
+      },
+      "LATE_REPORT": {
+        "DUPLICATE": 12
+      },
+      "ALREADY_RESOLVED": {
+        "DUPLICATE": 8
+      },
+      "POSSIBLE_RECURRENCE": {
+        "DUPLICATE": 8,
+        "NEW": 1
+      }
+    },
+    "stages": {
+      "first_or_no_answer": {
+        "correct": 26,
+        "deferred": 0,
+        "safe_error": 22,
+        "critical": 32,
+        "critical_miss_rate": 0.7272727272727273
+      },
+      "after_answer": {
+        "correct": 26,
+        "deferred": 0,
+        "safe_error": 22,
+        "critical": 32,
+        "critical_miss_rate": 0.7272727272727273
+      },
+      "asked": 0,
+      "answer_effect": {
+        "correct": 0,
+        "still_deferred": 0,
+        "safe_error": 0,
+        "critical": 0
+      }
+    }
+  },
+  "stress_summary": {
+    "cases": 32,
+    "outcomes": {
+      "correct": 16,
+      "deferred": 0,
+      "safe_error": 0,
+      "critical": 16
+    },
+    "critical_miss_rate": 1,
+    "review_reduction": 0.5,
+    "dup_precision": 0.5,
+    "dup_recall": 1,
+    "deferral_rate": 0,
+    "staff_review_if_no_answer": 0,
+    "question_rate": 0,
+    "usd_per_report": 0,
+    "seconds_per_report": 0.00009375,
+    "confusion": {
+      "DUPLICATE": {
+        "DUPLICATE": 16
+      },
+      "POSSIBLE_RECURRENCE": {
+        "DUPLICATE": 16
+      }
+    },
+    "stages": {
+      "first_or_no_answer": {
+        "correct": 16,
+        "deferred": 0,
+        "safe_error": 0,
+        "critical": 16,
+        "critical_miss_rate": 1
+      },
+      "after_answer": {
+        "correct": 16,
+        "deferred": 0,
+        "safe_error": 0,
+        "critical": 16,
+        "critical_miss_rate": 1
+      },
+      "asked": 0,
+      "answer_effect": {
+        "correct": 0,
+        "still_deferred": 0,
+        "safe_error": 0,
+        "critical": 0
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "H15-t1",
+      "asset_id": "H15",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H15-t2",
+      "asset_id": "H15",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H15-t2-low_res",
+      "asset_id": "H15",
+      "set": "stress",
+      "kind": "t2-low_res",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H15-t2-night",
+      "asset_id": "H15",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H15-t3",
+      "asset_id": "H15",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H15-t4",
+      "asset_id": "H15",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H15-t5",
+      "asset_id": "H15",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 18
+    },
+    {
+      "case_id": "H15-t6",
+      "asset_id": "H15",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 17
+    },
+    {
+      "case_id": "H15-t6-jpeg",
+      "asset_id": "H15",
+      "set": "stress",
+      "kind": "t6-jpeg",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H15-t6-night",
+      "asset_id": "H15",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H15-t7",
+      "asset_id": "H15",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H15/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H15-time-conflict",
+      "asset_id": "H15",
+      "set": "base",
+      "kind": "time-conflict",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "H15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H16-gps-large-t2",
+      "asset_id": "H16",
+      "set": "base",
+      "kind": "gps-large-t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H16-gps-large-t6",
+      "asset_id": "H16",
+      "set": "base",
+      "kind": "gps-large-t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H16-t1",
+      "asset_id": "H16",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H16-t2",
+      "asset_id": "H16",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H16-t2-night",
+      "asset_id": "H16",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H16-t2-off_center",
+      "asset_id": "H16",
+      "set": "stress",
+      "kind": "t2-off_center",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H16-t3",
+      "asset_id": "H16",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H16-t4",
+      "asset_id": "H16",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H16-t5",
+      "asset_id": "H16",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H16-t6",
+      "asset_id": "H16",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H16-t6-dark",
+      "asset_id": "H16",
+      "set": "stress",
+      "kind": "t6-dark",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H16-t6-night",
+      "asset_id": "H16",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "H16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H16-t7",
+      "asset_id": "H16",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "H16/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "H17-lookalike-after-fix",
+      "asset_id": "H17",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H17-lookalike-open",
+      "asset_id": "H17",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H18-lookalike-after-fix",
+      "asset_id": "H18",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "H18-lookalike-open",
+      "asset_id": "H18",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "H16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-closeup-late",
+      "asset_id": "P15",
+      "set": "base",
+      "kind": "closeup-late",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t1",
+      "asset_id": "P15",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t2",
+      "asset_id": "P15",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t2-night",
+      "asset_id": "P15",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t2-off_center",
+      "asset_id": "P15",
+      "set": "stress",
+      "kind": "t2-off_center",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t3",
+      "asset_id": "P15",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t4",
+      "asset_id": "P15",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t5",
+      "asset_id": "P15",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t6",
+      "asset_id": "P15",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t6-dark",
+      "asset_id": "P15",
+      "set": "stress",
+      "kind": "t6-dark",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t6-night",
+      "asset_id": "P15",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P15-t7",
+      "asset_id": "P15",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P15/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t1",
+      "asset_id": "P16",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t2",
+      "asset_id": "P16",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t2-blur",
+      "asset_id": "P16",
+      "set": "stress",
+      "kind": "t2-blur",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t2-night",
+      "asset_id": "P16",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t3",
+      "asset_id": "P16",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t4",
+      "asset_id": "P16",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "P16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t5",
+      "asset_id": "P16",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "P16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t6",
+      "asset_id": "P16",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t6-low_res",
+      "asset_id": "P16",
+      "set": "stress",
+      "kind": "t6-low_res",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t6-night",
+      "asset_id": "P16",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "P16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P16-t7",
+      "asset_id": "P16",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "P16/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "P17-lookalike-after-fix",
+      "asset_id": "P17",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P17-lookalike-open",
+      "asset_id": "P17",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P18-lookalike-after-fix",
+      "asset_id": "P18",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "P18-lookalike-open",
+      "asset_id": "P18",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "P16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-closeup-late",
+      "asset_id": "S15",
+      "set": "base",
+      "kind": "closeup-late",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t1",
+      "asset_id": "S15",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t2",
+      "asset_id": "S15",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t2-blur",
+      "asset_id": "S15",
+      "set": "stress",
+      "kind": "t2-blur",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t2-night",
+      "asset_id": "S15",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t3",
+      "asset_id": "S15",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t4",
+      "asset_id": "S15",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t5",
+      "asset_id": "S15",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t6",
+      "asset_id": "S15",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t6-low_res",
+      "asset_id": "S15",
+      "set": "stress",
+      "kind": "t6-low_res",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t6-night",
+      "asset_id": "S15",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S15-t7",
+      "asset_id": "S15",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S15/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-gps-small",
+      "asset_id": "S16",
+      "set": "base",
+      "kind": "gps-small",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t1",
+      "asset_id": "S16",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t2",
+      "asset_id": "S16",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t2-jpeg",
+      "asset_id": "S16",
+      "set": "stress",
+      "kind": "t2-jpeg",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t2-night",
+      "asset_id": "S16",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t3",
+      "asset_id": "S16",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t4",
+      "asset_id": "S16",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t5",
+      "asset_id": "S16",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t6",
+      "asset_id": "S16",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t6-night",
+      "asset_id": "S16",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t6-off_center",
+      "asset_id": "S16",
+      "set": "stress",
+      "kind": "t6-off_center",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "S16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S16-t7",
+      "asset_id": "S16",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "S16/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S17-lookalike-after-fix",
+      "asset_id": "S17",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S17-lookalike-open",
+      "asset_id": "S17",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S18-lookalike-after-fix",
+      "asset_id": "S18",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "S18-lookalike-open",
+      "asset_id": "S18",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "S16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t1",
+      "asset_id": "W15",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t2",
+      "asset_id": "W15",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "W15-t2-dark",
+      "asset_id": "W15",
+      "set": "stress",
+      "kind": "t2-dark",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t2-night",
+      "asset_id": "W15",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t3",
+      "asset_id": "W15",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t4",
+      "asset_id": "W15",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t5",
+      "asset_id": "W15",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t6",
+      "asset_id": "W15",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t6-blur",
+      "asset_id": "W15",
+      "set": "stress",
+      "kind": "t6-blur",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t6-night",
+      "asset_id": "W15",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-t7",
+      "asset_id": "W15",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W15/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W15-time-conflict",
+      "asset_id": "W15",
+      "set": "base",
+      "kind": "time-conflict",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "W15/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-gps-small",
+      "asset_id": "W16",
+      "set": "base",
+      "kind": "gps-small",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t1",
+      "asset_id": "W16",
+      "set": "base",
+      "kind": "t1",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "NEW",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "NEW",
+        "incident": null,
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t2",
+      "asset_id": "W16",
+      "set": "base",
+      "kind": "t2",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t2-low_res",
+      "asset_id": "W16",
+      "set": "stress",
+      "kind": "t2-low_res",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t2-night",
+      "asset_id": "W16",
+      "set": "stress",
+      "kind": "t2-night",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t3",
+      "asset_id": "W16",
+      "set": "base",
+      "kind": "t3",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "correct",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t4",
+      "asset_id": "W16",
+      "set": "base",
+      "kind": "t4",
+      "expected": {
+        "label": "LATE_REPORT",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t5",
+      "asset_id": "W16",
+      "set": "base",
+      "kind": "t5",
+      "expected": {
+        "label": "ALREADY_RESOLVED",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "safe_error",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t6",
+      "asset_id": "W16",
+      "set": "base",
+      "kind": "t6",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t6-jpeg",
+      "asset_id": "W16",
+      "set": "stress",
+      "kind": "t6-jpeg",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t6-night",
+      "asset_id": "W16",
+      "set": "stress",
+      "kind": "t6-night",
+      "expected": {
+        "label": "POSSIBLE_RECURRENCE",
+        "incident": "W16/I1"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W16-t7",
+      "asset_id": "W16",
+      "set": "base",
+      "kind": "t7",
+      "expected": {
+        "label": "DUPLICATE",
+        "incident": "W16/I2"
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W17-lookalike-after-fix",
+      "asset_id": "W17",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W17-lookalike-open",
+      "asset_id": "W17",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W15/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    },
+    {
+      "case_id": "W18-lookalike-after-fix",
+      "asset_id": "W18",
+      "set": "base",
+      "kind": "lookalike-after-fix",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 1
+    },
+    {
+      "case_id": "W18-lookalike-open",
+      "asset_id": "W18",
+      "set": "base",
+      "kind": "lookalike-open",
+      "expected": {
+        "label": "NEW",
+        "incident": null
+      },
+      "first": {
+        "label": "DUPLICATE",
+        "rule_id": "geo",
+        "missing_info": []
+      },
+      "asked": null,
+      "predicted": {
+        "label": "DUPLICATE",
+        "incident": "W16/I1",
+        "rule_id": "geo",
+        "confidence": 1,
+        "rules": [
+          "geo"
+        ]
+      },
+      "outcome": "critical",
+      "comparisons": [],
+      "agent_runs": [],
+      "errors": [],
+      "cost_usd": 0,
+      "latency_ms": 0
+    }
+  ]
+}

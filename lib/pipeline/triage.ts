@@ -11,6 +11,7 @@ import { Category, type ToolContext } from "../tools/types";
 
 export const TriageResult = z
   .object({
+    out_of_scope: z.boolean(),
     category: Category,
     sam_prompt: z.string(),
     damage_present: z.boolean(),
@@ -30,12 +31,15 @@ const ALLOWED_SAM_PROMPTS: Record<Category, readonly string[]> = {
   streetlight: ["street light", "streetlight", "street lamp", "street light pole", "light pole", "lamp post"],
   traffic_sign: ["traffic sign", "road sign", "street sign", "stop sign", "yield sign", "sign"],
   bench: ["bench", "park bench"],
+  road_damage: ["pothole", "road crack", "crack", "broken pavement", "sidewalk crack"],
+  trash: ["trash", "garbage", "trash pile", "garbage bags", "trash bags", "litter", "trash bin", "mattress"],
+  graffiti: ["graffiti", "spray paint"],
   other: [],
 };
 
 const MAX_LANDMARKS = 4;
 
-/** Category, SAM phrase, damage and photo quality for one resident photo. No time information goes in. */
+/** Scope, category, SAM phrase, problem and photo quality for one resident photo. No time information goes in. */
 export async function triage(
   imageId: string,
   report: { description: string | null; category_hint: string | null },

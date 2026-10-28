@@ -19,6 +19,9 @@ export const DEFAULT_SAM_PROMPT: Record<Category, string> = {
   streetlight: "street light",
   traffic_sign: "traffic sign",
   bench: "bench",
+  road_damage: "pothole",
+  trash: "trash",
+  graffiti: "graffiti",
   other: "object",
 };
 
@@ -56,7 +59,7 @@ export const segmentObject: Tool<typeof SegmentObjectIn, typeof SegmentObjectOut
     if (!image) throw new Error(`Unknown image ${image_id}`);
     const bytes = await ctx.images.bytes(image_id);
 
-    const sam = await segment(dataUrl(bytes, image.mime), phrase, { mode: ctx.mode });
+    const sam = await segment(dataUrl(bytes, image.mime), phrase, { mode: ctx.mode, signal: ctx.signal });
     const best = chooseInstance(sam.boxes, image.width, image.height);
     if (!best) {
       await ctx.images.saveSegmentation({

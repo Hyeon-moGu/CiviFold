@@ -1,0 +1,357 @@
+[
+  {
+    "config": "baseline_geo",
+    "split": "holdout3",
+    "run": 1,
+    "summary": {
+      "cases": 80,
+      "outcomes": {
+        "correct": 26,
+        "deferred": 0,
+        "safe_error": 22,
+        "critical": 32
+      },
+      "critical_miss_rate": 0.7272727272727273,
+      "review_reduction": 0.225,
+      "dup_precision": 0.2571428571428571,
+      "dup_recall": 0.46153846153846156,
+      "deferral_rate": 0,
+      "staff_review_if_no_answer": 0,
+      "question_rate": 0,
+      "usd_per_report": 0,
+      "seconds_per_report": 0.0005625,
+      "confusion": {
+        "NEW": {
+          "NEW": 8,
+          "DUPLICATE": 16
+        },
+        "DUPLICATE": {
+          "DUPLICATE": 26,
+          "NEW": 1
+        },
+        "LATE_REPORT": {
+          "DUPLICATE": 12
+        },
+        "ALREADY_RESOLVED": {
+          "DUPLICATE": 8
+        },
+        "POSSIBLE_RECURRENCE": {
+          "DUPLICATE": 8,
+          "NEW": 1
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 26,
+          "deferred": 0,
+          "safe_error": 22,
+          "critical": 32,
+          "critical_miss_rate": 0.7272727272727273
+        },
+        "after_answer": {
+          "correct": 26,
+          "deferred": 0,
+          "safe_error": 22,
+          "critical": 32,
+          "critical_miss_rate": 0.7272727272727273
+        },
+        "asked": 0,
+        "answer_effect": {
+          "correct": 0,
+          "still_deferred": 0,
+          "safe_error": 0,
+          "critical": 0
+        }
+      }
+    },
+    "stress_summary": {
+      "cases": 32,
+      "outcomes": {
+        "correct": 16,
+        "deferred": 0,
+        "safe_error": 0,
+        "critical": 16
+      },
+      "critical_miss_rate": 1,
+      "review_reduction": 0.5,
+      "dup_precision": 0.5,
+      "dup_recall": 1,
+      "deferral_rate": 0,
+      "staff_review_if_no_answer": 0,
+      "question_rate": 0,
+      "usd_per_report": 0,
+      "seconds_per_report": 0.00009375,
+      "confusion": {
+        "DUPLICATE": {
+          "DUPLICATE": 16
+        },
+        "POSSIBLE_RECURRENCE": {
+          "DUPLICATE": 16
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 16,
+          "deferred": 0,
+          "safe_error": 0,
+          "critical": 16,
+          "critical_miss_rate": 1
+        },
+        "after_answer": {
+          "correct": 16,
+          "deferred": 0,
+          "safe_error": 0,
+          "critical": 16,
+          "critical_miss_rate": 1
+        },
+        "asked": 0,
+        "answer_effect": {
+          "correct": 0,
+          "still_deferred": 0,
+          "safe_error": 0,
+          "critical": 0
+        }
+      }
+    }
+  },
+  {
+    "config": "C_rules",
+    "split": "holdout3",
+    "run": 1,
+    "summary": {
+      "cases": 80,
+      "outcomes": {
+        "correct": 72,
+        "deferred": 3,
+        "safe_error": 5,
+        "critical": 0
+      },
+      "critical_miss_rate": 0,
+      "review_reduction": 0.425,
+      "dup_precision": 1,
+      "dup_recall": 0.8717948717948718,
+      "deferral_rate": 0.0375,
+      "staff_review_if_no_answer": 0.3125,
+      "question_rate": 0.2875,
+      "usd_per_report": 0.05283841250000002,
+      "seconds_per_report": 24.201787500000002,
+      "confusion": {
+        "NEW": {
+          "NEW": 24
+        },
+        "DUPLICATE": {
+          "DUPLICATE": 22,
+          "NEW": 1,
+          "HUMAN_REVIEW": 3,
+          "POSSIBLE_RECURRENCE": 1
+        },
+        "LATE_REPORT": {
+          "LATE_REPORT": 12
+        },
+        "ALREADY_RESOLVED": {
+          "POSSIBLE_RECURRENCE": 2,
+          "ALREADY_RESOLVED": 6
+        },
+        "POSSIBLE_RECURRENCE": {
+          "POSSIBLE_RECURRENCE": 8,
+          "NEW": 1
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 51,
+          "deferred": 25,
+          "safe_error": 4,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "after_answer": {
+          "correct": 72,
+          "deferred": 3,
+          "safe_error": 5,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "asked": 23,
+        "answer_effect": {
+          "correct": 21,
+          "still_deferred": 1,
+          "safe_error": 1,
+          "critical": 0
+        }
+      }
+    },
+    "stress_summary": {
+      "cases": 32,
+      "outcomes": {
+        "correct": 28,
+        "deferred": 3,
+        "safe_error": 1,
+        "critical": 0
+      },
+      "critical_miss_rate": 0,
+      "review_reduction": 0.40625,
+      "dup_precision": 1,
+      "dup_recall": 0.8125,
+      "deferral_rate": 0.09375,
+      "staff_review_if_no_answer": 0.40625,
+      "question_rate": 0.3125,
+      "usd_per_report": 0.039339734375,
+      "seconds_per_report": 19.5493125,
+      "confusion": {
+        "DUPLICATE": {
+          "DUPLICATE": 13,
+          "HUMAN_REVIEW": 3
+        },
+        "POSSIBLE_RECURRENCE": {
+          "POSSIBLE_RECURRENCE": 15,
+          "NEW": 1
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 19,
+          "deferred": 13,
+          "safe_error": 0,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "after_answer": {
+          "correct": 28,
+          "deferred": 3,
+          "safe_error": 1,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "asked": 10,
+        "answer_effect": {
+          "correct": 9,
+          "still_deferred": 0,
+          "safe_error": 1,
+          "critical": 0
+        }
+      }
+    }
+  },
+  {
+    "config": "D_hybrid",
+    "split": "holdout3",
+    "run": 1,
+    "summary": {
+      "cases": 80,
+      "outcomes": {
+        "correct": 66,
+        "deferred": 8,
+        "safe_error": 6,
+        "critical": 0
+      },
+      "critical_miss_rate": 0,
+      "review_reduction": 0.375,
+      "dup_precision": 1,
+      "dup_recall": 0.7692307692307693,
+      "deferral_rate": 0.1,
+      "staff_review_if_no_answer": 0.3375,
+      "question_rate": 0.2875,
+      "usd_per_report": 0.04838865625000001,
+      "seconds_per_report": 28.7563125,
+      "confusion": {
+        "NEW": {
+          "NEW": 24
+        },
+        "DUPLICATE": {
+          "DUPLICATE": 20,
+          "NEW": 1,
+          "HUMAN_REVIEW": 5,
+          "POSSIBLE_RECURRENCE": 1
+        },
+        "LATE_REPORT": {
+          "LATE_REPORT": 10,
+          "HUMAN_REVIEW": 2
+        },
+        "ALREADY_RESOLVED": {
+          "POSSIBLE_RECURRENCE": 3,
+          "ALREADY_RESOLVED": 4,
+          "HUMAN_REVIEW": 1
+        },
+        "POSSIBLE_RECURRENCE": {
+          "POSSIBLE_RECURRENCE": 8,
+          "NEW": 1
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 49,
+          "deferred": 27,
+          "safe_error": 4,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "after_answer": {
+          "correct": 66,
+          "deferred": 8,
+          "safe_error": 6,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "asked": 23,
+        "answer_effect": {
+          "correct": 17,
+          "still_deferred": 4,
+          "safe_error": 2,
+          "critical": 0
+        }
+      }
+    },
+    "stress_summary": {
+      "cases": 32,
+      "outcomes": {
+        "correct": 28,
+        "deferred": 3,
+        "safe_error": 1,
+        "critical": 0
+      },
+      "critical_miss_rate": 0,
+      "review_reduction": 0.40625,
+      "dup_precision": 1,
+      "dup_recall": 0.8125,
+      "deferral_rate": 0.09375,
+      "staff_review_if_no_answer": 0.40625,
+      "question_rate": 0.3125,
+      "usd_per_report": 0.011599390625000002,
+      "seconds_per_report": 5.9619375,
+      "confusion": {
+        "DUPLICATE": {
+          "DUPLICATE": 13,
+          "HUMAN_REVIEW": 3
+        },
+        "POSSIBLE_RECURRENCE": {
+          "POSSIBLE_RECURRENCE": 15,
+          "NEW": 1
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 19,
+          "deferred": 13,
+          "safe_error": 0,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "after_answer": {
+          "correct": 28,
+          "deferred": 3,
+          "safe_error": 1,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "asked": 10,
+        "answer_effect": {
+          "correct": 9,
+          "still_deferred": 0,
+          "safe_error": 1,
+          "critical": 0
+        }
+      }
+    }
+  }
+]

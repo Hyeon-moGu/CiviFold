@@ -10,7 +10,8 @@ import { sparkJson } from "../meta/spark";
 import { memoryData, type IncidentRow } from "../tools/data";
 import { memoryImages, type ImageRow } from "../tools/images";
 import type { CompareResult, ToolContext } from "../tools/types";
-import { analyze, type ReportInput } from "./analyze";
+import { analyze, photoRoles, withAnswerPhoto, type ReportInput } from "./analyze";
+import type { Decision } from "./decide";
 import type { TriageResult } from "./triage";
 
 vi.mock("../meta/sam", () => ({ segment: vi.fn() }));
@@ -21,6 +22,7 @@ const HERE = { lat: 37.5665, lng: 126.978 };
 const NOW = "2026-11-01T12:00:00.000Z";
 
 const TRIAGE: TriageResult = {
+  out_of_scope: false,
   category: "fire_hydrant",
   sam_prompt: "fire hydrant",
   damage_present: true,
@@ -77,7 +79,7 @@ function incident(id: string, northM: number, extra: Partial<IncidentRow> = {}):
   };
 }
 
-function setup(incidents: IncidentRow[] = []): ToolContext {
+function setup(incidents: IncidentRow[] = [], extra: Array<{ row: ImageRow; bytes: Buffer }> = []): ToolContext {
   return {
     reportId: "r_new",
     runId: null,
@@ -89,7 +91,7 @@ function setup(incidents: IncidentRow[] = []): ToolContext {
       photos: incidents.map((i) => ({ image_id: `img_${i.id}`, report_id: `r_${i.id}`, incident_id: i.id, observed_at: i.created_at })),
     }),
     images: memoryImages({
-      images: [original("img_new", "r_new"), ...incidents.map((i) => original(`img_${i.id}`, `r_${i.id}`))],
+      images: [original("img_new", "r_new"), ...extra, ...incidents.map((i) => original(`img_${i.id}`, `r_${i.id}`))],
       incidentByReport: Object.fromEntries(incidents.map((i) => [`r_${i.id}`, i.id])),
     }),
   };
@@ -110,6 +112,15 @@ describe("analyze", () => {
     sparkReturns({ ...TRIAGE, image_quality: "blurry" });
     const a = await analyze(REPORT, setup([incident("I1", 5)]));
     expect(a.decision).toMatchObject({ label: "NEEDS_INFO", rule_id: "R0" });
+    expect(a.candidates).toEqual([]);
+    expect(sparkNames()).toEqual(["triage"]);
+    expect(segment).not.toHaveBeenCalled();
+  });
+
+  it("routes complaints about people to staff without search or image matching", async () => {
+    sparkReturns({ ...TRIAGE, out_of_scope: true, category: "other" });
+    const a = await analyze(REPORT, setup([incident("I1", 5)]));
+    expect(a.decision).toMatchObject({ label: "HUMAN_REVIEW", rule_id: "R0s" });
     expect(a.candidates).toEqual([]);
     expect(sparkNames()).toEqual(["triage"]);
     expect(segment).not.toHaveBeenCalled();
@@ -139,12 +150,51 @@ describe("analyze", () => {
     expect(a.candidates.map((c) => c.incident_id)).toEqual(["I1"]);
   });
 
+  it("searches the category the resident picked when the photo suggests another", async () => {
+    sparkReturns({ ...TRIAGE, category: "graffiti", sam_prompt: "graffiti" });
+    const a = await analyze({ ...REPORT, category_hint: "fire_hydrant" }, setup([incident("I1", 5)]));
+    expect(a.candidates.map((c) => c.incident_id)).toEqual(["I1"]);
+    const unhinted = await analyze(REPORT, setup([incident("I1", 5)]));
+    expect(unhinted.candidates).toEqual([]);
+  });
+
   it("keeps failed comparisons as missing results and records the error", async () => {
     sparkReturns(TRIAGE, new Error("Spark down"));
     const a = await analyze(REPORT, setup([incident("I1", 5)]));
     expect(a.comparisons.every((c) => c.result === null)).toBe(true);
     expect(a.errors).toHaveLength(2);
     expect(a.decision).toMatchObject({ label: "NEEDS_INFO", rule_id: "R5" });
+  });
+
+  it("compares an answer photo alongside the first one", async () => {
+    sparkReturns(TRIAGE);
+    const ctx = setup([incident("I1", 5)], [original("img_close", "r_new")]);
+    const a = await analyze({ ...REPORT, answer_image_ids: ["img_close"], already_asked: true }, ctx);
+    expect(a.comparisons.map((c) => [c.new_image_id, c.stage]).sort()).toEqual([["img_close", 1], ["img_close", 2], ["img_new", 1], ["img_new", 2]]);
+    expect(sparkNames()).toEqual(["triage", "compare", "compare", "compare", "compare"]);
+    expect(a.segmentation?.found).toBe(true);
+  });
+
+  it("adds an answer photo, or replaces a first photo that showed nothing usable", () => {
+    const decision = (rule_id: string): Decision => ({ label: "NEEDS_INFO", incident_id: null, rule_id, reasons: [], confidence: 0, missing_info: ["close_up"] });
+    expect(withAnswerPhoto(REPORT, decision("R6d"), "img_close")).toMatchObject({ image_id: "img_new", answer_image_ids: ["img_close"], already_asked: true });
+    expect(withAnswerPhoto(REPORT, decision("R0"), "img_close")).toMatchObject({ image_id: "img_close", answer_image_ids: [], already_asked: true, asked_by: "R0" });
+  });
+
+  it("picks the same photos from a report's stored list as the evaluation does", () => {
+    expect(photoRoles(["img_new", "img_close"], "R6d")).toEqual({ image_id: "img_new", answer_image_ids: ["img_close"] });
+    expect(photoRoles(["img_blurry", "img_sharp"], "R0")).toEqual({ image_id: "img_sharp", answer_image_ids: [] });
+    expect(photoRoles(["img_only"], "R0")).toEqual({ image_id: "img_only", answer_image_ids: [] });
+  });
+
+  it("does not ask for a close-up again once the one R7t asked for arrived", async () => {
+    sparkReturns({ ...TRIAGE, image_quality: "too_far" }, { ...SAME, damage: { ...SAME.damage, same_damage_signature: "different" } });
+    const fixed = incident("I1", 5, { status: "resolved", resolved_at: "2026-10-31T00:00:00.000Z" });
+    const first = await analyze(REPORT, setup([fixed]));
+    expect(first.decision).toMatchObject({ label: "NEEDS_INFO", rule_id: "R7t" });
+    const ctx = setup([fixed], [original("img_close", "r_new")]);
+    const again = await analyze(withAnswerPhoto(REPORT, first.decision, "img_close"), ctx);
+    expect(again.decision).toMatchObject({ label: "POSSIBLE_RECURRENCE", rule_id: "R7d" });
   });
 
   it("reports a crop request that fell back to full photos as stage 1", async () => {

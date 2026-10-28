@@ -27,6 +27,7 @@ export function cand(id: string, status: IncidentStatus, extra: Partial<Candidat
 
 type CmpOpts = {
   stage?: 1 | 2;
+  photo?: string;
   dmg?: boolean;
   sig?: "same" | "different" | "uncertain";
   rep?: boolean;
@@ -40,11 +41,12 @@ export function cmp(
   id: string,
   verdict: CompareResult["asset_match"]["verdict"],
   confidence: number,
-  { stage = 2, dmg = true, sig = "same", rep = false, missing = [] }: CmpOpts = {},
+  { stage = 2, photo = "img_new", dmg = true, sig = "same", rep = false, missing = [] }: CmpOpts = {},
 ): Comparison {
   return {
     incident_id: id,
     stage,
+    new_image_id: photo,
     candidate_image_id: `img_${id}_${++imageSeq}`,
     result: {
       asset_match: { verdict, confidence, evidence: [] },
@@ -63,8 +65,8 @@ export function cmp(
 }
 
 /** A comparison call that failed. */
-export function failed(id: string, stage: 1 | 2 = 2): Comparison {
-  return { incident_id: id, stage, candidate_image_id: `img_${id}_${++imageSeq}`, result: null };
+export function failed(id: string, stage: 1 | 2 = 2, photo = "img_new"): Comparison {
+  return { incident_id: id, stage, new_image_id: photo, candidate_image_id: `img_${id}_${++imageSeq}`, result: null };
 }
 
 export function input({
@@ -73,16 +75,20 @@ export function input({
   observed = at("+0d"),
   asked = false,
   quality = "ok",
+  outOfScope = false,
+  closeUps = [],
 }: {
   candidates?: Candidate[];
   comparisons?: Comparison[];
   observed?: string;
   asked?: boolean;
   quality?: DecideInput["triage"]["image_quality"];
+  outOfScope?: boolean;
+  closeUps?: string[];
 } = {}): DecideInput {
   return {
-    report: { observed_at: observed, already_asked: asked },
-    triage: { image_quality: quality },
+    report: { observed_at: observed, already_asked: asked, close_up_ids: closeUps },
+    triage: { image_quality: quality, out_of_scope: outOfScope },
     candidates,
     comparisons,
     config: TEST_CONFIG,
