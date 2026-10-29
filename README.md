@@ -1,21 +1,23 @@
 # CiviFold
 
-**Still broken, or broken again? Location can't tell. Photos can.**
+### Still broken, or broken again? Location can't tell. Photos can.
 
 CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Every link and closure is a suggestion until a staff member approves it.
 
-**Live demo:** _coming at deployment_ · **3-minute video:** _coming at submission_  
-Built by HyeonMo Gu for the **Meta Global AI Developer Hackathon · Indie track · Theme: Build for Your World**, October 26–November 4, 2026
-
-Built with **Muse Spark** (reads reports, compares photos, runs the verification agent with function tools), **SAM 3.1** (cuts out the object and its surroundings), **Muse Voice Transcribe** (voice reports) and **Muse Image** (504 synthetic evaluation images).
+On a pre-registered holdout of 80 synthetic reports, the fast path made **0 wrong closing suggestions on the 33 reports that needed attention**, in each of two live runs. A location-only baseline made 24 ([results](#results)).
 
 - **Nothing closes by itself.** The system never links or closes a report. It suggests, shows the evidence and waits for staff.
 - **Models judge the photo, rules judge the time.** Muse Spark and SAM 3.1 decide whether two photos show the same fixture and the same damage. Rules then apply the observation time and the repair history. The comparison never sees a timestamp.
 - **Closing takes two observations.** A duplicate, late report or already fixed suggestion needs a confident cut-out match or two distinct report photos. Staff can ask an agent to look for evidence against it, and the agent can only make the suggestion more cautious.
 
-**The workload is real.** In September 2026, New York City's 311 recorded 3,662 street pothole requests. The Department of Transportation closed 454 of them (12%) as duplicates of a previously filed complaint, and 63 after an inspection found the problem already fixed ([source](#sources)). A location rule sorts them badly: the broken fixture next door and the problem that returned after repair both sit where the earlier report was filed.
+| Meta model | What it does here |
+|---|---|
+| **Muse Spark** | Reads the words, compares photos whole and as cut-outs, runs the staff-requested verification agent with function tools |
+| **SAM 3.1** | Cuts out the fixture and its surroundings for the comparison |
+| **Muse Voice Transcribe** | Turns a spoken report into text |
+| **Muse Image** | Generated the 504-image synthetic evaluation set |
 
-**The result.** On the latest pre-registered holdout of 80 synthetic reports, the fast path made **0 wrong closing suggestions on the 33 reports that needed attention**, in each of two live runs. A location-only baseline made 24 ([results](#results)).
+**The workload is real.** In September 2026, New York City's 311 recorded 3,662 street pothole requests. The Department of Transportation closed 454 of them (12%) as duplicates of a previously filed complaint, and 63 after an inspection found the problem already fixed ([source](#sources)). A location rule sorts them badly: the broken fixture next door and the problem that returned after repair both sit where the earlier report was filed.
 
 ## Three reports, three different decisions
 
@@ -65,13 +67,6 @@ The verification agent starts with the incident's other photos and similar incid
 </details>
 
 ## Built with Meta AI
-
-| Model | Contribution | Used in |
-|---|---|---|
-| **Muse Spark** | Reads reports, compares visual evidence, runs the optional verification agent with function tools | Intake, matching, verification |
-| **SAM 3.1** | Isolates objects and their surrounding context | Photo comparison |
-| **Muse Voice Transcribe** | Converts spoken reports into text | Voice intake |
-| **Muse Image** | Generates controlled synthetic scenes | Evaluation dataset |
 
 **Why these models.** The hard part is identity: two residents photograph the same fixture from different angles, in different light, while a look-alike stands down the street. Muse Spark returns that judgment as structured fields the rules can check (same fixture or spot, problem visible, signs of repair, the features that matched), not as a similarity score. SAM 3.1 gives the comparison the object and its surroundings as separate crops, so a dent and a shop sign are both examined. Muse Voice brings spoken reports into the same flow, and Muse Image produced the repairs, recurrences and look-alikes that cannot be photographed on demand.
 
@@ -181,7 +176,7 @@ Visitors with the demo access code can upload their own photos for live calls, s
 
 ## Built during the hackathon
 
-The code, prompts, synthetic evaluation dataset, generation scripts and evaluation harness were created during **October 26–November 4, 2026**. The first commit is dated October 26 in US Eastern time. No earlier project code is reused; third-party code comes from the open-source dependencies in `package.json`.
+An entry in the Meta Global AI Developer Hackathon, Indie track, theme "Build for Your World". The code, prompts, synthetic evaluation dataset, generation scripts and evaluation harness were created during **October 26–November 4, 2026**. The first commit is dated October 26 in US Eastern time. No earlier project code is reused; third-party code comes from the open-source dependencies in `package.json`.
 
 The evaluation images and bundled photo demos were generated with Muse Image and are marked **SYNTHETIC** in the app.
 
