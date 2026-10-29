@@ -234,6 +234,127 @@
     }
   },
   {
+    "config": "C_rules",
+    "split": "holdout3",
+    "run": 2,
+    "summary": {
+      "cases": 80,
+      "outcomes": {
+        "correct": 67,
+        "deferred": 7,
+        "safe_error": 6,
+        "critical": 0
+      },
+      "critical_miss_rate": 0,
+      "review_reduction": 0.3875,
+      "dup_precision": 1,
+      "dup_recall": 0.7948717948717948,
+      "deferral_rate": 0.0875,
+      "staff_review_if_no_answer": 0.275,
+      "question_rate": 0.25,
+      "usd_per_report": 0.05097509374999999,
+      "seconds_per_report": 27.51435,
+      "confusion": {
+        "NEW": {
+          "NEW": 24
+        },
+        "DUPLICATE": {
+          "DUPLICATE": 20,
+          "NEW": 1,
+          "HUMAN_REVIEW": 5,
+          "POSSIBLE_RECURRENCE": 1
+        },
+        "LATE_REPORT": {
+          "LATE_REPORT": 11,
+          "HUMAN_REVIEW": 1
+        },
+        "ALREADY_RESOLVED": {
+          "POSSIBLE_RECURRENCE": 3,
+          "ALREADY_RESOLVED": 4,
+          "HUMAN_REVIEW": 1
+        },
+        "POSSIBLE_RECURRENCE": {
+          "POSSIBLE_RECURRENCE": 8,
+          "NEW": 1
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 52,
+          "deferred": 22,
+          "safe_error": 6,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "after_answer": {
+          "correct": 67,
+          "deferred": 7,
+          "safe_error": 6,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "asked": 20,
+        "answer_effect": {
+          "correct": 15,
+          "still_deferred": 5,
+          "safe_error": 0,
+          "critical": 0
+        }
+      }
+    },
+    "stress_summary": {
+      "cases": 32,
+      "outcomes": {
+        "correct": 28,
+        "deferred": 3,
+        "safe_error": 1,
+        "critical": 0
+      },
+      "critical_miss_rate": 0,
+      "review_reduction": 0.40625,
+      "dup_precision": 1,
+      "dup_recall": 0.8125,
+      "deferral_rate": 0.09375,
+      "staff_review_if_no_answer": 0.375,
+      "question_rate": 0.28125,
+      "usd_per_report": 0.0404122890625,
+      "seconds_per_report": 24.45109375,
+      "confusion": {
+        "DUPLICATE": {
+          "DUPLICATE": 13,
+          "HUMAN_REVIEW": 3
+        },
+        "POSSIBLE_RECURRENCE": {
+          "POSSIBLE_RECURRENCE": 15,
+          "NEW": 1
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 20,
+          "deferred": 12,
+          "safe_error": 0,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "after_answer": {
+          "correct": 28,
+          "deferred": 3,
+          "safe_error": 1,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "asked": 9,
+        "answer_effect": {
+          "correct": 8,
+          "still_deferred": 0,
+          "safe_error": 1,
+          "critical": 0
+        }
+      }
+    }
+  },
+  {
     "config": "D_hybrid",
     "split": "holdout3",
     "run": 1,
@@ -319,6 +440,127 @@
       "question_rate": 0.3125,
       "usd_per_report": 0.011599390625000002,
       "seconds_per_report": 5.9619375,
+      "confusion": {
+        "DUPLICATE": {
+          "DUPLICATE": 13,
+          "HUMAN_REVIEW": 3
+        },
+        "POSSIBLE_RECURRENCE": {
+          "POSSIBLE_RECURRENCE": 15,
+          "NEW": 1
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 19,
+          "deferred": 13,
+          "safe_error": 0,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "after_answer": {
+          "correct": 28,
+          "deferred": 3,
+          "safe_error": 1,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "asked": 10,
+        "answer_effect": {
+          "correct": 9,
+          "still_deferred": 0,
+          "safe_error": 1,
+          "critical": 0
+        }
+      }
+    }
+  },
+  {
+    "config": "D_hybrid",
+    "split": "holdout3",
+    "run": 2,
+    "summary": {
+      "cases": 80,
+      "outcomes": {
+        "correct": 63,
+        "deferred": 12,
+        "safe_error": 5,
+        "critical": 0
+      },
+      "critical_miss_rate": 0,
+      "review_reduction": 0.325,
+      "dup_precision": 1,
+      "dup_recall": 0.6666666666666666,
+      "deferral_rate": 0.15,
+      "staff_review_if_no_answer": 0.375,
+      "question_rate": 0.2875,
+      "usd_per_report": 0.025282162499999993,
+      "seconds_per_report": 18.9785125,
+      "confusion": {
+        "NEW": {
+          "NEW": 24
+        },
+        "DUPLICATE": {
+          "DUPLICATE": 16,
+          "HUMAN_REVIEW": 9,
+          "NEW": 1,
+          "POSSIBLE_RECURRENCE": 1
+        },
+        "LATE_REPORT": {
+          "LATE_REPORT": 10,
+          "HUMAN_REVIEW": 2
+        },
+        "ALREADY_RESOLVED": {
+          "POSSIBLE_RECURRENCE": 2,
+          "ALREADY_RESOLVED": 5,
+          "HUMAN_REVIEW": 1
+        },
+        "POSSIBLE_RECURRENCE": {
+          "POSSIBLE_RECURRENCE": 8,
+          "NEW": 1
+        }
+      },
+      "stages": {
+        "first_or_no_answer": {
+          "correct": 46,
+          "deferred": 30,
+          "safe_error": 4,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "after_answer": {
+          "correct": 63,
+          "deferred": 12,
+          "safe_error": 5,
+          "critical": 0,
+          "critical_miss_rate": 0
+        },
+        "asked": 23,
+        "answer_effect": {
+          "correct": 17,
+          "still_deferred": 5,
+          "safe_error": 1,
+          "critical": 0
+        }
+      }
+    },
+    "stress_summary": {
+      "cases": 32,
+      "outcomes": {
+        "correct": 28,
+        "deferred": 3,
+        "safe_error": 1,
+        "critical": 0
+      },
+      "critical_miss_rate": 0,
+      "review_reduction": 0.40625,
+      "dup_precision": 1,
+      "dup_recall": 0.8125,
+      "deferral_rate": 0.09375,
+      "staff_review_if_no_answer": 0.40625,
+      "question_rate": 0.3125,
+      "usd_per_report": 0.013717359375,
+      "seconds_per_report": 9.61671875,
       "confusion": {
         "DUPLICATE": {
           "DUPLICATE": 13,

@@ -45,7 +45,7 @@ The headline number counts critical outcomes among the reports that need attenti
 - **holdout2** was created and fingerprinted before the second round of rule changes, and pre-registered before its run. After it, the fast path (rules, triage, comparison and after-fix prompts, thresholds) was frozen.
 - **holdout3** was created and locked after the verification agent was tuned on dev, before its run. Only the agent changed in that round.
 - Holdout runs refuse to start without `HOLDOUT_FINAL_RUN=yes`, and holdout assets are excluded from the app.
-- Each configuration's first evaluation on each set is a single run. Two re-measurements were made afterwards, and both are reported below: the 23 affected holdout2 cases after a harness fix, and the agent configuration on holdout3 after removing meaningful identifiers.
+- Each configuration's first evaluation on each set is a single run. Three re-measurements were made afterwards, and all are reported below: the 23 affected holdout2 cases after a harness fix, the agent configuration on holdout3 after removing meaningful identifiers, and the fast path on holdout3 a second time, live, to see model variance.
 - Live runs used the Meta Model API. Replays of recorded calls cost nothing and give the same results.
 
 ## Configurations
@@ -100,7 +100,7 @@ test and holdout ran before two fixes to the simulated resident. The first fix c
 | C_rules, after the harness fix | 1 / 33 | 65 | 8 | 38.8% | 28.7% |
 | D_hybrid, after the harness fix | 1 / 33 | 62 | 11 | 35.0% | 31.3% |
 
-The remaining miss (W12-t6) is three paint buckets dumped again by a wall, read as "already fixed". The cut-out-only configuration got it right.
+The remaining miss (W12-t6) is three paint buckets dumped again by a wall, read as "already fixed". The cut-out-only configuration deferred it to staff, avoiding the wrong closing suggestion without classifying it as a recurrence.
 
 In C_rules' original holdout2 run, the correct incident was in front of staff for 53 of the 56 reports about an existing incident:
 
@@ -112,7 +112,7 @@ In C_rules' original holdout2 run, the correct incident was in front of staff fo
 | Missed: a large GPS error put the incident outside the search radius, so it was suggested as new | 2 |
 | Critical (W12-t6, above) | 1 |
 
-**holdout3**: 16 assets, 80 reports, 33 need attention. First run, plus the agent configuration's re-run.
+**holdout3**: 16 assets, 80 reports, 33 need attention. First run, a second live run of the fast path, and the agent configuration's re-run.
 
 | Config | Critical | Correct | Deferred | Correctly linked | Left to staff, no answers |
 |---|---|---|---|---|---|
@@ -120,10 +120,13 @@ In C_rules' original holdout2 run, the correct incident was in front of staff fo
 | A_full_image | not run | | | | |
 | B_sam_crops | not run | | | | |
 | C_rules | 0 / 33 | 72 | 3 | 42.5% | 31.3% |
+| C_rules, run 2 (same code, live again) | 0 / 33 | 67 | 7 | 38.8% | 27.5% |
 | D_hybrid, run 1 | 0 / 33 | 66 | 8 | 37.5% | 33.8% |
 | D_hybrid, run 2 | 0 / 33 | 63 | 12 | 32.5% | 37.5% |
 
 On holdout3, C asked the resident one question in 28.8% of reports, and its live run spent $0.053 per report (24 s). The agent added $0.025 per report in run 2; its fast-path calls were replayed from C's run.
+
+**Model variance.** C_rules ran on holdout3 a second time on October 29, live, with its calls recorded in a separate cache folder so run 1 stays replayable (`C_rules_holdout3_2.json`). The rules, thresholds and the triage and comparison prompts were unchanged (their prompt hashes match run 1); the code fingerprint differs because agent-only files and comments changed in between. Run 2 made no critical error either, got 67 of 80 right (52 before any answer, against 51) and deferred 7, asked in 25.0% of reports and spent $0.051 per report (28 s). Five of the 112 cases changed, every one toward caution. On W16 (a torn sofa and cardboard boxes) and S16 (a streetlight) one cut-out comparison came back "different" where run 1 had said "uncertain", so R2v held the report for staff after the resident's answer instead of linking it (W16-t2, W16-t4, W16-gps-small, S16-t5). On W16-t5 the zoomed after-fix check found a problem run 1 had missed, so the suggestion was possible recurrence instead of already fixed. The stress set came out identical.
 
 ## Stress sets
 
@@ -134,7 +137,7 @@ Critical outcomes over all stress reports, first runs:
 | test | 32 | 16 | 2 | 2 | 2 | 2 |
 | holdout | 16 | 8 | 3 | 1 | 3 | 2 |
 | holdout2 | 32 | 16 | 1 | 0 | 1 | 1 |
-| holdout3 | 32 | 16 | not run | not run | 0 | 0 (both runs) |
+| holdout3 | 32 | 16 | not run | not run | 0 (both runs) | 0 (both runs) |
 
 ## The verification agent
 
@@ -164,6 +167,12 @@ These commands evaluate the current code. They do not reproduce historical runs 
 npm run eval -- --config C_rules --split dev --run 100      # baseline_geo | A_full_image | B_sam_crops | C_rules | D_hybrid
 npm run summarize-eval -- --split dev
 HOLDOUT_FINAL_RUN=yes npm run eval -- --config C_rules --split holdout3 --run 100
+```
+
+A repeat run of the same code measures model variance only if its calls are live: the cache replays the first run otherwise. Point it at its own cache folder so the first run stays replayable:
+
+```bash
+HOLDOUT_FINAL_RUN=yes CIVIFOLD_CACHE_DIR=.cache/llm-holdout3-run2 npm run eval -- --config C_rules --split holdout3 --run 2
 ```
 
 Run the full set (the default, `--set all`). A run with `--set base` or `--set stress` writes only that set into its result file, replacing what was there. `--only` re-runs the listed cases into an existing result file and keeps its other cases (with no file yet, it writes only the listed cases); the file's code and prompt fingerprints then describe the latest run, not the kept cases.

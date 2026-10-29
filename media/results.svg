@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="440" viewBox="0 0 960 440" role="img" aria-labelledby="title desc">
+  <title id="title">Wrong closing suggestions on reports that needed attention</title>
+  <desc id="desc">Grouped columns for four evaluation sets. Distance baseline against CiviFold's fast path: test 24 against 1 of 33, holdout 11 against 3 of 16, holdout2 22 against 1 of 33, holdout3 24 against 0 of 33.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+    .heading { font-size: 24px; font-weight: 650; fill: #0f172a; }
+    .sub { font-size: 16px; fill: #475569; }
+    .legend { font-size: 15px; fill: #334155; }
+    .tick { font-size: 13px; fill: #64748b; }
+    .set { font-size: 16px; font-weight: 600; fill: #0f172a; }
+    .note { font-size: 13px; fill: #64748b; }
+    .base-label { font-size: 15px; fill: #475569; }
+    .fast-label { font-size: 15px; font-weight: 650; fill: #0f172a; }
+    .grid { stroke: #e2e8f0; stroke-width: 1; }
+    .axis { stroke: #cbd5e1; stroke-width: 1; }
+    .base { fill: #8a95a5; }
+    .fast { fill: #2563eb; }
+  </style>
+  <rect width="960" height="440" rx="20" fill="#f8fafc"/>
+
+  <text x="40" y="46" class="heading">Wrong closing suggestions on reports that needed attention</text>
+  <text x="40" y="72" class="sub">Share of the new problems and recurrences that received a duplicate, late report or already fixed suggestion.</text>
+  <text x="40" y="92" class="sub">First run of each set. All reports are synthetic.</text>
+
+  <rect x="40" y="112" width="14" height="14" rx="3" class="base"/>
+  <text x="62" y="124" class="legend">Distance baseline</text>
+  <rect x="222" y="112" width="14" height="14" rx="3" class="fast"/>
+  <text x="244" y="124" class="legend">CiviFold fast path (the app's default)</text>
+
+  <line x1="90" y1="150" x2="920" y2="150" class="grid"/>
+  <line x1="90" y1="205" x2="920" y2="205" class="grid"/>
+  <line x1="90" y1="260" x2="920" y2="260" class="grid"/>
+  <line x1="90" y1="315" x2="920" y2="315" class="grid"/>
+  <line x1="90" y1="370" x2="920" y2="370" class="axis"/>
+  <text x="78" y="154" text-anchor="end" class="tick">80%</text>
+  <text x="78" y="209" text-anchor="end" class="tick">60%</text>
+  <text x="78" y="264" text-anchor="end" class="tick">40%</text>
+  <text x="78" y="319" text-anchor="end" class="tick">20%</text>
+  <text x="78" y="374" text-anchor="end" class="tick">0%</text>
+
+  <!-- test: 24 / 33 vs 1 / 33 -->
+  <path d="M169,370 V174 Q169,170 173,170 H189 Q193,170 193,174 V370 Z" class="base"/>
+  <path d="M195,370 V365.7 Q195,361.7 199,361.7 H215 Q219,361.7 219,365.7 V370 Z" class="fast"/>
+  <text x="193" y="162" text-anchor="end" class="base-label">24 / 33</text>
+  <text x="195" y="353.7" class="fast-label">1 / 33</text>
+  <text x="194" y="396" text-anchor="middle" class="set">test</text>
+  <text x="194" y="416" text-anchor="middle" class="note">33 of 78 need attention</text>
+
+  <!-- holdout: 11 / 16 vs 3 / 16 -->
+  <path d="M376,370 V184.9 Q376,180.9 380,180.9 H396 Q400,180.9 400,184.9 V370 Z" class="base"/>
+  <path d="M402,370 V322.4 Q402,318.4 406,318.4 H422 Q426,318.4 426,322.4 V370 Z" class="fast"/>
+  <text x="400" y="172.9" text-anchor="end" class="base-label">11 / 16</text>
+  <text x="402" y="310.4" class="fast-label">3 / 16</text>
+  <text x="401" y="396" text-anchor="middle" class="set">holdout</text>
+  <text x="401" y="416" text-anchor="middle" class="note">16 of 39 need attention</text>
+
+  <!-- holdout2: 22 / 33 vs 1 / 33 -->
+  <path d="M584,370 V190.7 Q584,186.7 588,186.7 H604 Q608,186.7 608,190.7 V370 Z" class="base"/>
+  <path d="M610,370 V365.7 Q610,361.7 614,361.7 H630 Q634,361.7 634,365.7 V370 Z" class="fast"/>
+  <text x="608" y="178.7" text-anchor="end" class="base-label">22 / 33</text>
+  <text x="610" y="353.7" class="fast-label">1 / 33</text>
+  <text x="609" y="396" text-anchor="middle" class="set">holdout2</text>
+  <text x="609" y="416" text-anchor="middle" class="note">33 of 80 need attention</text>
+
+  <!-- holdout3: 24 / 33 vs 0 / 33 -->
+  <path d="M791,370 V174 Q791,170 795,170 H811 Q815,170 815,174 V370 Z" class="base"/>
+  <text x="815" y="162" text-anchor="end" class="base-label">24 / 33</text>
+  <text x="817" y="362" class="fast-label">0 / 33</text>
+  <text x="816" y="396" text-anchor="middle" class="set">holdout3</text>
+  <text x="816" y="416" text-anchor="middle" class="note">33 of 80 need attention</text>
+</svg>
