@@ -9,7 +9,7 @@ import type { IntakeResult } from "@/lib/pipeline/intake";
 import type { TriageResult } from "@/lib/pipeline/triage";
 import { AGENT_LIMITS } from "@/lib/pipeline/config";
 import { VERIFIED } from "@/lib/pipeline/hybrid";
-import { ANALYSIS_LEASE_MS, changedFacts, reportDetail, staleAnalysis, type FactChange } from "@/lib/server/reports";
+import { changedFacts, reportDetail, staleAnalysis, verifyRunning, WORDS_NOT_READ, wordsNotRead, type FactChange } from "@/lib/server/reports";
 import { runtime } from "@/lib/server/runtime";
 import type { Box, Channel, Label, RequestItem } from "@/lib/tools/types";
 import { Fact, OpsLabel, Panel, UrgentTag, LABEL_TONE, pct, readable, VERDICT_TEXT } from "@/app/_ui/console";
@@ -79,6 +79,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   const { report, analysis, runs, questions, photos, incidents, incidentPhotos, imageFacts, segmentations } = detail;
   const triage = (analysis?.triage as TriageResult | null | undefined) ?? undefined;
   const intake = (analysis?.intake as IntakeResult | null | undefined) ?? null;
+  const unread = wordsNotRead(analysis?.errors);
   const decision = analysis?.decision as Decision | undefined;
   const final = analysis?.final as Final | undefined;
   const candidates = (analysis?.candidates as Candidate[] | undefined) ?? [];
@@ -114,7 +115,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
     waiting && changes.length === 0 && final !== undefined && VERIFIED.has(final.label) && analysis!.input !== null && runs.length >= AGENT_LIMITS.max_runs_per_report
       ? AGENT_LIMITS.max_runs_per_report
       : null;
-  const verifying = report.verify_claimed_at !== null && Date.parse(String(report.verify_claimed_at)) > Date.now() - ANALYSIS_LEASE_MS;
+  const verifying = verifyRunning(report);
   // The latest run's verdict, while its result is the suggestion on screen (no analysis since).
   const lastRun = (runs as Run[]).at(-1);
   const currentRunId = lastRun && analysis?.pipeline_config === "C_rules+verify" ? lastRun.id : null;
@@ -178,6 +179,13 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
           <RetryButton reportId={report.id} />
         </Notice>
       )}
+      {report.status === "received" && (
+        <Notice>
+          The automatic check has not run. It starts from the resident&apos;s tracking page, which has not been opened. Run it here, or decide from the report.
+          <RetryButton reportId={report.id} text="Run the automatic check" />
+        </Notice>
+      )}
+      {report.status === "analyzing" && !staleAnalysis(report) && <Notice>The automatic check is running. Reload in a moment.</Notice>}
 
       {!analysis && report.incident_id && ["new_incident", "linked"].includes(report.status) ? (
         // The demo's starting history: incidents staff opened before the demo begins, entered as already decided.
@@ -400,6 +408,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               <PipelineTrace
                 hasMessage={Boolean(report.description || report.audio_path)}
                 intake={intake}
+                unread={unread !== null}
                 triage={triage}
                 candidates={candidates}
                 photoFound={photos[0] ? seg(photos[0].id)?.found : undefined}
@@ -516,6 +525,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               {(report.description || report.audio_path || intake) && (
                 <Panel title="Resident's message">
                   {report.description && <p className="text-sm">“{report.description}”</p>}
+                  {unread && <p className="mt-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-2.5 py-1.5 text-[12px] text-amber-200">{WORDS_NOT_READ[unread]}</p>}
                   {report.audio_path && (
                     <div className="mt-2 space-y-2">
                       <audio controls src={`/api/reports/${report.id}/audio`} className="h-9 w-full" />
@@ -543,7 +553,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   {questions.map((q) => (
                     <div key={q.id} className="text-[13px]">
                       <span className={`font-mono text-[10px] uppercase ${q.status === "pending" ? "text-violet-300" : "text-ops-dim"}`}>
-                        {q.reason_for_staff === "Requested by staff"
+                        {q.source === "staff"
                           ? "asked by staff"
                           : q.source === "agent"
                             ? "asked by the agent"
@@ -612,6 +622,7 @@ const STEP_TONE: Record<StepTone, string> = {
 function PipelineTrace(props: {
   hasMessage: boolean;
   intake: IntakeResult | null;
+  unread: boolean; // the words went unread (WORDS_NOT_READ)
   triage: TriageResult | undefined;
   candidates: Candidate[];
   photoFound: boolean | undefined;
@@ -632,8 +643,8 @@ function PipelineTrace(props: {
   const steps: Array<{ name: string; value: string; tone: StepTone }> = [
     {
       name: "Message",
-      value: props.hasMessage ? (intake ? `${intake.category.replace("_", " ")}${intake.emergency ? " · emergency" : ""}` : "read") : "none",
-      tone: props.hasMessage ? (intake?.emergency ? "stop" : "ok") : "skip",
+      value: props.hasMessage ? (intake ? `${intake.category.replace("_", " ")}${intake.emergency ? " · emergency" : ""}` : props.unread ? "not read" : "read") : "none",
+      tone: props.hasMessage ? (intake?.emergency ? "stop" : props.unread ? "warn" : "ok") : "skip",
     },
     {
       name: "Triage",

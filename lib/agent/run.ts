@@ -141,7 +141,7 @@ export async function investigate(
         // Near a limit the last step is kept for a proposal: other calls (several can come in one turn, or one
         // the model was not offered) are answered without running or counting as a step.
         if (closing() && !TERMINAL.some((t) => t.name === call.name)) {
-          const error = "Not run: only propose_decision or ask_resident is available now.";
+          const error = "Not run: only propose_decision is available now.";
           input.push({ type: "function_call_output", call_id: call.call_id, output: JSON.stringify({ ok: false, error, steps_left: limits.max_steps - steps.length }) });
           continue;
         }

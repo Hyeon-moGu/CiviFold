@@ -14,12 +14,13 @@ export type BlobStore = {
 export function fileBlobs(dir = path.join(process.cwd(), ".cache/blobs")): BlobStore {
   const file = (key: string) => path.join(dir, key);
   return {
+    // A deployment never takes this branch; the ignores stop the bundler from tracing the whole project for these paths.
     put: async (key, bytes) => {
-      await mkdir(path.dirname(file(key)), { recursive: true });
-      await writeFile(file(key), bytes);
+      await mkdir(/*turbopackIgnore: true*/ path.dirname(file(key)), { recursive: true });
+      await writeFile(/*turbopackIgnore: true*/ file(key), bytes);
     },
-    get: (key) => readFile(file(key)),
-    has: (key) => readFile(file(key)).then(() => true, () => false),
+    get: (key) => readFile(/*turbopackIgnore: true*/ file(key)),
+    has: (key) => readFile(/*turbopackIgnore: true*/ file(key)).then(() => true, () => false),
   };
 }
 

@@ -18,6 +18,12 @@ function stepsFor(view: ResidentView | null): string[] {
   return view.photos.length > 0 ? [...heard, ...read, ...PHOTO_STEPS] : [...heard, ...read, "Looking for reports nearby"];
 }
 
+async function fetchView(code: string): Promise<ResidentView | { error: string }> {
+  const res = await fetch(`/api/track/${code}`, { cache: "no-store" });
+  const body = (await res.json()) as ResidentView & { error?: string };
+  return res.ok ? body : { error: body.error ?? "Report not found." };
+}
+
 export function TrackView({ code }: { code: string }) {
   const [view, setView] = useState<ResidentView | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,13 +31,16 @@ export function TrackView({ code }: { code: string }) {
   const [step, setStep] = useState(0);
   const started = useRef(false);
 
-  const load = useCallback(async () => {
-    const res = await fetch(`/api/track/${code}`, { cache: "no-store" });
-    const body = (await res.json()) as ResidentView & { error?: string };
-    if (!res.ok) return setError(body.error ?? "Report not found.");
+  // Showing what came back is a callback of the fetch, never a synchronous step of an effect.
+  const show = useCallback((body: ResidentView | { error: string }) => {
+    if ("error" in body) {
+      setError(body.error);
+      return null;
+    }
     setView(body);
     return body;
-  }, [code]);
+  }, []);
+  const load = useCallback(() => fetchView(code).then(show), [code, show]);
 
   const run = useCallback(
     async (request: () => Promise<Response>) => {
@@ -110,6 +119,7 @@ export function TrackView({ code }: { code: string }) {
               <p className="text-zinc-600">{view.transcript ? `Transcript: “${view.transcript}”` : "Not transcribed yet."}</p>
             </>
           )}
+          {view.note && <p className="rounded-md bg-amber-50 px-2.5 py-1.5 text-xs text-amber-900">{view.note}</p>}
         </section>
       )}
 

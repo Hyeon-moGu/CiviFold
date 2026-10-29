@@ -22,7 +22,7 @@ export type IncomingReport = {
   text: string | null; // typed description and transcript
   category_hint: string | null;
   already_asked: boolean;
-  asked_by: string | null; // rule of the analysis that asked the resident, once they answered
+  asked_by: string | null; // what asked the resident, once they answered: a rule id, or a staff request (staffAsk)
   danger: boolean; // the resident ticked "someone may be in danger"
 };
 

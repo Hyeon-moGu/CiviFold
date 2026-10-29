@@ -6,7 +6,7 @@ import { loadPrompt } from "../prompts";
 import { compareImages } from "../tools/compare-images";
 import { searchIncidents } from "../tools/search-incidents";
 import { segmentObject } from "../tools/segment-object";
-import { Category, type ToolContext } from "../tools/types";
+import { Category, type RequestItem, type ToolContext } from "../tools/types";
 import { DECIDE_CONFIG, SEARCH_CONFIG } from "./config";
 import { checkAfterFix, type AfterFixResult } from "./after-fix";
 import { decide, type Candidate, type Comparison, type DecideInput, type Decision } from "./decide";
@@ -22,7 +22,7 @@ export type ReportInput = {
   description: string | null;
   category_hint: string | null;
   already_asked: boolean;
-  asked_by?: string | null; // rule of the analysis that asked the resident, once they answered
+  asked_by?: string | null; // what asked the resident, once they answered: a rule id, or a staff request (staffAsk)
 };
 
 type SearchedIncident = Awaited<ReturnType<typeof searchIncidents.run>>["incidents"][number];
@@ -42,7 +42,8 @@ export type Analysis = {
 };
 
 // The fast path: triage → candidate search → SAM → stage 1 (full photos) and stage 2 (crops)
-// per candidate → rules. Model calls stop as early as the rules allow.
+// per candidate → rules. Only an out-of-scope or unusable photo stops before the search; after it, every
+// candidate's first photo is compared with every photo of the report, in both stages, in parallel.
 export async function analyze(report: ReportInput, ctx: ToolContext): Promise<Analysis> {
   const start = Date.now();
   const { result, usd } = await metered(() => fastPath(report, ctx));
@@ -138,8 +139,11 @@ export function toCandidate(i: SearchedIncident): Candidate {
   };
 }
 
-// Rules that ask the resident for a close-up of the problem: the photo sent in reply is that close-up.
-const CLOSE_UP_ASKS: ReadonlySet<string> = new Set(["R6d", "R7g", "R7t", "R7r"]);
+/** A question staff asked, outside any rule, as `asked_by` records it. */
+export const staffAsk = (item: RequestItem) => `staff:${item}`;
+
+// Asks for a close-up of the problem, by a rule or by staff: the photo sent in reply is that close-up.
+const CLOSE_UP_ASKS: ReadonlySet<string> = new Set(["R6d", "R7g", "R7t", "R7r", staffAsk("close_up")]);
 
 const AFTER_FIX_RULES: ReadonlySet<string> = new Set(["R7c", "R7g"]);
 

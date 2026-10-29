@@ -27,9 +27,11 @@ const TABS = [
   {
     id: "review",
     text: "Review",
-    hint: "urgent, recurrence or unclear",
+    hint: "urgent, recurrence, unclear or not checked yet",
+    // A report whose automatic check never started (it starts from the resident's tracking page) or is
+    // still running is work too: without a row here it would be invisible until something analyzed it.
     match: (f: Final | null, s: string, urgent: boolean, stale: boolean) =>
-      (urgent && !DECIDED.has(s)) || (s === "under_review" && !ONE_CLICK.has(f?.label ?? "")) || s === "unavailable" || s === "failed" || stale,
+      (urgent && !DECIDED.has(s)) || (s === "under_review" && !ONE_CLICK.has(f?.label ?? "")) || s === "unavailable" || s === "failed" || s === "received" || s === "analyzing" || stale,
   },
   {
     id: "confirm",
@@ -197,8 +199,8 @@ export default async function AdminQueue({ searchParams }: { searchParams: Promi
   );
 }
 
-// Reports staff decided without an analysis (the demo's starting history), in plain words.
-const STATUS_TEXT: Record<string, string> = { new_incident: "Opened an incident", linked: "Linked", dismissed: "Dismissed" };
+// Reports without an analysis, in plain words: not checked yet, or decided before any check (the demo's starting history).
+const STATUS_TEXT: Record<string, string> = { received: "Not checked yet", analyzing: "Checking…", new_incident: "Opened an incident", linked: "Linked", dismissed: "Dismissed" };
 
 // The row's button says what opening it is for in this tab.
 const ACTION_TEXT: Record<(typeof TABS)[number]["id"], string> = { review: "Review", confirm: "Confirm", waiting: "View", done: "View" };

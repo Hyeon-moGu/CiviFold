@@ -6,12 +6,12 @@
 // seedDemo only writes the database, so /api/demo/reset can run it on a deployment; uploadDataset
 // puts the photos in the blob store once, from a machine that has dataset/images.
 import { readdir, readFile } from "node:fs/promises";
-import { sql } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import { imageId, type AssetFile } from "../dataset/assets";
 import { VOICE_DIR, voiceBlobKey } from "../dataset/messages";
 import type { BlobStore } from "../db/blobs";
 import type { Db } from "../db/client";
-import { images, incidentEvents, incidents, reports } from "../db/schema";
+import { demoResets, images, incidentEvents, incidents, reports } from "../db/schema";
 import { blobKey } from "../db/stores";
 import { assetLocation } from "../eval/cases";
 
@@ -29,15 +29,34 @@ const TABLES = [
 
 const DAY_MS = 86_400_000;
 
+export const RESET_COOLDOWN_MS = 60_000;
+
+/**
+ * Records a public reset, unless one happened within the cooldown: then it returns the seconds to wait
+ * (0 when the reset may go ahead). The check and the record run under one table lock, so two visitors
+ * clicking at once cannot both reset.
+ */
+export async function claimReset(database: Db, now = new Date(), cooldownMs = RESET_COOLDOWN_MS): Promise<number> {
+  return database.transaction(async (tx) => {
+    await tx.execute(sql`LOCK TABLE demo_resets IN SHARE ROW EXCLUSIVE MODE`);
+    const [last] = await tx.select({ at: demoResets.created_at }).from(demoResets).orderBy(desc(demoResets.id)).limit(1);
+    const wait = last ? new Date(last.at).getTime() + cooldownMs - now.getTime() : 0;
+    if (wait > 0) return Math.ceil(wait / 1000);
+    await tx.insert(demoResets).values({ created_at: now.toISOString() });
+    return 0;
+  });
+}
+
 export const seedIncidentId = (assetId: string) => `inc_${assetId.toLowerCase()}`;
 export const seedReportId = (assetId: string) => `rep_${assetId.toLowerCase()}_1`;
 
+// The uploads run from a machine with the dataset; the ignores stop the bundler from tracing it into the app.
 /** Uploads every dataset photo the blob store does not have yet. */
 export async function uploadDataset(store: BlobStore, dir = "dataset/images"): Promise<number> {
   let uploaded = 0;
-  for (const name of (await readdir(dir)).filter((f) => f.endsWith(".webp"))) {
+  for (const name of (await readdir(/*turbopackIgnore: true*/ dir)).filter((f) => f.endsWith(".webp"))) {
     if (await store.has(name)) continue;
-    await store.put(name, await readFile(`${dir}/${name}`), "image/webp");
+    await store.put(name, await readFile(/*turbopackIgnore: true*/ `${dir}/${name}`), "image/webp");
     uploaded += 1;
   }
   return uploaded;
@@ -46,10 +65,10 @@ export async function uploadDataset(store: BlobStore, dir = "dataset/images"): P
 /** Uploads the sample voice messages the blob store does not have yet. */
 export async function uploadVoices(store: BlobStore, dir = VOICE_DIR): Promise<number> {
   let uploaded = 0;
-  for (const name of (await readdir(dir)).filter((f) => f.endsWith(".wav"))) {
+  for (const name of (await readdir(/*turbopackIgnore: true*/ dir)).filter((f) => f.endsWith(".wav"))) {
     const key = voiceBlobKey(name.replace(/\.wav$/, ""));
     if (await store.has(key)) continue;
-    await store.put(key, await readFile(`${dir}/${name}`), "audio/wav");
+    await store.put(key, await readFile(/*turbopackIgnore: true*/ `${dir}/${name}`), "audio/wav");
     uploaded += 1;
   }
   return uploaded;

@@ -28,7 +28,7 @@ const SCOPE = [
   { title: "Possible emergencies", examples: "Smoke, a gas smell, a fallen power line", handled: "No matching; top of the staff queue, resident told to call 911", urgent: true },
 ];
 
-// Pothole requests created in September 2026, grouped by resolution description (queried 2026-10-29).
+// Street Condition / Pothole requests created in September 2026, grouped by resolution description (queried 2026-10-29).
 const NYC_311 = "https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9";
 
 export const dynamic = "force-dynamic";
@@ -50,13 +50,12 @@ export default function Home() {
               <span className="text-rose-600">Keep recurrences apart.</span>
             </h1>
             <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-zinc-600">
-              In September 2026, NYC 311 resolved 454 of 3,673 pothole reports as duplicates of an earlier one (
+              Of 3,662 street pothole requests recorded by NYC 311 in September 2026, 454 were closed as duplicates of an earlier one (
               <a href={NYC_311} className="underline underline-offset-2 hover:text-zinc-900">
                 NYC Open Data
               </a>
-              ). Grouping by location saves that work,
-              but it also hides the hydrant across the street and the one that broke again after its repair. CiviFold groups reports by what the photos
-              show, and only suggests.
+              ). Matching by location alone cannot tell a duplicate from a look-alike a few doors down, or from the same fixture broken again after its
+              repair. CiviFold compares what the photos show, checks the repair history, and suggests. Staff decide.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/demo" className="rounded-lg bg-zinc-900 px-5 py-3 text-sm font-semibold text-white hover:bg-zinc-800">
@@ -113,7 +112,8 @@ export default function Home() {
           </tbody>
         </table>
         <p className="mt-3 max-w-2xl text-xs text-zinc-500">
-          Synthetic photos generated with Muse Image; each run was scored once, on places never used for tuning. Every result is reported, including the weaker one.
+          Synthetic photos generated with Muse Image. First run on each set; each set was unseen when it ran. Rules were changed after the test set and
+          the first unseen set, so those two rows used earlier rules. Every run is in the evaluation notes.
         </p>
       </section>
 
@@ -162,14 +162,14 @@ function Stat({ value, label, sub, tone }: { value: string; label: string; sub: 
   );
 }
 
-// The guided demo's first two scenarios on one card: the same hydrant from another angle folds onto the open
-// incident; the same model 28 m away, which a distance rule would merge, stays a new problem.
+// The guided demo's first two scenarios: the same hydrant from another angle is suggested as a duplicate;
+// the same model 28 m away is suggested as a new problem. Staff decide whether to apply either suggestion.
 function SameBlock() {
   return (
     <figure className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-12px_rgba(0,0,0,0.18)]">
       <div className="relative overflow-hidden rounded-xl">
         {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
-        <img src="/api/images/syn_H1_damaged_v1_front?w=720" alt="The open incident: a leaking hydrant by the BAKERY" className="aspect-[16/9] w-full object-cover" />
+        <img src="/api/images/syn_H1_damaged_v1_front?w=960" alt="The open incident: a leaking hydrant by the BAKERY" className="aspect-[16/9] w-full object-cover" />
         <span className="absolute left-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white">SYNTHETIC</span>
         <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-3 pb-2.5 pt-8 text-white">
           <span className="block text-[11px] uppercase tracking-wider text-white/70">Open incident</span>
@@ -181,7 +181,7 @@ function SameBlock() {
           src="/api/samples/syn_H1_damaged_v1_across/image?w=480"
           alt="A new report of the same hydrant from across the street"
           where="Same spot, from across the street"
-          verdict="Duplicate · folded"
+          verdict="Suggested: duplicate"
           tone="bg-sky-50 text-sky-800 ring-sky-300"
           dot="bg-sky-500"
           why="Shop sign and bike rack match"
@@ -190,13 +190,13 @@ function SameBlock() {
           src="/api/samples/syn_H5_damaged_v1_front/image?w=480"
           alt="A new report of a look-alike hydrant 28 m away"
           where="28 m away, by the LAUNDRY"
-          verdict="New problem · kept apart"
+          verdict="Suggested: new problem"
           tone="bg-zinc-100 text-zinc-800 ring-zinc-300"
           dot="bg-zinc-500"
           why="Same model, different wall"
         />
       </div>
-      <p className="mt-3 px-1 text-[11px] text-zinc-500">A distance rule merges both. Results from the guided demo, which you can run yourself.</p>
+      <p className="mt-3 px-1 text-[11px] text-zinc-500">A distance-only rule would suggest both as duplicates. Results from the guided demo, which you can run yourself.</p>
     </figure>
   );
 }

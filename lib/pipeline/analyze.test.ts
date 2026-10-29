@@ -10,7 +10,7 @@ import { sparkJson } from "../meta/spark";
 import { memoryData, type IncidentRow } from "../tools/data";
 import { memoryImages, type ImageRow } from "../tools/images";
 import type { CompareResult, ToolContext } from "../tools/types";
-import { analyze, photoRoles, withAnswerPhoto, type ReportInput } from "./analyze";
+import { analyze, decideInputOf, photoRoles, staffAsk, withAnswerPhoto, type Analysis, type ReportInput } from "./analyze";
 import type { Decision } from "./decide";
 import type { TriageResult } from "./triage";
 
@@ -179,6 +179,14 @@ describe("analyze", () => {
     const decision = (rule_id: string): Decision => ({ label: "NEEDS_INFO", incident_id: null, rule_id, reasons: [], confidence: 0, missing_info: ["close_up"] });
     expect(withAnswerPhoto(REPORT, decision("R6d"), "img_close")).toMatchObject({ image_id: "img_new", answer_image_ids: ["img_close"], already_asked: true });
     expect(withAnswerPhoto(REPORT, decision("R0"), "img_close")).toMatchObject({ image_id: "img_close", answer_image_ids: [], already_asked: true, asked_by: "R0" });
+  });
+
+  it("treats the photo staff asked for as the close-up, like a rule's request", () => {
+    const facts = { triage: { ...TRIAGE }, candidates: [], comparisons: [] } as unknown as Pick<Analysis, "triage" | "candidates" | "comparisons">;
+    const answered = { ...REPORT, answer_image_ids: ["img_close"], already_asked: true };
+    expect(decideInputOf({ ...answered, asked_by: staffAsk("close_up") }, facts).report.close_up_ids).toEqual(["img_close"]);
+    expect(decideInputOf({ ...answered, asked_by: staffAsk("wider_context") }, facts).report.close_up_ids).toEqual([]);
+    expect(decideInputOf({ ...answered, asked_by: "R7t" }, facts).report.close_up_ids).toEqual(["img_close"]);
   });
 
   it("picks the same photos from a report's stored list as the evaluation does", () => {

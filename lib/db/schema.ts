@@ -154,7 +154,7 @@ export const infoRequests = pgTable("info_requests", {
   question: text("question").notNull(),
   requested_items: jsonb("requested_items").notNull(),
   reason_for_staff: text("reason_for_staff"),
-  source: text("source").notNull(), // template | agent
+  source: text("source").notNull(), // template (a rule asked, in the template's words) | staff | agent
   status: text("status").notNull(), // pending | answered | expired
   response: jsonb("response"),
   created_at: createdAt(),
@@ -175,6 +175,12 @@ export const llmCache = pgTable("llm_cache", {
   key: text("key").primaryKey(),
   model: text("model").notNull(),
   response: jsonb("response").notNull(),
+  created_at: createdAt(),
+});
+
+// Every public reset of the demo world, so resets can be held to a cooldown. A reset leaves this table alone.
+export const demoResets = pgTable("demo_resets", {
+  id: serial("id").primaryKey(),
   created_at: createdAt(),
 });
 

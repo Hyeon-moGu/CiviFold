@@ -147,7 +147,7 @@ export function Actions({
   );
 }
 
-export function RetryButton({ reportId }: { reportId: string }) {
+export function RetryButton({ reportId, text = "Retry the automatic check" }: { reportId: string; text?: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   async function retry() {
@@ -163,7 +163,7 @@ export function RetryButton({ reportId }: { reportId: string }) {
       disabled={busy}
       className="mt-3 rounded-md border border-ops-line px-3 py-1.5 text-sm text-ops-text hover:bg-ops-raised disabled:opacity-50"
     >
-      {busy ? "Analyzing…" : "Retry the automatic check"}
+      {busy ? "Analyzing…" : text}
     </button>
   );
 }

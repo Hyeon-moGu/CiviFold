@@ -18,7 +18,7 @@ import type { Decision } from "../pipeline/decide";
 import { verifySuggestion, type Verification } from "../pipeline/hybrid";
 import { readIntake, type IntakeResult } from "../pipeline/intake";
 import { transcribe } from "../meta/voice";
-import { analyzeReport, answerReport, changedFacts, createReport, reanalyzeReport, recordRepair, staffDecide, UserError, verifyReport } from "./reports";
+import { analyzeReport, answerReport, changedFacts, createReport, reanalyzeReport, recordRepair, staffDecide, UserError, verifyReport, WORDS_NOT_READ, wordsNotRead } from "./reports";
 import { spendGate, type Runtime } from "./runtime";
 import { spend } from "../db/schema";
 
@@ -111,6 +111,23 @@ describe("reports", () => {
     const input = vi.mocked(analyze).mock.calls.at(-1)![0] as ReportInput;
     expect(input.answer_image_ids).toHaveLength(1);
     expect(input.already_asked).toBe(true);
+    expect(input.asked_by).toBe("R6d");
+  });
+
+  it("reads a photo staff asked for as the close-up they asked for", async () => {
+    const { report_id } = await newReport();
+    fastSays({ label: "DUPLICATE", incident_id: "inc_h1", rule_id: "R6a", missing_info: [] });
+    await analyzeReport(rt, report_id);
+    const [a] = await rt.database.select({ id: reportAnalyses.id }).from(reportAnalyses).where(eq(reportAnalyses.report_id, report_id));
+    await staffDecide(rt, report_id, "request_info", null, "close_up", { analysis_id: a!.id, facts_changed_seen: false });
+    const [q] = await rt.database.select().from(infoRequests).where(eq(infoRequests.report_id, report_id));
+    expect(q).toMatchObject({ source: "staff", status: "pending", requested_items: ["close_up"] });
+
+    await answerReport(rt, report_id, { photo: { sample_id: "syn_H1_damaged_v1_closeup" } });
+    await analyzeReport(rt, report_id);
+    const input = vi.mocked(analyze).mock.calls.at(-1)![0] as ReportInput;
+    expect(input).toMatchObject({ already_asked: true, asked_by: "staff:close_up" });
+    expect(input.answer_image_ids).toHaveLength(1);
   });
 
   it("runs the fast path alone and keeps the input it read, for a later verification", async () => {
@@ -126,6 +143,26 @@ describe("reports", () => {
 
   it("marks a report it cannot replay as unavailable", async () => {
     const { report_id } = await newReport();
+    vi.mocked(analyze).mockRejectedValue(new CacheMissError("no cache"));
+    expect((await analyzeReport(rt, report_id)).status).toBe("unavailable");
+  });
+
+  it("analyzes the photo alone when the words have no recorded reading, and says so", async () => {
+    const { report_id } = await newReport({ description: "Water everywhere" });
+    vi.mocked(readIntake).mockRejectedValue(new CacheMissError("no cache"));
+    fastSays({ label: "DUPLICATE", incident_id: "inc_h1", rule_id: "R6a", missing_info: [] });
+    expect(await analyzeReport(rt, report_id)).toEqual({ status: "under_review" });
+    const [a] = await rt.database.select().from(reportAnalyses).where(eq(reportAnalyses.report_id, report_id));
+    expect(a).toMatchObject({ intake: null, final: { label: "DUPLICATE" }, errors: [WORDS_NOT_READ.no_recording] });
+    expect(wordsNotRead(a!.errors)).toBe("no_recording");
+    expect(readIntake).toHaveBeenCalledTimes(1);
+    expect(analyze).toHaveBeenCalledTimes(1);
+    expect((vi.mocked(analyze).mock.calls[0]![0] as ReportInput).description).toBeNull();
+  });
+
+  it("stays unavailable when the photo itself has no recorded reading", async () => {
+    const { report_id } = await newReport({ description: "Water everywhere" });
+    vi.mocked(readIntake).mockRejectedValue(new CacheMissError("no cache"));
     vi.mocked(analyze).mockRejectedValue(new CacheMissError("no cache"));
     expect((await analyzeReport(rt, report_id)).status).toBe("unavailable");
   });

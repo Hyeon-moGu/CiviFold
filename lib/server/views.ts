@@ -6,7 +6,7 @@
 import { samples, type Sample } from "../dataset/static";
 import { haversineM } from "../geo";
 import type { Channel, Label, RequestItem } from "../tools/types";
-import type { reportDetail } from "./reports";
+import { wordsNotRead, type reportDetail, type WordsUnread } from "./reports";
 
 type Detail = NonNullable<Awaited<ReturnType<typeof reportDetail>>>;
 
@@ -21,6 +21,11 @@ const SUGGESTION_TEXT: Record<Label, string> = {
 };
 
 const URGENT_TEXT = "If anyone is in danger, call 911 now. We sent your report to staff as urgent.";
+
+const WORDS_UNREAD_TEXT: Record<WordsUnread, string> = {
+  no_recording: "Staff will read your message themselves. The automatic check did not: the public demo has no recorded reading of it.",
+  budget: "Staff will read your message themselves. The automatic check did not: live model calls are paused for today.",
+};
 
 const STATUS_TEXT: Record<string, string> = {
   received: "Received. We are checking your report.",
@@ -46,6 +51,7 @@ export type ResidentView = {
   description: string | null;
   transcript: string | null;
   has_audio: boolean;
+  note: string | null; // when the automatic check did not read the message
   photos: string[];
   question: { question: string; requested_items: RequestItem[] } | null;
   // Demo only: the other dataset photos of the same place, so a visitor can answer like a resident would.
@@ -58,6 +64,7 @@ export function residentView(d: Detail): ResidentView {
   const status = d.report.status;
   const asset = d.photos.find((p) => p.dataset_image_id)?.dataset_image_id?.split("_")[1] ?? nearestAsset(d.report);
   const urgent = d.report.urgent;
+  const unread = wordsNotRead(d.analysis?.errors);
   return {
     report_id: d.report.id,
     tracking_code: d.report.tracking_code,
@@ -70,6 +77,7 @@ export function residentView(d: Detail): ResidentView {
     description: d.report.description,
     transcript: d.report.transcript,
     has_audio: d.report.audio_path !== null,
+    note: unread ? WORDS_UNREAD_TEXT[unread] : null,
     photos: d.photos.map((p) => p.id),
     question: pending ? { question: pending.question, requested_items: pending.requested_items as RequestItem[] } : null,
     suggested_samples: pending && asset ? samples().filter((s) => s.asset_id === asset) : [],

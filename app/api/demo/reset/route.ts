@@ -2,12 +2,19 @@
 // Created: 2026-10-27
 
 import { ASSET_FILE } from "@/lib/dataset/static";
-import { seedDemo } from "@/lib/demo/seed";
+import { claimReset, seedDemo } from "@/lib/demo/seed";
 import { handle } from "@/lib/server/http";
+import { UserError } from "@/lib/server/reports";
 import { runtime as app } from "@/lib/server/runtime";
 
 export const runtime = "nodejs";
 
+// The world is shared, so a reset under another visitor's feet is held to one a minute.
 export async function POST() {
-  return handle(async () => seedDemo((await app()).database, ASSET_FILE));
+  return handle(async () => {
+    const rt = await app();
+    const wait = await claimReset(rt.database);
+    if (wait > 0) throw new UserError(`The demo was reset less than a minute ago, by you or another visitor. Try again in ${wait} s.`);
+    return seedDemo(rt.database, ASSET_FILE);
+  });
 }

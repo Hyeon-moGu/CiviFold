@@ -33,8 +33,9 @@ export type AssetFile = z.infer<typeof AssetFile>;
 export type State = "damaged_v1" | "repaired" | "damaged_v2";
 export type View = "front" | "across" | "sidewalk" | "closeup" | "closeup_side" | "across_night" | "front_night";
 
+// Scripts only: the app imports the JSON. The ignore stops the bundler from tracing the whole project for this read.
 export async function loadAssets(file = "dataset/assets.json"): Promise<AssetFile> {
-  return AssetFile.parse(JSON.parse(await readFile(file, "utf8")));
+  return AssetFile.parse(JSON.parse(await readFile(/*turbopackIgnore: true*/ file, "utf8")));
 }
 
 export const imageId = (assetId: string, state: State, view: View) => `syn_${assetId}_${state}_${view}`;

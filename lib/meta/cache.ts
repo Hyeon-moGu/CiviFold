@@ -54,7 +54,9 @@ export function memoryStore(): CacheStore {
   };
 }
 
-let store: CacheStore = fileStore();
+// CIVIFOLD_CACHE_DIR points scripts at another folder: a repeat evaluation run records its own calls
+// there instead of overwriting the first run's, which the default folder keeps replayable.
+let store: CacheStore = fileStore(process.env.CIVIFOLD_CACHE_DIR ? path.resolve(process.env.CIVIFOLD_CACHE_DIR) : undefined);
 
 export const cacheStore = (): CacheStore => store;
 

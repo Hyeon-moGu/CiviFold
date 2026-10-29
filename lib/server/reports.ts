@@ -13,11 +13,11 @@ import { CacheMissError, defaultMode, LiveBudgetError, metered } from "../meta/c
 import { transcribe } from "../meta/voice";
 import { channelOf, messageText, type IntakeResult } from "../pipeline/intake";
 import type { AgentStep } from "../agent/run";
-import type { Analysis, ReportInput } from "../pipeline/analyze";
+import { staffAsk, type Analysis, type ReportInput } from "../pipeline/analyze";
 import type { Candidate } from "../pipeline/decide";
 import { AGENT_LIMITS } from "../pipeline/config";
 import { verifySuggestion, VERIFIED } from "../pipeline/hybrid";
-import { processReport } from "../pipeline/process";
+import { processReport, type IncomingReport, type ProcessResult } from "../pipeline/process";
 import type { Category, Label, RequestItem } from "../tools/types";
 import type { PhotoMeta } from "./photo-meta";
 import { templateQuestion } from "./questions";
@@ -124,6 +124,20 @@ export async function createReport(rt: Runtime, input: NewReport): Promise<{ rep
   return { report_id: reportId, tracking_code: code };
 }
 
+export type WordsUnread = "no_recording" | "budget";
+
+// Stored with the analysis's errors when a report's words went unread, and said to staff as is.
+export const WORDS_NOT_READ: Record<WordsUnread, string> = {
+  no_recording: "The resident's words were not read: the public demo has no recorded reading of them. The suggestion comes from the photo alone.",
+  budget: "The resident's words were not read: live model calls are paused for today. The suggestion comes from the photo alone.",
+};
+
+/** Why an analysis's words went unread, from its stored errors; null when they were read (or there were none). */
+export function wordsNotRead(errors: unknown): WordsUnread | null {
+  const list = Array.isArray(errors) ? (errors as unknown[]) : [];
+  return (Object.keys(WORDS_NOT_READ) as WordsUnread[]).find((why) => list.includes(WORDS_NOT_READ[why])) ?? null;
+}
+
 // received: new; answered: the resident replied; unavailable or failed: a retry.
 const ANALYZABLE = ["received", "answered", "unavailable", "failed"];
 
@@ -133,6 +147,11 @@ export const ANALYSIS_LEASE_MS = 10 * 60_000;
 
 export function staleAnalysis(report: { status: string; claimed_at: string | null }, now = Date.now()): boolean {
   return report.status === "analyzing" && (report.claimed_at === null || Date.parse(report.claimed_at) < now - ANALYSIS_LEASE_MS);
+}
+
+/** A staff-requested verification holds the report while its lease is fresh (verifyReport). */
+export function verifyRunning(report: { verify_claimed_at: string | null }, now = Date.now()): boolean {
+  return report.verify_claimed_at !== null && Date.parse(report.verify_claimed_at) > now - ANALYSIS_LEASE_MS;
 }
 
 const staleClaim = () =>
@@ -252,10 +271,15 @@ async function runAnalysis(rt: Runtime, report: typeof reports.$inferSelect, cla
     .from(images)
     .where(and(eq(images.report_id, reportId), eq(images.kind, "original")))
     .orderBy(asc(images.created_at), asc(images.id));
-  // After an answer, the rule that asked (the final decision's: a verification recheck can ask too) decides
-  // which photo the pipeline reads first (photoRoles) and which photos are close-ups.
+  // After an answer, whoever asked decides which photo the pipeline reads first (photoRoles) and which
+  // photos are close-ups: the rule behind the question (a verification recheck can ask too), or staff.
   const [asked] = report.already_asked
-    ? await database.select({ decision: reportAnalyses.final }).from(reportAnalyses).where(eq(reportAnalyses.report_id, reportId)).orderBy(desc(reportAnalyses.id)).limit(1)
+    ? await database
+        .select({ source: infoRequests.source, reason: infoRequests.reason_for_staff, items: infoRequests.requested_items })
+        .from(infoRequests)
+        .where(and(eq(infoRequests.report_id, reportId), eq(infoRequests.status, "answered")))
+        .orderBy(desc(infoRequests.id))
+        .limit(1)
     : [];
 
   const mode = report.live ? "cached_then_live" : defaultMode();
@@ -273,21 +297,30 @@ async function runAnalysis(rt: Runtime, report: typeof reports.$inferSelect, cla
       if (!report.danger) throw err;
     }
   }
-  const result = await processReport(
-    {
-      report_id: reportId,
-      image_ids: photos.map((p) => p.id),
-      lat: report.lat,
-      lng: report.lng,
-      observed_at: new Date(report.observed_at).toISOString(),
-      text: messageText(report.description, transcript),
-      category_hint: report.category_hint,
-      already_asked: report.already_asked,
-      asked_by: (asked?.decision as { rule_id: string } | undefined)?.rule_id ?? null,
-      danger: report.danger,
-    },
-    toolContext(rt, reportId, mode),
-  );
+  const incoming: IncomingReport = {
+    report_id: reportId,
+    image_ids: photos.map((p) => p.id),
+    lat: report.lat,
+    lng: report.lng,
+    observed_at: new Date(report.observed_at).toISOString(),
+    text: messageText(report.description, transcript),
+    category_hint: report.category_hint,
+    already_asked: report.already_asked,
+    asked_by: asked ? askedBy(asked) : null,
+    danger: report.danger,
+  };
+  let result: ProcessResult;
+  let unread: WordsUnread | null = null;
+  try {
+    result = await processReport(incoming, toolContext(rt, reportId, mode));
+  } catch (err) {
+    // A sample photo has a recorded reading, the words typed with it have none (or there is no budget left
+    // to read them live). The photo is then analyzed alone, and both screens say the words went unread.
+    // Words still reach staff, who read them themselves; the danger tick needs no model.
+    if (!incoming.text || !(err instanceof CacheMissError || err instanceof LiveBudgetError)) throw err;
+    unread = err instanceof CacheMissError ? "no_recording" : "budget";
+    result = await processReport({ ...incoming, text: null }, toolContext(rt, reportId, mode));
+  }
 
   const { photo, routed, final } = result;
   const analysis = photo?.analysis ?? null;
@@ -310,7 +343,7 @@ async function runAnalysis(rt: Runtime, report: typeof reports.$inferSelect, cla
         final,
         input: photo?.input ?? null,
         after_fix: analysis?.after_fix ?? null,
-        errors: analysis?.errors ?? [],
+        errors: [...(analysis?.errors ?? []), ...(unread ? [WORDS_NOT_READ[unread]] : [])],
         cost_usd: result.cost_usd + transcriptUsd,
         latency_ms: result.latency_ms,
       })
@@ -461,6 +494,13 @@ function question(reportId: string, analysisId: number, final: { rule_id: string
   return { report_id: reportId, analysis_id: analysisId, question: templateQuestion(item, category), requested_items: final.missing_info, reason_for_staff: final.rule_id, source: "template", status: "pending" };
 }
 
+// What asked the resident, as the pipeline reads it: the rule's id, or the item staff asked for.
+function askedBy(q: { source: string; reason: string | null; items: unknown }): string | null {
+  if (q.source !== "staff") return q.reason;
+  const [item] = q.items as RequestItem[];
+  return staffAsk(item ?? "wider_context");
+}
+
 // What the report is about: the photo's reading, else the kind the resident picked, else their words.
 function categoryOf(report: { category_hint: string | null }, triage: { category: Category } | null, intake: IntakeResult | null): Category {
   return triage?.category ?? (report.category_hint as Category | null) ?? intake?.category ?? "other";
@@ -591,7 +631,7 @@ export async function staffDecide(
         question: templateQuestion(item, category),
         requested_items: [item],
         reason_for_staff: "Requested by staff",
-        source: "template",
+        source: "staff",
         status: "pending",
       });
       await tx.update(reports).set({ status: "needs_info" }).where(eq(reports.id, reportId));

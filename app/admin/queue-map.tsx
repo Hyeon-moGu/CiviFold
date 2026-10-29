@@ -6,7 +6,7 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer, Tooltip, useMap } from "react-leaflet";
 import type { Label } from "@/lib/tools/types";
 import { LABEL_HEX } from "@/app/_ui/console";
@@ -44,7 +44,7 @@ export default function QueueMap({ reports, incidents }: { reports: MapReport[];
         maxZoom={19}
       />
       <Fit points={points} />
-      <FlyTo target={selected ? (pins.current.get(selected) ?? null) : null} />
+      <FlyTo pins={pins} selected={selected} />
       {incidents
         .filter((i) => i.recurrence_of && byId.has(i.recurrence_of))
         .map((i) => {
@@ -173,13 +173,15 @@ function numberPin(n: number, color: string, urgent: boolean, on: boolean): L.Di
   });
 }
 
-// Pans to the report a row's number picked (or a pin click) and opens its popup.
-function FlyTo({ target }: { target: L.Marker | L.CircleMarker | null }) {
+// Pans to the report a row's number picked (or a pin click) and opens its popup. The pins are read in the
+// effect, not during render: markers register themselves once the map has rendered.
+function FlyTo({ pins, selected }: { pins: RefObject<Map<string, L.Marker | L.CircleMarker>>; selected: string | null }) {
   const map = useMap();
   useEffect(() => {
+    const target = selected ? pins.current.get(selected) : undefined;
     if (!target) return;
     map.flyTo(target.getLatLng(), Math.max(map.getZoom(), 17), { duration: 0.6 });
     if (!target.isPopupOpen()) target.openPopup();
-  }, [target, map]);
+  }, [selected, pins, map]);
   return null;
 }

@@ -43,6 +43,13 @@
       "when": 1793171823461,
       "tag": "0005_staff_verification",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793267024040,
+      "tag": "0006_demo_resets",
+      "breakpoints": true
     }
   ]
 }
