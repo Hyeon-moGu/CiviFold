@@ -2,6 +2,8 @@
 
 ### Still broken, or broken again? Location can't tell. Photos can.
 
+**[Live demo](https://civi-fold.vercel.app)** · guided scenarios replay recorded model calls, so trying it costs nothing
+
 CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Every link and closure is a suggestion until a staff member approves it.
 
 On a pre-registered holdout of 80 synthetic reports, the fast path made **0 wrong closing suggestions on the 33 reports that needed attention**, in each of two live runs. A location-only baseline made 24 ([results](#results)).

@@ -6,7 +6,7 @@
 // Usage: npm run seed
 import { blobs } from "../lib/db/blobs";
 import { db, migratePostgres } from "../lib/db/client";
-import { loadAssets } from "../lib/dataset/assets";
+import { ASSET_FILE } from "../lib/dataset/static";
 import { seedDemo, uploadDataset, uploadVoices } from "../lib/demo/seed";
 
 async function main() {
@@ -15,7 +15,8 @@ async function main() {
   if (uploaded > 0) console.log(`uploaded ${uploaded} dataset photos`);
   const voices = await uploadVoices(await blobs());
   if (voices > 0) console.log(`uploaded ${voices} sample recordings`);
-  const result = await seedDemo(await db(), await loadAssets());
+  // The same world the app's reset seeds: the holdout assets stay out of it.
+  const result = await seedDemo(await db(), ASSET_FILE);
   console.log(`seeded ${result.incidents} open incidents into ${process.env.DATABASE_URL ? "Postgres (DATABASE_URL)" : "local PGlite (.cache/pglite)"}`);
   process.exit(0);
 }

@@ -11,6 +11,9 @@ const config: NextConfig = {
   // The dataset's photos and recordings are served from the blob store once seeded, and the local caches,
   // results and README media never run on a deployment. Traced in, they put 300 MB into every function.
   outputFileTracingExcludes: { "/**": ["./dataset/images/**", "./dataset/voice/**", "./.cache/**", "./eval/**", "./coverage/**", "./media/**"] },
+  // The staff console and residents' tracking pages are not for search engines, whatever robots.txt is obeyed.
+  headers: async () =>
+    ["/admin", "/admin/:path*", "/track/:path*"].map((source) => ({ source, headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] })),
 };
 
 export default config;
