@@ -14,7 +14,7 @@ On a pre-registered holdout of 80 synthetic reports, the fast path made **0 wron
 
 | Meta model | What it does here |
 |---|---|
-| **Muse Spark** | Reads the words, compares photos whole and as cut-outs, runs the staff-requested verification agent with function tools |
+| **Muse Spark** | Reads the words, compares photos whole and as cut-outs, runs the staff-requested verification and case brief agents with function tools |
 | **SAM 3.1** | Cuts out the fixture and its surroundings for the comparison |
 | **Muse Voice Transcribe** | Turns a spoken report into text |
 | **Muse Image** | Generated the 504-image synthetic evaluation set |
@@ -53,6 +53,7 @@ Designed for staff reviewing incoming reports at a 311 center or public works of
 - **Route first.** Emergencies (from the text, the voice note or the resident's danger flag) go to the top of the staff queue. Reports about people or behavior skip image matching. Without a photo, nothing is matched; the system asks for one when nearby incidents need telling apart. That matches how reports arrive: in San Francisco, 7 in 10 of the 311 cases opened in September 2026 came with a photo, and phone calls, 1 in 5, almost never do ([source](#sources)).
 - **Compare, then apply time.** Muse Spark compares the full photos and SAM crops without seeing any timestamp. Rules then use the observation time and repair history to tell a duplicate, a late report and a possible recurrence apart. Too little evidence leads to a question or staff review.
 - **Verify when staff ask (experimental).** On a duplicate, late or already-fixed suggestion, an agent looks for counter-evidence with the same tools. It can only make the suggestion more cautious.
+- **Brief when staff ask (experimental).** On any analyzed report, an agent reads the pipeline's facts, the incident's history and what is open nearby, and writes the case brief staff read before deciding. Every item cites a tool result or a numbered fact; items without a valid citation are deleted before the brief is shown. It decides nothing.
 
 <details>
 <summary><strong>Evidence requirements and verification behavior</strong></summary>
@@ -65,6 +66,8 @@ The verification agent starts with the incident's other photos and similar incid
 - If it stops partway, the rules still use the evidence collected so far.
 - Verification uses the latest stored analysis and runs once at a time per report. Results superseded by a staff decision or a newer analysis are recorded without being applied.
 - If a candidate incident's repair state has changed since analysis, staff are prompted to analyze again before requesting verification.
+
+The case brief agent gets the same tools, limits and neutral names as the verifier, plus a numbered list of facts (the triage, the candidates, every comparison, the incident's events and photos, incidents of the same kind within 60 m) that it can cite without a call. Its only terminal tool writes the brief; the server keeps an item only if it cites a successful tool call of that run or a listed fact, and shows how many were deleted. The brief has no label field and changes nothing. In the first demo scenario it wrote 8 cited items from the facts alone, with 0 tool calls, for $0.018 in 12 s; its wording was adjusted on two live runs and has no evaluation beyond the citation rule.
 
 </details>
 
@@ -145,7 +148,7 @@ Three photos are a sanity check, not a measurement. They show that the cautious 
 - **Evidence and uncertainty.** The evidence check counts lines, not semantically independent features. Problem visibility is yes/no; “not observable” is not a separate state.
 - **Category disagreement.** Search uses the resident's chosen type, while visual analysis uses the type read from the photo. They can refer to different objects.
 - **Changes after analysis.** The out-of-date check compares the candidate incidents an analysis read with their current state. An incident opened nearby after the analysis is not detected.
-- **Agent evaluation.** Automatic verification increased deferrals on the latest holdout. Staff-requested verification has no separate evaluation. Only the fast path on holdout3 was run twice; every other configuration and set is a single run.
+- **Agent evaluation.** Automatic verification increased deferrals on the latest holdout. Staff-requested verification and the case brief have no separate evaluation; the brief's only check is that every shown item cites evidence. Only the fast path on holdout3 was run twice; every other configuration and set is a single run.
 - **Demo deployment.** The staff console has no login, so anyone with the URL can act as staff, and anyone can reset the demo world (once a minute). A real deployment needs authentication, an audit trail of staff decisions and rate limits.
 - **No undo.** Staff decisions are final: a link cannot be undone and an incident cannot be reopened. The analysis starts from the resident's tracking page; a report whose page was never opened waits in the staff queue as not checked yet.
 
@@ -173,7 +176,7 @@ npm run dev                 # http://localhost:3000
 <details>
 <summary><strong>Demo replay and live calls</strong></summary>
 
-The public deployment uses `cached` mode and shows **models: replay**. Guided scenarios replay recorded calls, including a staff-requested agent check in the first scenario. A cache miss never triggers a live call in this mode.
+The public deployment uses `cached` mode and shows **models: replay**. Guided scenarios replay recorded calls, including a staff-requested agent check and a case brief in the first scenario. A cache miss never triggers a live call in this mode.
 
 - A report without a prepared result is marked unavailable. A typed message sent with a sample photo has no recorded reading: the photo is then analyzed alone, and the resident and staff are both told that the words were not read.
 - Verification without a recorded first call does not start; the suggestion stays unchanged.

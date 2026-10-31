@@ -78,7 +78,7 @@ function noteOf(r: VerifyResult): State["note"] {
   }
 }
 
-function useElapsed(since: number, on: boolean): number {
+export function useElapsed(since: number, on: boolean): number {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (!on) return;
@@ -88,7 +88,7 @@ function useElapsed(since: number, on: boolean): number {
   return Math.max(0, now - since);
 }
 
-const clockOf = (ms: number) => `${Math.floor(ms / 60_000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
+export const clockOf = (ms: number) => `${Math.floor(ms / 60_000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}`;
 
 export function Spinner({ className = "" }: { className?: string }) {
   return <span aria-hidden className={`inline-block h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent ${className}`} />;

@@ -11,9 +11,10 @@
 import { and, asc, desc, eq, inArray, like } from "drizzle-orm";
 import { messageSample } from "../dataset/messages";
 import { sample } from "../dataset/static";
-import { incidentEvents, incidents, reportAnalyses, reports } from "../db/schema";
+import { briefs, incidentEvents, incidents, reportAnalyses, reports } from "../db/schema";
 import { seedIncidentId } from "./seed";
 import type { Label } from "../tools/types";
+import { briefReport } from "../server/briefs";
 import { analyzeReport, answerReport, createReport, recordRepair, UserError, verifyReport } from "../server/reports";
 import type { Runtime } from "../server/runtime";
 
@@ -25,7 +26,9 @@ type Step =
   // The resident answers the question the previous step's report was asked, with a dataset photo.
   | { kind: "answer"; sample: string; text: string; why: string; expect: Label }
   // Staff ask the verification agent to check the previous step's suggestion.
-  | { kind: "verify"; text: string; why: string; expect: Label };
+  | { kind: "verify"; text: string; why: string; expect: Label }
+  // Staff ask for a case brief of the latest report sent in this scenario.
+  | { kind: "brief"; text: string; why: string };
 
 // `world`: the seeded incidents the replay depends on, shown as already open.
 export type Scenario = { id: string; title: string; story: string; world: string[]; steps: Step[] };
@@ -50,6 +53,11 @@ export const SCENARIOS: Scenario[] = [
         text: "Staff ask the verification agent to check it",
         why: "The agent looks for evidence against the suggestion: other photos of the incident and look-alikes within 60 m.",
         expect: "DUPLICATE",
+      },
+      {
+        kind: "brief",
+        text: "Staff ask for a case brief",
+        why: "The brief agent reads the pipeline's facts, the incident's history and what is open nearby, and writes the brief staff read before deciding. Every item cites a tool result or a fact; the rest is deleted. It decides nothing.",
       },
     ],
   },
@@ -248,6 +256,21 @@ export async function runStep(rt: Runtime, scenarioId: string, index: number) {
     if (result.status === "facts_changed") return { ...out, error: RESET };
     return { ...out, error: "Another check or a staff decision took over this report." };
   }
+  if (step.kind === "brief") {
+    const [briefed] = await rt.database
+      .select({ id: reports.id, tracking_code: reports.tracking_code })
+      .from(reports)
+      .where(eq(reports.dataset_case_id, demoTag(scenarioId, ownerIndex(scenario, index))))
+      .orderBy(desc(reports.submitted_at))
+      .limit(1);
+    if (!briefed) throw new UserError("Run the previous step first.");
+    const [latest] = await rt.database.select({ id: reportAnalyses.id }).from(reportAnalyses).where(eq(reportAnalyses.report_id, briefed.id)).orderBy(desc(reportAnalyses.id)).limit(1);
+    if (!latest) throw new UserError("Run the previous step first.");
+    const result = await briefReport(rt, briefed.id, latest.id);
+    const out = { report_id: briefed.id, tracking_code: briefed.tracking_code };
+    if (result.status === "not_started") return { ...out, error: result.message };
+    return { ...out, brief: briefOutcome(result.run) };
+  }
   if (step.kind === "answer") {
     const [asked] = await rt.database
       .select({ id: reports.id, tracking_code: reports.tracking_code })
@@ -276,7 +299,16 @@ export async function runStep(rt: Runtime, scenarioId: string, index: number) {
   return analyzed(rt, created);
 }
 
-export type StepOutcome = { report_id: string; tracking_code: string; label?: Label } | { done: string };
+export type BriefOutcome = { status: string; kept: number; dropped: number };
+export type StepOutcome = { report_id: string; tracking_code: string; label?: Label; brief?: BriefOutcome } | { done: string };
+
+const briefOutcome = (run: { status: string; brief: { kept: number; dropped: number } | null }): BriefOutcome => ({ status: run.status, kept: run.brief?.kept ?? 0, dropped: run.brief?.dropped ?? 0 });
+
+// The latest step before `index` that sent a report: a brief (like a verification) acts on that report.
+function ownerIndex(scenario: Scenario, index: number): number {
+  for (let i = index - 1; i >= 0; i--) if (scenario.steps[i]!.kind === "report" || scenario.steps[i]!.kind === "message") return i;
+  throw new UserError("Run the previous step first.");
+}
 
 /**
  * What every step has already done, read back from the shared world: the demo tags its reports
@@ -298,12 +330,21 @@ export async function demoState(rt: Runtime): Promise<Record<string, StepOutcome
         .orderBy(asc(reportAnalyses.id))
     : [];
   const resolved = new Set((await database.select({ id: incidents.id }).from(incidents).where(eq(incidents.status, "resolved"))).map((i) => i.id));
+  const written = tagged.length
+    ? await database.select({ report_id: briefs.report_id, status: briefs.status, brief: briefs.brief }).from(briefs).where(inArray(briefs.report_id, tagged.map((r) => r.id))).orderBy(asc(briefs.id))
+    : [];
   const out: Record<string, StepOutcome> = {};
   for (const scenario of SCENARIOS) {
     scenario.steps.forEach((step, i) => {
       const key = `${scenario.id}:${i}`;
       if (step.kind === "repair") {
         if (resolved.has(seedIncidentId(step.asset))) out[key] = { done: step.text };
+        return;
+      }
+      if (step.kind === "brief") {
+        const report = tagged.find((r) => r.tag === demoTag(scenario.id, ownerIndex(scenario, i)));
+        const last = report && written.filter((b) => b.report_id === report.id).at(-1);
+        if (report && last) out[key] = { report_id: report.id, tracking_code: report.tracking_code, brief: briefOutcome({ status: last.status, brief: last.brief as BriefOutcome | null }) };
         return;
       }
       // An answer and a verification act on the previous step's report, each adding an analysis of its own.

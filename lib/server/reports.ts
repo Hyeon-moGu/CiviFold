@@ -7,7 +7,7 @@ import { randomBytes } from "node:crypto";
 import { and, asc, count, desc, eq, inArray, isNull, lt, or } from "drizzle-orm";
 import { messageSample, voiceBlobKey } from "../dataset/messages";
 import { sample } from "../dataset/static";
-import { agentRuns, images, incidentEvents, incidents, infoRequests, reportAnalyses, reports, segmentations, staffDecisions } from "../db/schema";
+import { agentRuns, briefs, images, incidentEvents, incidents, infoRequests, reportAnalyses, reports, segmentations, staffDecisions } from "../db/schema";
 import { blobKey } from "../db/stores";
 import { CacheMissError, defaultMode, LiveBudgetError, metered } from "../meta/call";
 import { transcribe } from "../meta/voice";
@@ -369,6 +369,29 @@ export type VerifyEvent =
 const verifyClaimFree = () => or(isNull(reports.verify_claimed_at), lt(reports.verify_claimed_at, new Date(Date.now() - ANALYSIS_LEASE_MS).toISOString()));
 
 /**
+ * The stored analysis as the fast path left it, with the input it read. Its decision is the stored final (a
+ * previous check may have made it more cautious), so an agent starts from the suggestion staff see. The
+ * caller checks that the row has an input and a triage.
+ */
+export function storedAnalysis(latest: typeof reportAnalyses.$inferSelect): { input: ReportInput; analysis: Analysis } {
+  const final = latest.final as { label: Label; incident_id: string | null; rule_id: string; missing_info: RequestItem[] };
+  const analysis: Analysis = {
+    pipeline_config: "C_rules",
+    prompt_hash: latest.prompt_hash as Analysis["prompt_hash"],
+    triage: latest.triage as Analysis["triage"],
+    segmentation: null,
+    candidates: latest.candidates as Analysis["candidates"],
+    comparisons: latest.comparisons as Analysis["comparisons"],
+    after_fix: (latest.after_fix as Analysis["after_fix"]) ?? null,
+    errors: latest.errors as string[],
+    decision: { ...(latest.decision as Analysis["decision"]), label: final.label, incident_id: final.incident_id, rule_id: final.rule_id, missing_info: final.missing_info as Analysis["decision"]["missing_info"] },
+    cost_usd: latest.cost_usd,
+    latency_ms: latest.latency_ms,
+  };
+  return { input: latest.input as ReportInput, analysis };
+}
+
+/**
  * Staff ask the verification agent to check the suggestion they are looking at (analysisId, the report's
  * latest analysis). One verification runs per report at a time (a lease like an analysis's claim). The
  * result applies only if, when it is stored, the report is still waiting for staff, the lease is still
@@ -406,22 +429,7 @@ export async function verifyReport(rt: Runtime, reportId: string, analysisId: nu
       return { status: "facts_changed", changes };
     }
 
-    const input = latest.input as ReportInput;
-    // The stored analysis as the fast path left it; the suggestion verified is its final (a previous check
-    // may have made it more cautious), so the agent starts from that one.
-    const analysis: Analysis = {
-      pipeline_config: "C_rules",
-      prompt_hash: latest.prompt_hash as Analysis["prompt_hash"],
-      triage: latest.triage as Analysis["triage"],
-      segmentation: null,
-      candidates: latest.candidates as Analysis["candidates"],
-      comparisons: latest.comparisons as Analysis["comparisons"],
-      after_fix: (latest.after_fix as Analysis["after_fix"]) ?? null,
-      errors: latest.errors as string[],
-      decision: { ...(latest.decision as Analysis["decision"]), label: final.label, incident_id: final.incident_id, rule_id: final.rule_id, missing_info: final.missing_info as Analysis["decision"]["missing_info"] },
-      cost_usd: latest.cost_usd,
-      latency_ms: latest.latency_ms,
-    };
+    const { input, analysis } = storedAnalysis(latest);
     const mode = report.live ? "cached_then_live" : defaultMode();
     const checked = await verifySuggestion(input, analysis, toolContext(rt, reportId, mode), onStep);
     if (!checked.started) {
@@ -674,9 +682,10 @@ export async function reportDetail(rt: Runtime, reportId: string) {
   const { database } = rt;
   const [report] = await database.select().from(reports).where(eq(reports.id, reportId));
   if (!report) return null;
-  const [analyses, runs, questions, photos] = await Promise.all([
+  const [analyses, runs, briefRows, questions, photos] = await Promise.all([
     database.select().from(reportAnalyses).where(eq(reportAnalyses.report_id, reportId)).orderBy(desc(reportAnalyses.id)),
     database.select().from(agentRuns).where(eq(agentRuns.report_id, reportId)).orderBy(asc(agentRuns.id)),
+    database.select().from(briefs).where(eq(briefs.report_id, reportId)).orderBy(asc(briefs.id)),
     database.select().from(infoRequests).where(eq(infoRequests.report_id, reportId)).orderBy(asc(infoRequests.id)),
     database.select().from(images).where(and(eq(images.report_id, reportId), eq(images.kind, "original"))).orderBy(asc(images.created_at), asc(images.id)),
   ]);
@@ -701,7 +710,7 @@ export async function reportDetail(rt: Runtime, reportId: string) {
   }
   // Whether each compared photo is synthetic, and its size: real uploads are neither 1920×1280 nor synthetic.
   const imageFacts = Object.fromEntries(compared.map((i) => [i.id, i]));
-  return { report, analysis: latest, runs, questions, photos, incidents: candidateIncidents, incidentPhotos, imageFacts, segmentations: Object.fromEntries(latestSeg) };
+  return { report, analysis: latest, runs, briefs: briefRows, questions, photos, incidents: candidateIncidents, incidentPhotos, imageFacts, segmentations: Object.fromEntries(latestSeg) };
 }
 
 export async function reportByCode(rt: Runtime, code: string) {

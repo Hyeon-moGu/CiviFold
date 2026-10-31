@@ -152,6 +152,27 @@ export const agentRuns = pgTable(
   (t) => [index("agent_runs_report").on(t.report_id)],
 );
 
+// Case briefs staff asked the brief agent for. A brief only informs: it never changes the report or its suggestion.
+export const briefs = pgTable(
+  "briefs",
+  {
+    id: serial("id").primaryKey(),
+    report_id: text("report_id").notNull(),
+    analysis_id: integer("analysis_id").notNull(),
+    requested_by: text("requested_by").notNull().default("staff"),
+    status: text("status").notNull(), // written | failed | budget_exceeded
+    steps: jsonb("steps").notNull(),
+    facts: jsonb("facts").notNull(), // the numbered facts of the first message, with real ids
+    brief: jsonb("brief"), // null when the run ended without one
+    dropped: integer("dropped").notNull().default(0), // items deleted for citing no valid evidence
+    error: text("error"),
+    cost_usd: real("cost_usd").notNull(),
+    latency_ms: integer("latency_ms").notNull(),
+    created_at: createdAt(),
+  },
+  (t) => [index("briefs_report").on(t.report_id)],
+);
+
 export const infoRequests = pgTable("info_requests", {
   id: serial("id").primaryKey(),
   report_id: text("report_id").notNull(),

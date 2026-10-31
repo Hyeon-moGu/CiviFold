@@ -18,6 +18,7 @@ export const TOOL_TEXT: Record<string, string> = {
   compare_images: "Compared photos",
   ask_resident: "Asked the resident",
   propose_decision: "Proposed a decision",
+  write_brief: "Wrote the brief",
 };
 
 export const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
@@ -41,6 +42,10 @@ export function summarize(s: StepView): string {
     case "propose_decision": {
       const a = s.args as { label: Label; incident_id: string | null };
       return `${LABEL_TEXT[a.label]}${a.incident_id ? ` → ${a.incident_id}` : ""}`;
+    }
+    case "write_brief": {
+      const b = d as { kept: number; dropped: number };
+      return `${plural(b.kept, "item")} with evidence${b.dropped ? `, ${b.dropped} deleted without` : ""}`;
     }
     default:
       return "done";

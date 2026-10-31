@@ -6,6 +6,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Label, RequestItem } from "@/lib/tools/types";
+import { useBrief } from "./brief";
 import { Spinner, useVerify } from "./verify";
 
 type Action = "link" | "new_incident" | "recurrence" | "request_info" | "dismiss";
@@ -28,6 +29,8 @@ export function Actions({
   stale,
   verify,
   verifyLimit,
+  brief,
+  briefLimit,
 }: {
   reportId: string;
   analysisId: number; // the analysis this screen shows; the server refuses a choice made on an older one
@@ -38,14 +41,18 @@ export function Actions({
   stale: boolean; // an incident the suggestion relied on changed since: no one-click suggestion
   verify: { analysisId: number; running: boolean; again: boolean } | null; // the suggestion can be checked by the agent
   verifyLimit: number | null; // the suggestion could be checked, but this many runs is the most allowed
+  brief: { analysisId: number; again: boolean } | null; // staff can ask for a case brief of this analysis
+  briefLimit: number | null; // this many briefs is the most allowed
 }) {
   const router = useRouter();
   const checking = useVerify();
+  const briefing = useBrief();
   const [saving, setBusy] = useState<Action | null>(null);
   const [error, setError] = useState<string | null>(null);
   const suggested = final && !stale ? SUGGESTED[final.label] : undefined;
   const verifying = checking?.state.phase === "running";
-  const busy = saving ?? (checking?.busy ? "verify" : null);
+  const writing = briefing?.state.phase === "running";
+  const busy = saving ?? (checking?.busy ? "verify" : briefing?.busy ? "brief" : null);
 
   async function act(action: Action) {
     setBusy(action);
@@ -134,12 +141,28 @@ export function Actions({
             Verified {verifyLimit} times (the limit)
           </button>
         )}
+        {brief && briefing && (
+          <button
+            disabled={busy !== null}
+            onClick={() => briefing.start(brief.analysisId)}
+            title="Muse Spark reads the pipeline's facts, the incident's history and what is open nearby, and writes a brief in which every item cites its evidence. It never changes the suggestion."
+            className="inline-flex items-center gap-2 rounded-md border border-violet-500/50 bg-violet-500/10 px-3 py-1.5 text-sm text-violet-200 transition hover:border-violet-400 hover:bg-violet-500/20 disabled:opacity-35"
+          >
+            {writing && <Spinner className="h-3 w-3" />}
+            {writing ? "Writing…" : brief.again ? "Write a new brief" : "Write a brief"}
+          </button>
+        )}
+        {!brief && briefLimit !== null && (
+          <button disabled title="Each report can have at most this many briefs." className="rounded-md border border-ops-line px-3 py-1.5 text-sm text-ops-dim opacity-60">
+            {briefLimit} briefs (the limit)
+          </button>
+        )}
       </div>
       {error ? (
         <p className="text-sm text-rose-300">{error}</p>
       ) : (
         <p className="text-[11px] text-ops-dim">
-          {verifying ? "Decisions wait until the check finishes. " : suggested ? "The white button is the suggestion. " : stale ? "The suggestion is out of date. " : ""}
+          {verifying ? "Decisions wait until the check finishes. " : writing ? "Decisions wait until the brief is written. " : suggested ? "The white button is the suggestion. " : stale ? "The suggestion is out of date. " : ""}
           Nothing is merged or closed until you choose.
         </p>
       )}

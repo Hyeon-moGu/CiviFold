@@ -25,7 +25,7 @@ import type { Label, MissingItem, Tool, ToolContext } from "../tools/types";
 import { Aliases } from "./aliases";
 
 // The tools differ in their zod types; the loop only needs their common shape.
-type AnyTool = Tool<z.ZodType, z.ZodType>;
+export type AnyTool = Tool<z.ZodType, z.ZodType>;
 // Questions to the resident come from the rules (R5, R2w, R7r and the rest), so the agent is not offered ask_resident.
 const TOOLS = [searchIncidents, getIncidentTimeline, segmentObject, compareImages, proposeDecision] as unknown as AnyTool[];
 const TERMINAL = TOOLS.filter((t) => t.terminal);
@@ -205,7 +205,7 @@ export async function investigate(
 class DeadlineError extends Error {}
 
 /** Stops waiting at the deadline. The call itself may still finish; its cost still reaches the daily total. */
-async function beforeDeadline<T>(work: Promise<T>, deadline: number): Promise<T> {
+export async function beforeDeadline<T>(work: Promise<T>, deadline: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const late = new Promise<never>((_, reject) => {
     timer = setTimeout(() => reject(new DeadlineError("The run reached its time limit")), Math.max(0, deadline - Date.now()));
@@ -217,7 +217,7 @@ async function beforeDeadline<T>(work: Promise<T>, deadline: number): Promise<T>
   }
 }
 
-async function runStep(
+export async function runStep(
   calledName: string,
   rawArgs: string,
   n: number,
@@ -276,11 +276,11 @@ async function runStep(
   return { step: done, halt: null };
 }
 
-type Known = { timeline: Awaited<ReturnType<typeof getIncidentTimeline.run>> | null; around: Awaited<ReturnType<typeof searchIncidents.run>>["incidents"] };
+export type Known = { timeline: Awaited<ReturnType<typeof getIncidentTimeline.run>> | null; around: Awaited<ReturnType<typeof searchIncidents.run>>["incidents"] };
 
 // What the agent would otherwise spend its first steps looking up: the suggested incident's photos and the
 // incidents of this kind nearby. Database reads only, no model calls.
-async function preload(report: ReportInput, a: Analysis, ctx: ToolContext): Promise<Known> {
+export async function preload(report: ReportInput, a: Analysis, ctx: ToolContext): Promise<Known> {
   const target = a.decision.incident_id;
   const [timeline, found] = await Promise.all([
     target ? getIncidentTimeline.run({ incident_id: target }, ctx).catch(() => null) : null,

@@ -17,6 +17,7 @@ import { when } from "@/app/_ui/format";
 import { LABEL_TEXT } from "@/app/_ui/labels";
 import { MaskedPhoto } from "@/app/_ui/photo";
 import { Actions, RetryButton } from "./actions";
+import { BriefCard, BriefProgress, BriefProvider, type StoredBrief } from "./brief";
 import { summarize, TOOL_TEXT, verdictOf, type StepView, type Verdict } from "./steps";
 import { ReanalyzeButton, VerifyProgress, VerifyProvider } from "./verify";
 
@@ -76,7 +77,7 @@ function headline(label: Label, incident: string | null): string {
 export default async function ReportDetail({ params }: { params: Promise<{ id: string }> }) {
   const detail = await reportDetail(await runtime(), (await params).id);
   if (!detail) notFound();
-  const { report, analysis, runs, questions, photos, incidents, incidentPhotos, imageFacts, segmentations } = detail;
+  const { report, analysis, runs, questions, photos, incidents, incidentPhotos, imageFacts, segmentations, briefs } = detail;
   const triage = (analysis?.triage as TriageResult | null | undefined) ?? undefined;
   const intake = (analysis?.intake as IntakeResult | null | undefined) ?? null;
   const unread = wordsNotRead(analysis?.errors);
@@ -116,6 +117,10 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
       ? AGENT_LIMITS.max_runs_per_report
       : null;
   const verifying = verifyRunning(report);
+  // Staff can ask for a case brief of any analysis that stored its inputs; it reads evidence and decides nothing.
+  const briefable = analysis !== null && analysis !== undefined && analysis.input !== null && !decided && briefs.length < AGENT_LIMITS.max_runs_per_report;
+  const briefLimit = analysis && analysis.input !== null && !decided && briefs.length >= AGENT_LIMITS.max_runs_per_report ? AGENT_LIMITS.max_runs_per_report : null;
+  const latestBrief = (briefs as StoredBrief[]).at(-1) ?? null;
   // The latest run's verdict, while its result is the suggestion on screen (no analysis since).
   const lastRun = (runs as Run[]).at(-1);
   const currentRunId = lastRun && analysis?.pipeline_config === "C_rules+verify" ? lastRun.id : null;
@@ -225,6 +230,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
         </p>
       ) : (
         <VerifyProvider reportId={report.id}>
+        <BriefProvider reportId={report.id}>
           {/* Verdict and decision: one band that stays under the header while staff look through the evidence. */}
           <div className="z-[999] -mx-4 mt-4 bg-ops-bg/95 px-4 py-2 backdrop-blur md:sticky md:top-[45px]">
             <section
@@ -273,12 +279,16 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 stale={changes.length > 0}
                 verify={verifiable ? { analysisId: analysis!.id, running: verifying, again: runs.length > 0 } : null}
                 verifyLimit={verifyLimit}
+                brief={briefable ? { analysisId: analysis!.id, again: briefs.length > 0 } : null}
+                briefLimit={briefLimit}
               />
             </section>
             <VerifyProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} runningSince={verifying ? String(report.verify_claimed_at) : null} />
+            <BriefProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} />
           </div>
           {changes.length > 0 && <OutOfDate changes={changes} reportId={report.id} analysisId={analysis.id} />}
           {verdict && !decided && changes.length === 0 && <VerdictCard verdict={verdict} />}
+          {latestBrief && <BriefCard stored={latestBrief} stale={latestBrief.analysis_id !== analysis.id} />}
 
           <div className="mt-2 grid gap-4 xl:grid-cols-[1fr_380px]">
             <div className="min-w-0 space-y-4">
@@ -569,6 +579,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               {runs.length > 0 && <Investigation runs={runs as Run[]} currentRunId={currentRunId} />}
             </aside>
           </div>
+        </BriefProvider>
         </VerifyProvider>
       )}
     </main>

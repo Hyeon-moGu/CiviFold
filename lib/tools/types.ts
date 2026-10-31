@@ -104,6 +104,7 @@ export type ToolContext = {
   investigation?: Investigation; // set while the agent runs; the terminal tools read it
   signal?: AbortSignal; // set while the agent runs: model calls inside tools stop at its deadline
   compareModel?: string; // set while the agent runs: its comparisons may use another model than the fast path's
+  briefing?: { steps: GuardStep[]; fact_refs: readonly string[] }; // set while the brief agent runs; write_brief validates its refs against it
 
 };
 

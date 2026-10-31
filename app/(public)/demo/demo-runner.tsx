@@ -9,7 +9,7 @@ import type { Label } from "@/lib/tools/types";
 import { LabelBadge, SyntheticBadge, UrgentBadge } from "@/app/_ui/labels";
 
 type StepView = {
-  kind: "repair" | "report" | "message" | "answer" | "verify";
+  kind: "repair" | "report" | "message" | "answer" | "verify" | "brief";
   text: string;
   why: string;
   expect: Label | null;
@@ -18,7 +18,7 @@ type StepView = {
   message?: { kind: "voice" | "text"; text: string; audio: string | null };
 };
 export type ScenarioView = { id: string; title: string; story: string; world: Array<{ title: string; photo: string }>; steps: StepView[] };
-type StepResult = { report_id?: string; tracking_code?: string; label?: Label; error?: string; done?: string };
+type StepResult = { report_id?: string; tracking_code?: string; label?: Label; brief?: { status: string; kept: number; dropped: number }; error?: string; done?: string };
 
 const ACTION: Record<StepView["kind"], string> = {
   repair: "Record it",
@@ -26,6 +26,7 @@ const ACTION: Record<StepView["kind"], string> = {
   message: "Send this message",
   answer: "Send the answer",
   verify: "Run the check",
+  brief: "Write the brief",
 };
 
 function Thumb({ src, alt }: { src: string; alt: string }) {
@@ -164,7 +165,7 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioView[] }) {
                       ) : st.message ? (
                         <Placeholder text={st.message.kind === "voice" ? "Voice, no photo" : "Text, no photo"} />
                       ) : (
-                        <Placeholder text={st.kind === "repair" ? "Staff action" : "Verification agent"} />
+                        <Placeholder text={st.kind === "repair" ? "Staff action" : st.kind === "brief" ? "Case brief agent" : "Verification agent"} />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -196,6 +197,13 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioView[] }) {
                       </span>
                     )}
                     {r?.done && <span className="text-sm text-emerald-700">Done.</span>}
+                    {r?.brief && (
+                      <span className={`text-xs ${r.brief.status === "written" ? "text-emerald-700" : "text-amber-700"}`}>
+                        {r.brief.status === "written"
+                          ? `Brief written: ${r.brief.kept} items, every one citing evidence${r.brief.dropped ? ` (${r.brief.dropped} deleted without)` : ""}`
+                          : "The brief was not finished; its reads are recorded on the staff view."}
+                      </span>
+                    )}
                     {r?.report_id && (
                       <span className="flex gap-3 text-sm sm:ml-auto">
                         <Link href={`/admin/reports/${r.report_id}`} className="font-medium text-zinc-900 underline underline-offset-2">
