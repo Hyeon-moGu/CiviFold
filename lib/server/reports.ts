@@ -709,9 +709,11 @@ export async function reportByCode(rt: Runtime, code: string) {
   return report ? reportDetail(rt, report.id) : null;
 }
 
+const QUEUE_LIMIT = 200; // the console refreshes every few seconds; the demo world resets long before this fills
+
 export async function queue(rt: Runtime) {
   const { database } = rt;
-  const rows = await database.select().from(reports).orderBy(desc(reports.submitted_at));
+  const rows = await database.select().from(reports).orderBy(desc(reports.submitted_at)).limit(QUEUE_LIMIT);
   const analyses = rows.length
     ? await database.select().from(reportAnalyses).where(inArray(reportAnalyses.report_id, rows.map((r) => r.id))).orderBy(desc(reportAnalyses.id))
     : [];

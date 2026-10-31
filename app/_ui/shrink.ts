@@ -8,6 +8,9 @@ const MAX_SIDE = 1920;
 
 export const EXIF_SLICE = 512 * 1024; // the EXIF sits at the start of a JPEG; this much is enough to read it
 
+// Browsers other than Safari cannot decode HEIC, so it is refused up front rather than failing in the upload.
+export const isHeic = (f: File) => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
+
 export async function shrinkForUpload(file: File): Promise<File> {
   if (file.size <= LIMIT) return file;
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });

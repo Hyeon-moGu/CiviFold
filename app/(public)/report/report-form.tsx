@@ -7,10 +7,11 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import type { MessageSample } from "@/lib/dataset/messages";
+import { MAX_DESCRIPTION_CHARS } from "@/lib/limits";
 import type { Sample } from "@/lib/dataset/static";
 import type { Category } from "@/lib/tools/types";
 import { SyntheticBadge } from "@/app/_ui/labels";
-import { EXIF_SLICE, shrinkForUpload } from "@/app/_ui/shrink";
+import { EXIF_SLICE, isHeic, shrinkForUpload } from "@/app/_ui/shrink";
 import { Recorder } from "./recorder";
 
 // Leaflet needs the browser's window.
@@ -40,8 +41,6 @@ function localInput(iso: string): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-
-const isHeic = (f: File) => /heic|heif/i.test(f.type) || /\.(heic|heif)$/i.test(f.name);
 
 export function ReportForm({ samples, messages }: { samples: Sample[]; messages: MessageSample[] }) {
   const router = useRouter();
@@ -164,29 +163,33 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
       }
     }
     setError(null);
-    const form = new FormData();
-    if (source === "sample" && picked) form.set("sample_id", picked.id);
-    else if (source === "upload" && file) form.set("photo", await shrinkForUpload(file));
-    if (voiceSample) form.set("voice_sample_id", voiceSample.id);
-    if (recording) form.set("voice", new File([recording], "voice.wav", { type: "audio/wav" }));
-    if (needsCode) form.set("access_code", accessCode);
-    form.set("tz_offset", String(new Date().getTimezoneOffset()));
-    if (exif?.time && when === "custom" && custom === exif.time) form.set("observed_at_source", "exif");
-    if (danger) form.set("danger", "yes");
-    form.set("lat", lat);
-    form.set("lng", lng);
-    const observed = when === "now" ? new Date() : when === "earlier" ? new Date(Date.now() - 3 * 3_600_000) : custom ? new Date(custom) : null;
-    if (observed) form.set("observed_at", observed.toISOString());
-    if (category) form.set("category_hint", category);
-    if (description) form.set("description", description);
     setBusy(true);
-    const res = await fetch("/api/reports", { method: "POST", body: form });
-    const body = (await res.json()) as { tracking_code?: string; error?: string };
-    if (!res.ok || !body.tracking_code) {
+    try {
+      const form = new FormData();
+      if (source === "sample" && picked) form.set("sample_id", picked.id);
+      else if (source === "upload" && file) form.set("photo", await shrinkForUpload(file));
+      if (voiceSample) form.set("voice_sample_id", voiceSample.id);
+      if (recording) form.set("voice", new File([recording], "voice.wav", { type: "audio/wav" }));
+      if (needsCode) form.set("access_code", accessCode);
+      form.set("tz_offset", String(new Date().getTimezoneOffset()));
+      if (exif?.time && when === "custom" && custom === exif.time) form.set("observed_at_source", "exif");
+      if (danger) form.set("danger", "yes");
+      form.set("lat", lat);
+      form.set("lng", lng);
+      const observed = when === "now" ? new Date() : when === "earlier" ? new Date(Date.now() - 3 * 3_600_000) : custom ? new Date(custom) : null;
+      if (observed) form.set("observed_at", observed.toISOString());
+      if (category) form.set("category_hint", category);
+      if (description) form.set("description", description);
+      const res = await fetch("/api/reports", { method: "POST", body: form });
+      const body = (await res.json()) as { tracking_code?: string; error?: string };
+      if (!res.ok || !body.tracking_code) return setError(body.error ?? "The report could not be sent.");
+      router.push(`/track/${body.tracking_code}`);
+    } catch {
+      // A dropped connection or a photo the browser could not re-encode: the button must come back.
+      setError("The report could not be sent. Check your connection and try again.");
+    } finally {
       setBusy(false);
-      return setError(body.error ?? "The report could not be sent.");
     }
-    router.push(`/track/${body.tracking_code}`);
   }
 
   const needsCode = source === "upload" || recording !== null;
@@ -271,6 +274,15 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
                 <span className="text-xs text-zinc-500">{preview ? "Tap to choose another" : "Its location and time are read from the photo when they are in it."}</span>
                 <input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={(e) => void choosePhoto(e.target.files?.[0] ?? null)} className="sr-only" />
               </label>
+            )}
+            {source === "upload" && (
+              <div className="mt-3 rounded-xl bg-zinc-50 px-3.5 py-3 text-xs text-zinc-600">
+                <p className="font-medium text-zinc-900">What makes a photo easy to match</p>
+                <p className="mt-1">
+                  Keep what stays put in the frame: a shop sign, a door, a pole, the curb. That is what tells this spot from the one next to it. A close-up of the
+                  damage alone usually gets a question back asking for a second, wider photo.
+                </p>
+              </div>
             )}
 
             {source === "none" && (
@@ -381,7 +393,7 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
 
             <label className="mt-4 block text-sm font-medium">
               Message
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className={`${input} mt-1.5 font-normal`} placeholder="What is wrong, and where exactly?" />
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={MAX_DESCRIPTION_CHARS} className={`${input} mt-1.5 font-normal`} placeholder="What is wrong, and where exactly?" />
             </label>
             <div className="mt-2">
               {voiceSample ? (

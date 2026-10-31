@@ -50,6 +50,13 @@
       "when": 1793267024040,
       "tag": "0006_demo_resets",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793442540704,
+      "tag": "0007_crop_bytes",
+      "breakpoints": true
     }
   ]
 }

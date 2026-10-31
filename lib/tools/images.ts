@@ -72,6 +72,40 @@ export function memoryImages(seed: {
   };
 }
 
+/**
+ * The same store, reading each image's row and bytes at most once. One analysis reads a photo for triage,
+ * segmentation and every comparison, and on a deployment each read is a database or blob round trip.
+ * Scope it to one analysis: rows never change once written, and a put fills the row in.
+ */
+export function memoizedImages(store: ImageStore): ImageStore {
+  const rows = new Map<string, ImageRow>();
+  const bytes = new Map<string, Promise<Buffer>>();
+  return {
+    ...store,
+    get: async (id) => {
+      const known = rows.get(id);
+      if (known) return known;
+      const row = await store.get(id);
+      if (row) rows.set(id, row);
+      return row;
+    },
+    bytes: (id) => {
+      let pending = bytes.get(id);
+      if (!pending) {
+        pending = store.bytes(id);
+        bytes.set(id, pending);
+        pending.catch(() => bytes.delete(id));
+      }
+      return pending;
+    },
+    put: async (row, data) => {
+      await store.put(row, data);
+      rows.set(row.id, row);
+      bytes.set(row.id, Promise.resolve(data));
+    },
+  };
+}
+
 export function dataUrl(bytes: Buffer, mime: string): string {
   return `data:${mime};base64,${bytes.toString("base64")}`;
 }

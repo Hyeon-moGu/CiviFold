@@ -25,6 +25,7 @@
     "eval": "tsx --env-file=.env.local scripts/eval.ts",
     "summarize-eval": "tsx scripts/summarize-eval.ts",
     "seed": "tsx --env-file-if-exists=.env.local scripts/seed.ts",
+    "migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts",
     "push-cache": "tsx --env-file-if-exists=.env.local scripts/push-cache.ts"
   },
   "dependencies": {

@@ -69,6 +69,7 @@ async function main() {
   }
   // New photos get their own ids, so a world photo can also be submitted as a new report.
   const newPhotos = await Promise.all(positionals.map((file) => loadImage(file, `${imageId(file)}_new`, `r_new_${path.basename(file)}`)));
+  // Tools only compare a report's own photo, so each run names the new photo's report.
   const ctx: ToolContext = {
     reportId: "cli",
     runId: null,
@@ -86,6 +87,7 @@ async function main() {
   await mkdir(outDir, { recursive: true });
   for (const [i, file] of positionals.entries()) {
     const { row } = newPhotos[i]!;
+    ctx.reportId = row.report_id;
     const a = await analyze(
       {
         report_id: row.report_id,

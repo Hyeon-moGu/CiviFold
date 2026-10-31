@@ -159,6 +159,26 @@ In D_hybrid the agent runs whenever the fast path suggests a closing label. It h
 
 In run 2, the two unfinished runs ended because the model answered without calling a tool twice in a row. The safety rule sent both reports to staff. On holdout3 the agent did not reduce critical errors, since the fast path already had none, and it increased deferrals.
 
+## Real-world check
+
+Three real photos of one pile of dumped bags at a street tree, taken by the author on a street in Korea within two minutes on 2026-10-27 at 23:07 KST: from across the street (`dump1_far`), from the sidewalk (`dump1_side`) and close up (`dump1_close`). They are in [dataset/real/](../dataset/real/), normalized the way the app normalizes an upload (turned upright, longest side 1920 px, JPEG). The phone's location tag was off, so the worlds place every photo at the resident's pin, 0 m apart. The photos are in no evaluation set and not in the demo.
+
+The expectations were written before the run and nothing was changed after it. With no incident nearby, each photo should be a new problem. With one of the photos already on file, each of the other two should be linked as a duplicate or get a question; a second incident for the same pile would be a miss. With one site and an open incident, no critical outcome is possible, so this checks behavior, not the headline number.
+
+| World | New report | Suggestion | Comparisons |
+|---|---|---|---|
+| No incident nearby | far, side, close | New problem (R1), each | none |
+| Far shot on file | side | Question: wider shot, another angle (R5) | uncertain, full frame and cut-outs |
+| Far shot on file | close | Question: wider shot (R5) | uncertain |
+| Close shot on file | far | Question: wider shot, another angle (R5) | uncertain |
+| Close shot on file | side | Question: wider shot (R5) | uncertain |
+
+Triage read all three as dumped trash with the problem visible. The comparison model's evidence lines name what one view shows and the other does not: a storefront sign and striped shutters across the street in the far shot, a lit pizza sign in the side shot, only the tree, pavers and a road marking in the close-up. Nothing fixed is visible in two of these views at once, so "uncertain" is the honest reading, and the rules asked the resident rather than link. The run uses the same code as the app's fast path:
+
+```bash
+npm run analyze -- dataset/real/dump1_side.jpg --world scripts/worlds/real-dump1-far-first.json --observed 2026-10-27T14:08:17.000Z
+```
+
 ## Running the evaluation
 
 These commands evaluate the current code. They do not reproduce historical runs made with earlier code or prompts, and the model cache those runs used is not in the repository, so they need a Meta Model API key. `--run` defaults to 1, which is the number of the published results. Pass a new number so they are not overwritten.

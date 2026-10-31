@@ -1,7 +1,7 @@
 // Author: HyeonMo Gu
 // Created: 2026-10-27
 
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -79,6 +79,13 @@ describe("dbImages", () => {
     await store.put({ id: "img_3", report_id: "r3", kind: "original", source_image_id: null, width: 2, height: 1, mime: "image/png", is_synthetic: false }, Buffer.from("png"));
     expect((await store.bytes("img_3")).toString()).toBe("png");
     expect(await store.get("img_3")).toMatchObject({ report_id: "r3", width: 2, mime: "image/png" });
+    expect(await store.get("img_3")).not.toHaveProperty("bytes");
+
+    // A crop's bytes stay in its row: only the original reaches the blob store.
+    await store.put({ id: "img_3_crop", report_id: "r3", kind: "object_crop", source_image_id: "img_3", width: 1, height: 1, mime: "image/webp", is_synthetic: false }, Buffer.from([0, 255, 7]));
+    expect([...(await store.bytes("img_3_crop"))]).toEqual([0, 255, 7]);
+    expect(await store.get("img_3_crop")).toMatchObject({ kind: "object_crop", source_image_id: "img_3" });
+    expect(await readdir(dir)).toEqual(["img_3.png"]);
     expect(await store.incidentOf("img_2")).toBe("I1");
     expect(await store.incidentOf("img_3")).toBeNull();
 

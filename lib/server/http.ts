@@ -2,6 +2,7 @@
 // Created: 2026-10-27
 
 import sharp from "sharp";
+import { MAX_DESCRIPTION_CHARS } from "../limits";
 import { checkWav } from "../meta/voice";
 import { photoMeta } from "./photo-meta";
 import { Category } from "../tools/types";
@@ -21,6 +22,7 @@ export async function handle(fn: () => Promise<unknown>): Promise<Response> {
 const MAX_UPLOAD = 25 * 1024 * 1024; // a 50 MP phone photo; the browser shrinks large ones before a deployment's 4.5 MB body limit
 const ACCEPTED = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_SIDE = 1920; // what the models are given anyway; also what the dataset photos are
+const MAX_PIXELS = 64_000_000; // decoded size: a 48 MP phone photo fits, a small file that inflates to gigabytes does not
 
 /**
  * The photo in a form: a sample id, or an uploaded file. An upload's EXIF (where and when it was taken) is read
@@ -36,7 +38,7 @@ export async function photoFrom(form: FormData): Promise<Photo | null> {
   const original = Buffer.from(await file.arrayBuffer());
   const offset = Number(text(form, "tz_offset"));
   const meta = await photoMeta(original, Number.isFinite(offset) ? offset : null);
-  const normalized = await sharp(original)
+  const normalized = await sharp(original, { limitInputPixels: MAX_PIXELS })
     .rotate()
     .resize({ width: MAX_SIDE, height: MAX_SIDE, fit: "inside", withoutEnlargement: true })
     .jpeg({ quality: 88 })
@@ -66,6 +68,13 @@ export async function voiceFrom(form: FormData): Promise<Voice | null> {
 export function text(form: FormData, key: string): string | null {
   const v = form.get(key);
   return typeof v === "string" && v.trim() ? v.trim() : null;
+}
+
+/** The resident's typed message, within the length the form allows. */
+export function message(form: FormData, key: string): string | null {
+  const value = text(form, key);
+  if (value && value.length > MAX_DESCRIPTION_CHARS) throw new UserError(`Messages up to ${MAX_DESCRIPTION_CHARS.toLocaleString("en-US")} characters, please.`);
+  return value;
 }
 
 /** Latitude and longitude from a form; a missing field is an error, not 0 (Number(null) is 0). */

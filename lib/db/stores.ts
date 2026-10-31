@@ -68,36 +68,47 @@ export function dbData(database: Db, asOf: string): ToolData {
 
 export const blobKey = (imageId: string, mime: string) => `${imageId}.${mime.split("/")[1] ?? "bin"}`;
 
+// The row without its bytes: a crop row carries hundreds of KB, and most reads only need the metadata.
+const IMAGE_ROW = {
+  id: images.id,
+  report_id: images.report_id,
+  kind: images.kind,
+  source_image_id: images.source_image_id,
+  width: images.width,
+  height: images.height,
+  mime: images.mime,
+  is_synthetic: images.is_synthetic,
+};
+
+/** An image's bytes: from the row when they are stored there (crops), otherwise from the blob store (originals). */
+export function storedBytes(row: { storage_path: string | null; bytes: Buffer | null }, store: BlobStore): Promise<Buffer> {
+  if (row.bytes) return Promise.resolve(row.bytes);
+  if (row.storage_path) return store.get(row.storage_path);
+  return Promise.reject(new Error("Image has neither bytes nor a storage path"));
+}
+
 export function dbImages(database: Db, store: BlobStore): ImageStore {
-  const get = async (id: string) => (await database.select().from(images).where(eq(images.id, id)))[0];
   return {
     get: async (id) => {
-      const r = await get(id);
+      const [r] = await database.select(IMAGE_ROW).from(images).where(eq(images.id, id));
       if (!r) return null;
-      const row: ImageRow = {
-        id: r.id,
-        report_id: r.report_id,
-        kind: r.kind as ImageRow["kind"],
-        source_image_id: r.source_image_id,
-        width: r.width,
-        height: r.height,
-        mime: r.mime,
-        is_synthetic: r.is_synthetic,
-      };
+      const row: ImageRow = { ...r, kind: r.kind as ImageRow["kind"] };
       return row;
     },
     bytes: async (id) => {
-      const r = await get(id);
+      const [r] = await database.select({ storage_path: images.storage_path, bytes: images.bytes }).from(images).where(eq(images.id, id));
       if (!r) throw new Error(`Unknown image ${id}`);
-      return store.get(r.storage_path);
+      return storedBytes(r, store);
     },
+    // Originals go to the blob store; crops stay in their row (see the schema).
     put: async (row, bytes) => {
-      const key = blobKey(row.id, row.mime);
-      await store.put(key, bytes, row.mime);
-      await database
-        .insert(images)
-        .values({ ...row, storage_path: key, dataset_image_id: null })
-        .onConflictDoNothing();
+      if (row.kind === "original") {
+        const key = blobKey(row.id, row.mime);
+        await store.put(key, bytes, row.mime);
+        await database.insert(images).values({ ...row, storage_path: key, bytes: null, dataset_image_id: null }).onConflictDoNothing();
+      } else {
+        await database.insert(images).values({ ...row, storage_path: null, bytes, dataset_image_id: null }).onConflictDoNothing();
+      }
     },
     latestSegmentation: async (imageId) => {
       const [s] = await database.select().from(segmentations).where(eq(segmentations.image_id, imageId)).orderBy(desc(segmentations.id)).limit(1);

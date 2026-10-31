@@ -2,10 +2,12 @@
 // Created: 2026-10-27
 
 // Ids are text: the pipeline, the dataset and the evaluation all name things with readable string ids.
-import { boolean, doublePrecision, index, integer, jsonb, pgTable, real, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, customType, doublePrecision, index, integer, jsonb, pgTable, real, serial, text, timestamp } from "drizzle-orm/pg-core";
 
 const at = (name: string) => timestamp(name, { withTimezone: true, mode: "string" });
 const createdAt = () => at("created_at").notNull().defaultNow();
+// Drizzle has no bytea column; postgres-js returns a Buffer and PGlite a Uint8Array, both accepted as parameters.
+const bytea = (name: string) => customType<{ data: Buffer; driverData: Buffer | Uint8Array }>({ dataType: () => "bytea", fromDriver: (v) => Buffer.from(v) })(name);
 
 export const incidents = pgTable("incidents", {
   id: text("id").primaryKey(),
@@ -73,7 +75,10 @@ export const images = pgTable(
     report_id: text("report_id").notNull(), // crops point at the report of their source photo
     kind: text("kind").notNull(), // original | object_crop | context_crop
     source_image_id: text("source_image_id"),
-    storage_path: text("storage_path").notNull(),
+    // Originals live in the blob store under storage_path; crops keep their bytes here, so segmenting a photo
+    // costs no blob uploads (Vercel Blob counts each one against a monthly quota).
+    storage_path: text("storage_path"),
+    bytes: bytea("bytes"),
     mime: text("mime").notNull(),
     width: integer("width").notNull(),
     height: integer("height").notNull(),

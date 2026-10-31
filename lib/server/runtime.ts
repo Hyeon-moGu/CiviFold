@@ -3,6 +3,7 @@
 
 // Wiring for the web app: one database, one blob store, the model cache in the database when the
 // app is deployed, and a daily cap on live model spend.
+import { timingSafeEqual } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { blobs, type BlobStore } from "../db/blobs";
 import { db, type Db } from "../db/client";
@@ -10,6 +11,7 @@ import { spend } from "../db/schema";
 import { dbCache, dbData, dbImages } from "../db/stores";
 import { setCacheStore } from "../meta/cache";
 import { setLiveGate, type LiveGate, type Mode } from "../meta/call";
+import { memoizedImages } from "../tools/images";
 import type { ToolContext } from "../tools/types";
 
 export type Runtime = { database: Db; store: BlobStore };
@@ -56,12 +58,20 @@ export function toolContext({ database, store }: Runtime, reportId: string, mode
     mode,
     budget: { usdLeft: Infinity, deadline: Infinity },
     data: dbData(database, new Date().toISOString()),
-    images: dbImages(database, store),
+    images: memoizedImages(dbImages(database, store)),
   };
 }
 
 /** A visitor's access code unlocks live model calls for their report. */
 export function accessCodeValid(code: string | null | undefined): boolean {
   const expected = process.env.DEMO_ACCESS_CODE;
-  return Boolean(expected && code && code.trim() === expected);
+  const given = code?.trim();
+  return Boolean(expected && given && sameSecret(given, expected));
+}
+
+// Constant-time once the lengths match, so response timing does not tell a guesser how many leading characters were right.
+function sameSecret(a: string, b: string): boolean {
+  const x = Buffer.from(a);
+  const y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
 }

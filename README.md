@@ -126,11 +126,20 @@ All images and resident answers are **simulated**, and the numbers count suggest
 
 </details>
 
+### Real-world check
+
+Three photos of one pile of dumped bags at a street tree, taken by the author on a street in Korea within two minutes on the night of October 27, 2026: from across the street, from the sidewalk and close up. The phone's location tag was off, so all three share the resident's map pin. The frozen fast path ran once on them, with the expected outcomes written down first ([details](eval/README.md#real-world-check)).
+
+- With no incident nearby, each photo was read as dumped trash and suggested as a new problem.
+- With one of the photos already on file, each of the other two arrived as a new report and was compared full-frame and by SAM cut-out. All four pairings came back uncertain: the three views share no sign, wall or road marking, so the fast path asked the resident for a wider shot instead of linking. No wrong link, and no confirmed duplicate either.
+
+Three photos are a sanity check, not a measurement. They show that the cautious behavior holds on real night photos, and what it costs: when views do not overlap, the link waits for a resident answer or a staff decision.
+
 **[Evaluation methods, harness fixes, ablations and every recorded result →](eval/README.md)**
 
 ## Limitations
 
-- **Synthetic evaluation.** No study with real residents, no interviews with city staff, and no measured time savings. The harness supplies correct incident history rather than carrying earlier mistakes into later cases.
+- **Synthetic evaluation.** Three real photos of one site were run once as a sanity check, not as a measurement. No study with real residents, no interviews with city staff, and no measured time savings. The harness supplies correct incident history rather than carrying earlier mistakes into later cases.
 - **Four evaluated categories.** Hydrants, street lights, dumped trash and road damage. The app also accepts signs, benches and graffiti, which have not been evaluated.
 - **Hard identity cases.** Look-alikes have different surroundings. Identical fixtures sharing the same background have not been evaluated separately.
 - **Evidence and uncertainty.** The evidence check counts lines, not semantically independent features. Problem visibility is yes/no; “not observable” is not a separate state.

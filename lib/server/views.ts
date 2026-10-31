@@ -56,6 +56,7 @@ export type ResidentView = {
   question: { question: string; requested_items: RequestItem[] } | null;
   // Demo only: the other dataset photos of the same place, so a visitor can answer like a resident would.
   suggested_samples: Sample[];
+  live: boolean; // sent with the access code: an answer with the resident's own photo needs no code again
 };
 
 export function residentView(d: Detail): ResidentView {
@@ -81,6 +82,7 @@ export function residentView(d: Detail): ResidentView {
     photos: d.photos.map((p) => p.id),
     question: pending ? { question: pending.question, requested_items: pending.requested_items as RequestItem[] } : null,
     suggested_samples: pending && asset ? samples().filter((s) => s.asset_id === asset) : [],
+    live: d.report.live,
   };
 }
 
