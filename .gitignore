@@ -28,3 +28,4 @@ next-env.d.ts
 
 # Raw phone originals (EXIF, 10 MB each); the normalized copies live in dataset/real
 실데이터/
+.vercel
