@@ -23,6 +23,7 @@ const TABLES = [
   "segmentations",
   "report_analyses",
   "agent_runs",
+  "briefs",
   "info_requests",
   "staff_decisions",
 ] as const;

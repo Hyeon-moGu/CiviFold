@@ -85,6 +85,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   const final = analysis?.final as Final | undefined;
   const candidates = (analysis?.candidates as Candidate[] | undefined) ?? [];
   const comparisons = (analysis?.comparisons as Comparison[] | undefined) ?? [];
+  const names = photoNames(photos.map((p) => p.id), comparisons);
 
   // The incident the suggestion points at, else the nearest candidate.
   const focusId = final?.incident_id ?? candidates[0]?.incident_id ?? null;
@@ -288,7 +289,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
           </div>
           {changes.length > 0 && <OutOfDate changes={changes} reportId={report.id} analysisId={analysis.id} />}
           {verdict && !decided && changes.length === 0 && <VerdictCard verdict={verdict} />}
-          {latestBrief && <BriefCard stored={latestBrief} stale={latestBrief.analysis_id !== analysis.id} />}
+          {latestBrief && <BriefCard stored={latestBrief} stale={latestBrief.analysis_id !== analysis.id} names={names} />}
 
           <div className="mt-2 grid gap-4 xl:grid-cols-[1fr_380px]">
             <div className="min-w-0 space-y-4">
@@ -519,6 +520,10 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 {best?.result && (
                   <>
                     <h3 className="mt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-ops-dim">What the photos show</h3>
+                    <p className="mt-1 text-[11px] text-ops-dim">
+                      From the {best.stage === 2 && !best.fallback ? "cut-out" : "whole photo"} comparison of {names[best.new_image_id] ?? "the report's photo"} with{" "}
+                      {names[best.candidate_image_id] ?? `${best.incident_id}'s photo`}, model confidence {pct(best.result.asset_match.confidence)}.
+                    </p>
                     <ul className="mt-2 space-y-1.5 text-[13px]">
                       {[...best.result.asset_match.evidence, ...best.result.damage.evidence].map((e, i) => (
                         <li key={i} className="flex gap-2">
@@ -809,6 +814,26 @@ function Investigation({ runs, currentRunId }: { runs: Run[]; currentRunId: numb
       })}
     </Panel>
   );
+}
+
+// Staff words for the image ids that stored texts carry: internal ids mean nothing to staff, and a dataset id
+// names the photo's state, which is the answer the comparison is there to find.
+function photoNames(reportPhotos: string[], comparisons: Comparison[]): Record<string, string> {
+  const names: Record<string, string> = {};
+  reportPhotos.forEach((id, i) => {
+    names[id] = i === 0 ? "the report's photo" : reportPhotos.length > 2 ? `the resident's answer photo ${i}` : "the resident's answer photo";
+  });
+  const byIncident = new Map<string, string[]>();
+  for (const c of comparisons) {
+    if (c.candidate_image_id in names) continue;
+    const ids = byIncident.get(c.incident_id) ?? [];
+    if (!ids.includes(c.candidate_image_id)) ids.push(c.candidate_image_id);
+    byIncident.set(c.incident_id, ids);
+  }
+  for (const [incident, ids] of byIncident) {
+    ids.forEach((id, i) => (names[id] = ids.length > 1 ? `${incident}'s photo ${i + 1}` : `${incident}'s photo`));
+  }
+  return names;
 }
 
 // The comparison model calls the two photos NEW and CANDIDATE; staff know them as this report and the incident.

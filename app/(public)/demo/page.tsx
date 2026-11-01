@@ -22,7 +22,7 @@ function view(): ScenarioView[] {
       return { title: `${a.object_short} by the ${a.sign_texts[0]}`, photo: `/api/images/${imageId(a.id, "damaged_v1", "front")}?w=480` };
     }),
     steps: steps.map((s) => {
-      const base = { kind: s.kind, text: s.text, why: s.why, expect: s.kind === "repair" || s.kind === "brief" ? null : s.expect, urgent: s.kind === "message" && Boolean(s.urgent) };
+      const base = { kind: s.kind, text: s.text, why: s.why, expect: s.kind === "repair" || s.kind === "brief" || s.kind === "decide" ? null : s.expect, urgent: s.kind === "message" && Boolean(s.urgent) };
       if (s.kind === "report" || s.kind === "answer") return { ...base, photo: sampleImage(s.sample) };
       if (s.kind === "message") {
         const m = messageSample(s.message)!;

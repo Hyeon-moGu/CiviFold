@@ -6,7 +6,7 @@
 // A staff-requested case brief as it is written: the agent's reads arrive one by one from the brief route,
 // then the page refreshes to show the stored brief. The brief never changes the suggestion; it is read beside it.
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useState, useTransition, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useTransition, type ReactNode } from "react";
 import type { BriefEvent, BriefResult } from "@/lib/server/briefs";
 import type { BriefFact } from "@/lib/agent/brief";
 import type { Brief } from "@/lib/tools/write-brief";
@@ -161,38 +161,84 @@ const SECTION_TEXT: Record<string, string> = {
   next: "What staff could do next",
 };
 
-// The refs behind an item; the tooltip holds the fact or tool result they name.
-function Refs({ refs, explain }: { refs: string[]; explain: (ref: string) => string }) {
+// Fact texts and step results carry image ids; staff read names instead. A dataset id names the photo's state,
+// so an id without a name is still hidden.
+const LEFTOVER_ID = /\b(?:syn_[A-Za-z0-9_]+|img_[0-9a-f]+)\b/g;
+
+function nameIds(text: string, names: Record<string, string>): string {
+  let out = text;
+  for (const id of Object.keys(names).sort((a, b) => b.length - a.length)) out = out.split(id).join(names[id]);
+  return out.replace(LEFTOVER_ID, "a photo");
+}
+
+type OpenChip = { open: string | null; toggle: (key: string) => void };
+
+// The refs behind an item. Each chip opens a popover with the fact or tool result it names; one is open at a time.
+function Refs({ id, refs, explain, chip }: { id: string; refs: string[]; explain: (ref: string) => string; chip: OpenChip }) {
   return (
     <span className="ml-1.5 inline-flex flex-wrap gap-1 align-middle">
-      {refs.map((ref) => (
-        <span key={ref} title={explain(ref)} className="cursor-help rounded border border-violet-500/40 bg-violet-500/10 px-1 font-mono text-[10px] leading-4 text-violet-200">
-          {ref.replace("_", " ")}
-        </span>
-      ))}
+      {refs.map((ref) => {
+        const key = `${id}-${ref}`;
+        const open = chip.open === key;
+        return (
+          <span key={ref} className="relative inline-block">
+            <button
+              type="button"
+              onClick={() => chip.toggle(key)}
+              aria-expanded={open}
+              aria-controls={open ? `brief-ref-${key}` : undefined}
+              className={`rounded border px-1 font-mono text-[10px] leading-4 transition ${open ? "border-violet-300 bg-violet-500/30 text-white" : "border-violet-500/40 bg-violet-500/10 text-violet-200 hover:bg-violet-500/20"}`}
+            >
+              {ref.replace("_", " ")}
+            </button>
+            {open && (
+              <span
+                id={`brief-ref-${key}`}
+                role="note"
+                className="absolute left-0 top-full z-20 mt-1 block w-72 max-w-[80vw] rounded-md border border-ops-line bg-ops-raised px-3 py-2 text-left text-[12px] font-normal leading-relaxed text-ops-text shadow-lg shadow-black/40"
+              >
+                <span className="mb-0.5 block font-mono text-[10px] uppercase tracking-wider text-violet-300">{ref.replace("_", " ")}</span>
+                {explain(ref)}
+              </span>
+            )}
+          </span>
+        );
+      })}
     </span>
   );
 }
 
-/** The latest stored brief: the summary, its sections, and every item's evidence in a tooltip. */
-export function BriefCard({ stored, stale }: { stored: StoredBrief; stale: boolean }) {
+/** The latest stored brief: the summary, its sections, and every item's evidence a click away. */
+export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale: boolean; names: Record<string, string> }) {
   const brief = stored.brief as Brief | null;
   const steps = stored.steps as StepView[];
   const facts = stored.facts as BriefFact[];
+  const [open, setOpen] = useState<string | null>(null);
+  useEffect(() => {
+    if (open === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+  const chip: OpenChip = { open, toggle: (key) => setOpen((o) => (o === key ? null : key)) };
+  const clean = (text: string) => nameIds(text, names);
   const explain = (ref: string): string => {
     const fact = facts.find((f) => f.ref === ref);
-    if (fact) return fact.text;
+    if (fact) return clean(fact.text);
     const step = steps.find((s) => s.ref === ref);
-    return step ? `${TOOL_TEXT[step.tool] ?? step.tool}: ${summarize(step)}` : ref;
+    return step ? `${TOOL_TEXT[step.tool] ?? step.tool}: ${clean(summarize(step))}` : ref;
   };
   const sections = Object.keys(SECTION_TEXT).map((key) => ({ key, items: (brief?.items ?? []).filter((i) => i.section === key) })).filter((s) => s.items.length > 0);
   const reads = steps.filter((s) => s.ok && s.tool !== "write_brief").length;
+  const called = steps.some((s) => s.tool !== "write_brief");
   return (
     <Panel
       title="Case brief"
       aside={
         <span className="font-mono">
-          Muse Spark · {plural(reads, "read")} · ${stored.cost_usd.toFixed(3)} · {(stored.latency_ms / 1000).toFixed(1)}s
+          Muse Spark · {called ? plural(reads, "read") : "from the stored facts, no tool calls needed"} · ${stored.cost_usd.toFixed(3)} · {(stored.latency_ms / 1000).toFixed(1)}s
         </span>
       }
       className="border-violet-500/40"
@@ -201,8 +247,8 @@ export function BriefCard({ stored, stale }: { stored: StoredBrief; stale: boole
         <div className="space-y-4">
           {brief.summary && (
             <p className="text-[15px] leading-relaxed text-white">
-              {brief.summary.text}
-              <Refs refs={brief.summary.evidence_refs} explain={explain} />
+              {clean(brief.summary.text)}
+              <Refs id="summary" refs={brief.summary.evidence_refs} explain={explain} chip={chip} />
             </p>
           )}
           {sections.map((s) => (
@@ -211,8 +257,8 @@ export function BriefCard({ stored, stale }: { stored: StoredBrief; stale: boole
               <ul className="mt-1 space-y-1 text-[13px] text-ops-text">
                 {s.items.map((item, i) => (
                   <li key={i} className="leading-relaxed">
-                    {item.text}
-                    <Refs refs={item.evidence_refs} explain={explain} />
+                    {clean(item.text)}
+                    <Refs id={`${s.key}-${i}`} refs={item.evidence_refs} explain={explain} chip={chip} />
                   </li>
                 ))}
               </ul>
@@ -221,10 +267,10 @@ export function BriefCard({ stored, stale }: { stored: StoredBrief; stale: boole
           {brief.items.length === 0 && <p className="text-sm text-amber-200">Every item the agent wrote lacked evidence, so nothing is shown.</p>}
         </div>
       ) : (
-        <p className="text-sm text-amber-200">The brief was not finished ({stored.status.replace("_", " ")}{stored.error ? `: ${stored.error}` : ""}). Its reads are recorded below.</p>
+        <p className="text-sm text-amber-200">The brief was not finished ({stored.status.replace("_", " ")}{stored.error ? `: ${clean(stored.error)}` : ""}). Its reads are recorded below.</p>
       )}
       <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-ops-line pt-2 text-[11px] text-ops-dim">
-        <span>Every item cites a tool result or a pipeline fact; hover a ref to read it.</span>
+        <span>Every item cites a tool result or a pipeline fact; click a ref to read it.</span>
         {stored.dropped > 0 && <span className="text-amber-300">{plural(stored.dropped, "item")} deleted for lacking evidence.</span>}
         {stale && <span className="text-amber-300">Written on an earlier analysis of this report.</span>}
         <span className="ml-auto">It does not decide anything.</span>
@@ -236,7 +282,7 @@ export function BriefCard({ stored, stale }: { stored: StoredBrief; stale: boole
               <span className="w-12 shrink-0 font-mono text-[10px] text-ops-dim">{s.ref.replace("_", " ")}</span>
               <span className="min-w-0">
                 <span className="font-medium text-white">{TOOL_TEXT[s.tool] ?? s.tool}</span>
-                <span className={`ml-2 break-words ${s.ok ? "text-ops-text" : "text-rose-300"}`}>{summarize(s)}</span>
+                <span className={`ml-2 break-words ${s.ok ? "text-ops-text" : "text-rose-300"}`}>{clean(summarize(s))}</span>
               </span>
             </li>
           ))}

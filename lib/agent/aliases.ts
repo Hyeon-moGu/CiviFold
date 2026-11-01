@@ -24,7 +24,8 @@ const SHAPES: Array<[RegExp, Kind]> = [
   [/\breport:[A-Za-z0-9_-]+|\b[A-Z]+\d+#\d+\b|\brep_[A-Za-z0-9_]+/g, "report"],
 ];
 
-const ALIAS = /\b(photo|incident|report)_(\d{2,})\b/g;
+// Case-insensitive: a model sometimes writes "Incident_01" at the start of a sentence.
+const ALIAS = /\b(photo|incident|report)_(\d{2,})\b/gi;
 
 export class Aliases {
   private alias = new Map<string, string>();
@@ -61,6 +62,6 @@ export class Aliases {
 
   /** The model's call with real ids; an unknown name is left for the tool to reject. */
   unmask(text: string): string {
-    return text.replace(ALIAS, (name) => this.real.get(name) ?? name);
+    return text.replace(ALIAS, (name) => this.real.get(name.toLowerCase()) ?? name);
   }
 }

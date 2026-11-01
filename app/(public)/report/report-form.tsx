@@ -253,7 +253,7 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
                         <SyntheticBadge />
                       </span>
                       {picked?.id === s.id && <span className="absolute right-1.5 top-1.5 rounded-full bg-zinc-900 px-1.5 text-xs font-bold text-white">✓</span>}
-                      <span className="block truncate px-2 py-1.5 text-xs text-zinc-600">{s.title}</span>
+                      <span className="block truncate px-2 py-1.5 text-xs text-zinc-600">{tileTitle(s.title)}</span>
                     </button>
                   ))}
                 </div>
@@ -471,6 +471,12 @@ function Progress({ step, onJump }: { step: number; onJump: (at: number) => void
       ))}
     </ol>
   );
+}
+
+// A tile names the object and the view, not the photo's state: the state is what the system has to find out.
+function tileTitle(title: string): string {
+  const parts = title.split(", ");
+  return parts.length === 3 ? `${parts[0]} · ${parts[2]}` : title;
 }
 
 function Step({ title, hint, children }: { title: string; hint: string; children: ReactNode }) {

@@ -67,7 +67,7 @@ The verification agent starts with the incident's other photos and similar incid
 - Verification uses the latest stored analysis and runs once at a time per report. Results superseded by a staff decision or a newer analysis are recorded without being applied.
 - If a candidate incident's repair state has changed since analysis, staff are prompted to analyze again before requesting verification.
 
-The case brief agent gets the same tools, limits and neutral names as the verifier, plus a numbered list of facts (the triage, the candidates, every comparison, the incident's events and photos, incidents of the same kind within 60 m) that it can cite without a call. Its only terminal tool writes the brief; the server keeps an item only if it cites a successful tool call of that run or a listed fact, and shows how many were deleted. The brief has no label field and changes nothing. In the first demo scenario it wrote 8 cited items from the facts alone, with 0 tool calls, for $0.018 in 12 s; its wording was adjusted on two live runs and has no evaluation beyond the citation rule.
+The case brief agent gets the same tools, limits and neutral names as the verifier, plus a numbered list of facts (the triage, the candidates, every comparison, the incident's events and photos, incidents of the same kind within 60 m) that it can cite without a call. Its only terminal tool writes the brief; the server keeps an item only if it cites a successful tool call of that run or a listed fact, and shows how many were deleted. The brief has no label field and changes nothing. In the first demo scenario it wrote 10 cited items from the facts alone, with no tool call, in 12 s; in the fifth, on a report that was asked for another view, it read the incident's history and the area with 2 tool calls and wrote 9 cited items for $0.04 in 24 s. Its wording was adjusted on two live runs, and it has no evaluation beyond the citation rule.
 
 </details>
 
@@ -176,7 +176,7 @@ npm run dev                 # http://localhost:3000
 <details>
 <summary><strong>Demo replay and live calls</strong></summary>
 
-The public deployment uses `cached` mode and shows **models: replay**. Guided scenarios replay recorded calls, including a staff-requested agent check and a case brief in the first scenario. A cache miss never triggers a live call in this mode.
+The public deployment uses `cached` mode and shows **models: replay**. Guided scenarios replay recorded calls, including a staff-requested agent check, a case brief and a staff approval in the first scenario, and a case brief of a report that was asked for another view in the fifth. A cache miss never triggers a live call in this mode.
 
 - A report without a prepared result is marked unavailable. A typed message sent with a sample photo has no recorded reading: the photo is then analyzed alone, and the resident and staff are both told that the words were not read.
 - Verification without a recorded first call does not start; the suggestion stays unchanged.

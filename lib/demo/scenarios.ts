@@ -11,11 +11,11 @@
 import { and, asc, desc, eq, inArray, like } from "drizzle-orm";
 import { messageSample } from "../dataset/messages";
 import { sample } from "../dataset/static";
-import { briefs, incidentEvents, incidents, reportAnalyses, reports } from "../db/schema";
+import { briefs, incidentEvents, incidents, reportAnalyses, reports, staffDecisions } from "../db/schema";
 import { seedIncidentId } from "./seed";
 import type { Label } from "../tools/types";
 import { briefReport } from "../server/briefs";
-import { analyzeReport, answerReport, createReport, recordRepair, UserError, verifyReport } from "../server/reports";
+import { analyzeReport, answerReport, createReport, recordRepair, staffDecide, UserError, verifyReport } from "../server/reports";
 import type { Runtime } from "../server/runtime";
 
 // `why` tells the visitor what is about to happen and why that answer is the right one.
@@ -28,7 +28,9 @@ type Step =
   // Staff ask the verification agent to check the previous step's suggestion.
   | { kind: "verify"; text: string; why: string; expect: Label }
   // Staff ask for a case brief of the latest report sent in this scenario.
-  | { kind: "brief"; text: string; why: string };
+  | { kind: "brief"; text: string; why: string }
+  // Staff act on the suggestion for the latest report sent in this scenario: the only step that changes a report.
+  | { kind: "decide"; action: "link"; text: string; why: string };
 
 // `world`: the seeded incidents the replay depends on, shown as already open.
 export type Scenario = { id: string; title: string; story: string; world: string[]; steps: Step[] };
@@ -58,6 +60,12 @@ export const SCENARIOS: Scenario[] = [
         kind: "brief",
         text: "Staff ask for a case brief",
         why: "The brief agent reads the pipeline's facts, the incident's history and what is open nearby, and writes the brief staff read before deciding. Every item cites a tool result or a fact; the rest is deleted. It decides nothing.",
+      },
+      {
+        kind: "decide",
+        action: "link",
+        text: "Staff approve the suggestion",
+        why: "A member of staff links the report to the open incident. Only this click changes anything: the suggestion, the check and the brief were all advice. The resident's page now says decided.",
       },
     ],
   },
@@ -139,6 +147,11 @@ export const SCENARIOS: Scenario[] = [
         why: "It looks fixed, but one distant photo of an empty curb is not enough to say so. Expect a request for another view.",
         expect: "NEEDS_INFO",
       },
+      {
+        kind: "brief",
+        text: "Staff ask for a case brief",
+        why: "A report that was asked for another view is where a brief earns its keep: it says what the one distant photo settles, what it does not, and what to ask for. Every item cites a fact or a tool result; the rest is deleted.",
+      },
     ],
   },
   {
@@ -189,12 +202,20 @@ const RESET =
 
 /** Each incident the scenario relies on is open, or repaired once by an earlier step of the same scenario, and nothing else has happened to it. */
 async function checkWorld(rt: Runtime, scenario: Scenario, index: number) {
+  // A linked report leaves its incident open with the representative photo first, the only incident photo the
+  // fast path compares, so report steps still replay as recorded. The agents read every photo and event of an
+  // incident, so before their steps a link is a change like any other.
+  const kind = scenario.steps[index]!.kind;
+  const agent = kind === "verify" || kind === "brief";
   for (const asset of scenario.world) {
     const id = seedIncidentId(asset);
     const repaired = scenario.steps.slice(0, index).some((s) => s.kind === "repair" && s.asset === asset);
     const [incident] = await rt.database.select({ status: incidents.status }).from(incidents).where(eq(incidents.id, id));
     const events = await rt.database.select({ type: incidentEvents.type }).from(incidentEvents).where(eq(incidentEvents.incident_id, id));
-    const types = events.map((e) => e.type).sort();
+    const types = events
+      .map((e) => e.type)
+      .filter((t) => agent || t !== "report_linked")
+      .sort();
     const expected = repaired ? ["created", "repair_recorded"] : ["created"];
     if (!incident || incident.status !== (repaired ? "resolved" : "open") || types.join() !== expected.join()) throw new UserError(RESET);
   }
@@ -257,19 +278,18 @@ export async function runStep(rt: Runtime, scenarioId: string, index: number) {
     return { ...out, error: "Another check or a staff decision took over this report." };
   }
   if (step.kind === "brief") {
-    const [briefed] = await rt.database
-      .select({ id: reports.id, tracking_code: reports.tracking_code })
-      .from(reports)
-      .where(eq(reports.dataset_case_id, demoTag(scenarioId, ownerIndex(scenario, index))))
-      .orderBy(desc(reports.submitted_at))
-      .limit(1);
-    if (!briefed) throw new UserError("Run the previous step first.");
-    const [latest] = await rt.database.select({ id: reportAnalyses.id }).from(reportAnalyses).where(eq(reportAnalyses.report_id, briefed.id)).orderBy(desc(reportAnalyses.id)).limit(1);
-    if (!latest) throw new UserError("Run the previous step first.");
-    const result = await briefReport(rt, briefed.id, latest.id);
-    const out = { report_id: briefed.id, tracking_code: briefed.tracking_code };
+    const { report, latest } = await owned(rt, scenario, index);
+    const result = await briefReport(rt, report.id, latest.id);
+    const out = { report_id: report.id, tracking_code: report.tracking_code };
     if (result.status === "not_started") return { ...out, error: result.message };
     return { ...out, brief: briefOutcome(result.run) };
+  }
+  if (step.kind === "decide") {
+    const { report, latest } = await owned(rt, scenario, index);
+    const incidentId = (latest.final as { incident_id: string | null }).incident_id;
+    if (!incidentId) throw new UserError("The suggestion names no incident to link to. Run the earlier steps first.");
+    await staffDecide(rt, report.id, step.action, incidentId, undefined, { analysis_id: latest.id, facts_changed_seen: false });
+    return { report_id: report.id, tracking_code: report.tracking_code, decided: { action: step.action, incident_id: incidentId } };
   }
   if (step.kind === "answer") {
     const [asked] = await rt.database
@@ -300,20 +320,41 @@ export async function runStep(rt: Runtime, scenarioId: string, index: number) {
 }
 
 export type BriefOutcome = { status: string; kept: number; dropped: number };
-export type StepOutcome = { report_id: string; tracking_code: string; label?: Label; brief?: BriefOutcome } | { done: string };
+export type StepOutcome =
+  | { report_id: string; tracking_code: string; label?: Label; brief?: BriefOutcome; decided?: { action: string; incident_id: string | null } }
+  | { done: string };
 
 const briefOutcome = (run: { status: string; brief: { kept: number; dropped: number } | null }): BriefOutcome => ({ status: run.status, kept: run.brief?.kept ?? 0, dropped: run.brief?.dropped ?? 0 });
 
-// The latest step before `index` that sent a report: a brief (like a verification) acts on that report.
+// The latest step before `index` that sent a report: a brief or a staff decision (like a verification) acts on that report.
 function ownerIndex(scenario: Scenario, index: number): number {
   for (let i = index - 1; i >= 0; i--) if (scenario.steps[i]!.kind === "report" || scenario.steps[i]!.kind === "message") return i;
   throw new UserError("Run the previous step first.");
 }
 
+async function owned(rt: Runtime, scenario: Scenario, index: number) {
+  const [report] = await rt.database
+    .select({ id: reports.id, tracking_code: reports.tracking_code })
+    .from(reports)
+    .where(eq(reports.dataset_case_id, demoTag(scenario.id, ownerIndex(scenario, index))))
+    .orderBy(desc(reports.submitted_at))
+    .limit(1);
+  if (!report) throw new UserError("Run the previous step first.");
+  const [latest] = await rt.database
+    .select({ id: reportAnalyses.id, final: reportAnalyses.final })
+    .from(reportAnalyses)
+    .where(eq(reportAnalyses.report_id, report.id))
+    .orderBy(desc(reportAnalyses.id))
+    .limit(1);
+  if (!latest) throw new UserError("Run the previous step first.");
+  return { report, latest };
+}
+
 /**
  * What every step has already done, read back from the shared world: the demo tags its reports
- * (dataset_case_id) and the scenarios' repairs resolve their incidents. A visitor's progress survives a
- * page change, and steps another visitor ran show their result instead of failing the world check.
+ * (dataset_case_id), the scenarios' repairs resolve their incidents and staff decisions are kept per report.
+ * A visitor's progress survives a page change, and steps another visitor ran show their result instead of
+ * failing the world check.
  */
 export async function demoState(rt: Runtime): Promise<Record<string, StepOutcome>> {
   const { database } = rt;
@@ -322,16 +363,24 @@ export async function demoState(rt: Runtime): Promise<Record<string, StepOutcome
     .from(reports)
     .where(like(reports.dataset_case_id, "demo:%"))
     .orderBy(desc(reports.submitted_at), desc(reports.id));
-  const analyses = tagged.length
+  const ids = tagged.map((r) => r.id);
+  const analyses = ids.length
     ? await database
         .select({ report_id: reportAnalyses.report_id, pipeline_config: reportAnalyses.pipeline_config, final: reportAnalyses.final })
         .from(reportAnalyses)
-        .where(inArray(reportAnalyses.report_id, tagged.map((r) => r.id)))
+        .where(inArray(reportAnalyses.report_id, ids))
         .orderBy(asc(reportAnalyses.id))
     : [];
   const resolved = new Set((await database.select({ id: incidents.id }).from(incidents).where(eq(incidents.status, "resolved"))).map((i) => i.id));
-  const written = tagged.length
-    ? await database.select({ report_id: briefs.report_id, status: briefs.status, brief: briefs.brief }).from(briefs).where(inArray(briefs.report_id, tagged.map((r) => r.id))).orderBy(asc(briefs.id))
+  const written = ids.length
+    ? await database.select({ report_id: briefs.report_id, status: briefs.status, brief: briefs.brief }).from(briefs).where(inArray(briefs.report_id, ids)).orderBy(asc(briefs.id))
+    : [];
+  const decisions = ids.length
+    ? await database
+        .select({ report_id: staffDecisions.report_id, final_action: staffDecisions.final_action, incident_id: staffDecisions.incident_id })
+        .from(staffDecisions)
+        .where(inArray(staffDecisions.report_id, ids))
+        .orderBy(asc(staffDecisions.id))
     : [];
   const out: Record<string, StepOutcome> = {};
   for (const scenario of SCENARIOS) {
@@ -345,6 +394,12 @@ export async function demoState(rt: Runtime): Promise<Record<string, StepOutcome
         const report = tagged.find((r) => r.tag === demoTag(scenario.id, ownerIndex(scenario, i)));
         const last = report && written.filter((b) => b.report_id === report.id).at(-1);
         if (report && last) out[key] = { report_id: report.id, tracking_code: report.tracking_code, brief: briefOutcome({ status: last.status, brief: last.brief as BriefOutcome | null }) };
+        return;
+      }
+      if (step.kind === "decide") {
+        const report = tagged.find((r) => r.tag === demoTag(scenario.id, ownerIndex(scenario, i)));
+        const last = report && decisions.filter((d) => d.report_id === report.id).at(-1);
+        if (report && last) out[key] = { report_id: report.id, tracking_code: report.tracking_code, decided: { action: last.final_action, incident_id: last.incident_id } };
         return;
       }
       // An answer and a verification act on the previous step's report, each adding an analysis of its own.

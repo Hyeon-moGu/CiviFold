@@ -9,7 +9,7 @@ import type { Label } from "@/lib/tools/types";
 import { LabelBadge, SyntheticBadge, UrgentBadge } from "@/app/_ui/labels";
 
 type StepView = {
-  kind: "repair" | "report" | "message" | "answer" | "verify" | "brief";
+  kind: "repair" | "report" | "message" | "answer" | "verify" | "brief" | "decide";
   text: string;
   why: string;
   expect: Label | null;
@@ -18,7 +18,15 @@ type StepView = {
   message?: { kind: "voice" | "text"; text: string; audio: string | null };
 };
 export type ScenarioView = { id: string; title: string; story: string; world: Array<{ title: string; photo: string }>; steps: StepView[] };
-type StepResult = { report_id?: string; tracking_code?: string; label?: Label; brief?: { status: string; kept: number; dropped: number }; error?: string; done?: string };
+type StepResult = {
+  report_id?: string;
+  tracking_code?: string;
+  label?: Label;
+  brief?: { status: string; kept: number; dropped: number };
+  decided?: { action: string; incident_id: string | null };
+  error?: string;
+  done?: string;
+};
 
 const ACTION: Record<StepView["kind"], string> = {
   repair: "Record it",
@@ -27,6 +35,7 @@ const ACTION: Record<StepView["kind"], string> = {
   answer: "Send the answer",
   verify: "Run the check",
   brief: "Write the brief",
+  decide: "Approve the suggestion",
 };
 
 function Thumb({ src, alt }: { src: string; alt: string }) {
@@ -152,7 +161,9 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioView[] }) {
               const r = results[key];
               const ran = ok(r);
               const locked = i > 0 && !ok(results[`${sc.id}:${i - 1}`]);
-              const disabled = busy !== null || !loaded || locked || (st.kind === "repair" && ran);
+              // Staff actions change the world, so one that already ran cannot run again.
+              const staffAction = st.kind === "repair" || st.kind === "decide";
+              const disabled = busy !== null || !loaded || locked || (staffAction && ran);
               return (
                 <li key={key} className="rounded-xl border border-zinc-200 p-3">
                   <div className="flex gap-3">
@@ -165,7 +176,7 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioView[] }) {
                       ) : st.message ? (
                         <Placeholder text={st.message.kind === "voice" ? "Voice, no photo" : "Text, no photo"} />
                       ) : (
-                        <Placeholder text={st.kind === "repair" ? "Staff action" : st.kind === "brief" ? "Case brief agent" : "Verification agent"} />
+                        <Placeholder text={staffAction ? "Staff action" : st.kind === "brief" ? "Case brief agent" : "Verification agent"} />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -183,7 +194,7 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioView[] }) {
                       title={locked ? "Run the previous step first." : undefined}
                       className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:border-zinc-400 hover:bg-zinc-50 disabled:opacity-50"
                     >
-                      {busy === key ? "Running…" : ran && st.kind === "repair" ? "Recorded" : ACTION[st.kind]}
+                      {busy === key ? "Running…" : ran && st.kind === "repair" ? "Recorded" : ran && st.kind === "decide" ? "Approved" : ACTION[st.kind]}
                     </button>
                     {st.expect && (
                       <span className="flex items-center gap-1 text-xs text-zinc-500">
@@ -202,6 +213,11 @@ export function DemoRunner({ scenarios }: { scenarios: ScenarioView[] }) {
                         {r.brief.status === "written"
                           ? `Brief written: ${r.brief.kept} items, every one citing evidence${r.brief.dropped ? ` (${r.brief.dropped} deleted without)` : ""}`
                           : "The brief was not finished; its reads are recorded on the staff view."}
+                      </span>
+                    )}
+                    {r?.decided && (
+                      <span className="text-xs text-emerald-700">
+                        {r.decided.action === "link" ? `Linked to ${r.decided.incident_id} by staff.` : `Staff decided: ${r.decided.action.replace("_", " ")}.`} The resident&apos;s page shows Decided.
                       </span>
                     )}
                     {r?.report_id && (

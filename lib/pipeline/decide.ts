@@ -54,7 +54,18 @@ export type Decision = {
 };
 
 type Assessed =
-  | { candidate: Candidate; verdict: "MATCH" | "NO_MATCH"; result: CompareResult; problemFromOtherPhoto?: boolean; closeUpRead?: boolean; problemDisputed?: boolean; identityStrong?: boolean; fixConfirmed?: boolean; contradicted?: boolean }
+  | {
+      candidate: Candidate;
+      verdict: "MATCH" | "NO_MATCH";
+      result: CompareResult;
+      problemFromOtherPhoto?: boolean;
+      problemStage?: 1 | 2; // set with problemFromOtherPhoto when the reading is another stage of the same photo
+      closeUpRead?: boolean;
+      problemDisputed?: boolean;
+      identityStrong?: boolean;
+      fixConfirmed?: boolean;
+      contradicted?: boolean;
+    }
   | { candidate: Candidate; verdict: "UNCERTAIN"; result: CompareResult | null; conflict: boolean };
 type Matched = Extract<Assessed, { verdict: "MATCH" | "NO_MATCH" }>;
 
@@ -135,7 +146,12 @@ function applyRules(input: DecideInput): Decision {
   }
 
   if (best.problemFromOtherPhoto) {
-    const from = best.closeUpRead ? "the close-up the resident sent" : "another photo of this report";
+    // The reading may also come from the other comparison stage of the very photo that settled the identity.
+    const from = best.closeUpRead
+      ? "the close-up the resident sent"
+      : best.problemStage !== undefined
+        ? `the ${best.problemStage === 2 ? "cut-out" : "whole-photo"} comparison of the same photo`
+        : "another photo of this report";
     chainReasons.push({ rule_id: "R2d", text: `The problem is judged from ${from}.` });
   }
 
@@ -211,7 +227,8 @@ function assess(candidate: Candidate, comparisons: Comparison[], closeUps: Reado
   // A close-up with no problem in it confirms a fix another photo of the report shows signs of.
   const fixSeenElsewhere = !shown && closeUpRead && readable.some((c) => c.result.damage.repair_signs_in_new);
   const damage = fixSeenElsewhere ? { ...reading.result.damage, repair_signs_in_new: true } : reading.result.damage;
-  return { candidate, verdict: "MATCH", result: { ...result, damage }, problemFromOtherPhoto: true, ...facts };
+  const samePhoto = reading.photo === matches.photo;
+  return { candidate, verdict: "MATCH", result: { ...result, damage }, problemFromOtherPhoto: true, ...(samePhoto ? { problemStage: reading.stage } : {}), ...facts };
 }
 
 // A different problem keeps a report out of the incident; an uncertain one at least lowers confidence.

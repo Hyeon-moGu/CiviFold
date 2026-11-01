@@ -31,4 +31,10 @@ describe("Aliases", () => {
     expect(names.mask("inc_h1 inc_h12")).toBe("incident_01 incident_02");
     expect(names.unmask('{"incident_id":"incident_09"}')).toBe('{"incident_id":"incident_09"}');
   });
+
+  it("unmasks a name whatever its case, as a model writes it at the start of a sentence", () => {
+    const names = new Aliases();
+    names.collect({ incident_id: "inc_w1" });
+    expect(names.unmask("Incident_01 was opened on Oct 29.")).toBe("inc_w1 was opened on Oct 29.");
+  });
 });
