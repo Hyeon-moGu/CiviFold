@@ -33,9 +33,9 @@ On a pre-registered holdout of 80 synthetic reports, the fast path made **0 wron
 
 ## What staff see
 
-![Staff console: two hydrant photos with SAM outlines, the evidence and rule behind a possible recurrence, and staff action buttons.](media/staff-review.webp)
+![Staff console: a possible recurrence with its suggested decision, two hydrant photos with SAM outlines and cut-outs, what the comparison found about the fixture and the problem, and the rule behind the suggestion.](media/staff-review.webp)
 
-Photos side by side, visible differences, the rule behind the suggestion and a map. Staff can accept the suggestion or choose another action. **Nothing is linked or closed automatically.**
+Both photos and their SAM cut-outs side by side, what the comparison found about the fixture and about the problem, and the rule behind the suggestion. The queue shows every report on a map. Staff can accept the suggestion in one click or choose another action. **Nothing is linked or closed automatically.**
 
 *Synthetic sample photos. The white button is the suggested action.*
 
@@ -67,7 +67,7 @@ The verification agent starts with the incident's other photos and similar incid
 - Verification uses the latest stored analysis and runs once at a time per report. Results superseded by a staff decision or a newer analysis are recorded without being applied.
 - If a candidate incident's repair state has changed since analysis, staff are prompted to analyze again before requesting verification.
 
-The case brief agent gets the same tools, limits and neutral names as the verifier, plus a numbered list of facts (the triage, the candidates, every comparison, the incident's events and photos, incidents of the same kind within 60 m) that it can cite without a call. Its only terminal tool writes the brief; the server keeps an item only if it cites a successful tool call of that run or a listed fact, and shows how many were deleted. The brief has no label field and changes nothing. In the first demo scenario it wrote 10 cited items from the facts alone, with no tool call, in 12 s; in the fifth, on a report that was asked for another view, it read the incident's history and the area with 2 tool calls and wrote 9 cited items for $0.04 in 24 s. Its wording was adjusted on two live runs, and it has no evaluation beyond the citation rule.
+The case brief agent gets the same tools, limits and neutral names as the verifier, plus a numbered list of facts (the triage, the candidates, every comparison, the incident's events and photos, incidents of the same kind within 60 m) that it can cite without a call. Its only terminal tool writes the brief; the server keeps an item only if it cites a successful tool call of that run or a listed fact, and shows how many were deleted. The brief has no label field and changes nothing. In the first demo scenario it wrote 7 cited items from the facts alone, with no tool call, for $0.02 in 15 s; in the fifth, on a report that was asked for another view, it read the incident's history and the area with 2 tool calls and wrote 11 cited items for $0.03 in 20 s. It writes no calendar dates, only times relative to the report and the repair, because a replayed brief is shown on later days. Its wording was adjusted on three live runs, and it has no evaluation beyond the citation rule.
 
 </details>
 
@@ -167,7 +167,7 @@ npm run dev                 # http://localhost:3000
 
 | Page | Purpose |
 |---|---|
-| `/demo` | Guided scenarios; run the steps in order |
+| `/demo` | Seven cases, already run, each beside what grouping by location alone would do; one button runs them all again |
 | `/report` | Resident reporting form |
 | `/admin` | Staff queue and evidence review |
 
