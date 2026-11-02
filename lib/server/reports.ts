@@ -6,6 +6,7 @@
 import { randomBytes } from "node:crypto";
 import { and, asc, count, desc, eq, inArray, isNull, lt, or } from "drizzle-orm";
 import { messageSample, voiceBlobKey } from "../dataset/messages";
+import { VIEW_SIZE } from "../dataset/assets";
 import { sample } from "../dataset/static";
 import { agentRuns, briefs, images, incidentEvents, incidents, infoRequests, reportAnalyses, reports, segmentations, staffDecisions } from "../db/schema";
 import { blobKey } from "../db/stores";
@@ -75,8 +76,8 @@ async function photoRow(rt: Runtime, reportId: string, photo: Photo): Promise<ty
       kind: "original",
       storage_path: blobKey(s.id, "image/webp"),
       mime: "image/webp",
-      width: 1920,
-      height: 1280,
+      // The real size: SAM's box, the crops and the overlay all read it, and close-ups are upright.
+      ...VIEW_SIZE[s.view],
       is_synthetic: true,
       dataset_image_id: s.id,
     };
@@ -728,7 +729,17 @@ export async function queue(rt: Runtime) {
     : [];
   const latest = new Map<string, (typeof analyses)[number]>();
   for (const a of analyses) if (!latest.has(a.report_id)) latest.set(a.report_id, a);
-  return rows.map((r) => ({ report: r, analysis: latest.get(r.id) ?? null }));
+  // Each report's first photo, for the row's thumbnail.
+  const photos = rows.length
+    ? await database
+        .select({ id: images.id, report_id: images.report_id, is_synthetic: images.is_synthetic })
+        .from(images)
+        .where(and(inArray(images.report_id, rows.map((r) => r.id)), eq(images.kind, "original")))
+        .orderBy(asc(images.created_at), asc(images.id))
+    : [];
+  const first = new Map<string, (typeof photos)[number]>();
+  for (const p of photos) if (!first.has(p.report_id)) first.set(p.report_id, p);
+  return rows.map((r) => ({ report: r, analysis: latest.get(r.id) ?? null, photo: first.get(r.id) ?? null }));
 }
 
 /** Every incident's place and state, for the console map. */

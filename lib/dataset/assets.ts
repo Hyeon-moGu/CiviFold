@@ -33,6 +33,17 @@ export type AssetFile = z.infer<typeof AssetFile>;
 export type State = "damaged_v1" | "repaired" | "damaged_v2";
 export type View = "front" | "across" | "sidewalk" | "closeup" | "closeup_side" | "across_night" | "front_night";
 
+// Muse Image returned the close-ups upright and every other view landscape; assets.test.ts checks every dataset photo.
+export const VIEW_SIZE: Record<View, { width: number; height: number }> = {
+  front: { width: 1920, height: 1280 },
+  across: { width: 1920, height: 1280 },
+  sidewalk: { width: 1920, height: 1280 },
+  across_night: { width: 1920, height: 1280 },
+  front_night: { width: 1920, height: 1280 },
+  closeup: { width: 1280, height: 1920 },
+  closeup_side: { width: 1280, height: 1920 },
+};
+
 // Scripts only: the app imports the JSON. The ignore stops the bundler from tracing the whole project for this read.
 export async function loadAssets(file = "dataset/assets.json"): Promise<AssetFile> {
   return AssetFile.parse(JSON.parse(await readFile(/*turbopackIgnore: true*/ file, "utf8")));
