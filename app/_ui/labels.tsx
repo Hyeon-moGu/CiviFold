@@ -13,13 +13,14 @@ export const LABEL_TEXT: Record<Label, string> = {
   HUMAN_REVIEW: "Needs staff review",
 };
 
+// The console's four meanings (app/_ui/console.tsx): folds, possible recurrence, new, waiting on a person.
 const LABEL_STYLE: Record<Label, string> = {
   NEW: "bg-zinc-100 text-zinc-800 ring-zinc-300",
   DUPLICATE: "bg-sky-50 text-sky-800 ring-sky-300",
-  LATE_REPORT: "bg-indigo-50 text-indigo-800 ring-indigo-300",
+  LATE_REPORT: "bg-sky-50 text-sky-800 ring-sky-300",
   POSSIBLE_RECURRENCE: "bg-rose-50 text-rose-800 ring-rose-300",
-  ALREADY_RESOLVED: "bg-emerald-50 text-emerald-800 ring-emerald-300",
-  NEEDS_INFO: "bg-violet-50 text-violet-800 ring-violet-300",
+  ALREADY_RESOLVED: "bg-sky-50 text-sky-800 ring-sky-300",
+  NEEDS_INFO: "bg-amber-50 text-amber-900 ring-amber-300",
   HUMAN_REVIEW: "bg-amber-50 text-amber-900 ring-amber-300",
 };
 

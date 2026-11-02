@@ -116,8 +116,8 @@ export function VerifyProgress({ maxSteps, maxMs, runningSince }: { maxSteps: nu
 
   if (elsewhere) {
     return (
-      <section className="mt-2 flex items-center gap-3 rounded-lg border border-sky-500/40 bg-sky-500/10 px-4 py-3 text-sm text-sky-100" role="status">
-        <Spinner className="text-sky-300" />
+      <section className="mt-2 flex items-center gap-3 rounded-lg border border-violet-500/40 bg-violet-500/10 px-4 py-3 text-sm text-violet-100" role="status">
+        <Spinner className="text-violet-300" />
         <span>A verification started {clockOf(elapsed)} ago is still running. This page updates when it finishes.</span>
       </section>
     );
@@ -126,8 +126,8 @@ export function VerifyProgress({ maxSteps, maxMs, runningSince }: { maxSteps: nu
   if (state.phase === "finished") {
     if (!state.note) {
       return v.refreshing ? (
-        <section className="mt-2 flex items-center gap-3 rounded-lg border border-sky-500/40 bg-ops-panel px-4 py-3 text-sm text-sky-100" role="status">
-          <Spinner className="text-sky-300" />
+        <section className="mt-2 flex items-center gap-3 rounded-lg border border-violet-500/40 bg-ops-panel px-4 py-3 text-sm text-violet-100" role="status">
+          <Spinner className="text-violet-300" />
           Verification finished. Loading the result…
         </section>
       ) : null;
@@ -150,16 +150,16 @@ export function VerifyProgress({ maxSteps, maxMs, runningSince }: { maxSteps: nu
         : "Choosing the next check";
   const checks = state.steps.filter((s) => s.tool !== "propose_decision").length;
   return (
-    <section className="mt-2 rounded-lg border border-sky-500/40 bg-ops-panel px-4 py-3" role="status" aria-live="polite">
+    <section className="mt-2 rounded-lg border border-violet-500/40 bg-ops-panel px-4 py-3" role="status" aria-live="polite">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <Spinner className="text-sky-300" />
+        <Spinner className="text-violet-300" />
         <p className="font-semibold text-white">The verification agent is looking for evidence against this suggestion</p>
         <span className="ml-auto font-mono text-[11px] text-ops-dim">
           {plural(checks, "check")} of up to {maxSteps} · {clockOf(elapsed)} of up to {clockOf(maxMs)}
         </span>
       </div>
       <div className="mt-2 h-1 overflow-hidden rounded-full bg-ops-raised">
-        <div className="h-full rounded-full bg-sky-400 transition-[width] duration-500" style={{ width: `${Math.min(100, Math.max((checks / maxSteps) * 100, (elapsed / maxMs) * 100, 4))}%` }} />
+        <div className="h-full rounded-full bg-violet-400 transition-[width] duration-500" style={{ width: `${Math.min(100, Math.max((checks / maxSteps) * 100, (elapsed / maxMs) * 100, 4))}%` }} />
       </div>
       <ol className="mt-3 space-y-1.5 text-[12px]">
         {state.steps.map((s) => (
@@ -171,7 +171,7 @@ export function VerifyProgress({ maxSteps, maxMs, runningSince }: { maxSteps: nu
             </span>
           </li>
         ))}
-        <li className="flex items-center gap-2.5 text-sky-200">
+        <li className="flex items-center gap-2.5 text-violet-200">
           <span className="flex w-4 shrink-0 justify-center">
             <Spinner className="h-3 w-3" />
           </span>

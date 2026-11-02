@@ -9,7 +9,7 @@
   --color-ops-panel: #0f1318;
   --color-ops-raised: #151a21;
   --color-ops-line: #222a35;
-  --color-ops-dim: #6b7685;
+  --color-ops-dim: #8590a0;
   --color-ops-text: #d7dde5;
 }
 
@@ -27,7 +27,7 @@
   font-family: var(--font-sans);
 }
 .ops .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.4);
+  filter: grayscale(1) invert(1) brightness(0.8) contrast(0.8);
 }
 .ops .leaflet-control-attribution {
   background: rgb(9 11 14 / 0.75) !important;

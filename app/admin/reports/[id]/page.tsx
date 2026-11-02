@@ -14,7 +14,7 @@ import { runtime } from "@/lib/server/runtime";
 import type { Box, Channel, Label, RequestItem } from "@/lib/tools/types";
 import { Fact, OpsLabel, Panel, UrgentTag, LABEL_TONE, pct, readable, VERDICT_TEXT } from "@/app/_ui/console";
 import { when } from "@/app/_ui/format";
-import { LABEL_TEXT } from "@/app/_ui/labels";
+import { LABEL_TEXT, SyntheticBadge } from "@/app/_ui/labels";
 import { MaskedPhoto } from "@/app/_ui/photo";
 import { Actions, RetryButton } from "./actions";
 import { BriefCard, BriefProgress, BriefProvider, type StoredBrief } from "./brief";
@@ -51,6 +51,18 @@ const CHANNEL_TEXT: Record<Channel, string> = {
   voice_photo: "Voice + photo",
 };
 
+const STATUS_WORDS: Record<string, string> = {
+  received: "Not checked yet",
+  analyzing: "Checking",
+  under_review: "Waiting for staff",
+  needs_info: "Waiting for the resident",
+  linked: "Linked by staff",
+  new_incident: "Opened as an incident",
+  dismissed: "Dismissed",
+  failed: "Check failed",
+  unavailable: "No prepared result",
+};
+
 // The suggestion in one sentence, as staff would say it.
 // Suggestions that tie the report to an incident; HUMAN_REVIEW may name one without tying the report to it.
 const LINKS: ReadonlySet<Label> = new Set(["DUPLICATE", "LATE_REPORT", "ALREADY_RESOLVED", "POSSIBLE_RECURRENCE"]);
@@ -85,7 +97,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   const final = analysis?.final as Final | undefined;
   const candidates = (analysis?.candidates as Candidate[] | undefined) ?? [];
   const comparisons = (analysis?.comparisons as Comparison[] | undefined) ?? [];
-  const names = photoNames(photos.map((p) => p.id), comparisons);
+  const names = { ...photoNames(photos.map((p) => p.id), comparisons), [report.id]: "this report" };
 
   // The incident the suggestion points at, else the nearest candidate.
   const focusId = final?.incident_id ?? candidates[0]?.incident_id ?? null;
@@ -138,6 +150,9 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   // Compared and judged a different place or fixture: shown as a checked-and-excluded note, not as a match.
   const ruledOut = !linked && shownMatch?.result?.asset_match.verdict === "different";
   const focusDistance = candidates.find((c) => c.incident_id === focusId)?.distance_m;
+  const suggestedIncident = incidents.find((i) => i.id === final?.incident_id);
+  // A report photo compared with the incident's, and not ruled out: the comparison is the evidence, shown whole.
+  const sideBySide = !ruledOut && photos.length > 0 && compared;
 
   return (
     <main className="mx-auto max-w-[1400px] px-4 pb-16 pt-4">
@@ -149,7 +164,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
         <h1 className="font-mono text-lg font-semibold tracking-wider text-white">{report.tracking_code}</h1>
         {report.urgent && <UrgentTag />}
         <span className="rounded border border-ops-line px-1.5 py-0.5 text-[11px] text-ops-dim">{CHANNEL_TEXT[report.channel as Channel]}</span>
-        <span className="font-mono text-[11px] uppercase tracking-wider text-ops-dim">{report.status.replace("_", " ")}</span>
+        <span className="text-xs text-ops-dim">{STATUS_WORDS[report.status] ?? report.status.replace("_", " ")}</span>
         {analysis && (
           <span className="ml-auto font-mono text-[11px] text-ops-dim">
             ${analysis.cost_usd.toFixed(3)} · {(analysis.latency_ms / 1000).toFixed(1)}s · {report.is_synthetic ? "synthetic sample" : "resident upload"}
@@ -234,31 +249,40 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
         <BriefProvider reportId={report.id}>
           {/* Verdict and decision: one band that stays under the header while staff look through the evidence. */}
           <div className="z-[999] -mx-4 mt-4 bg-ops-bg/95 px-4 py-2 backdrop-blur md:sticky md:top-[45px]">
-            <section
-              className={`flex flex-col gap-3 rounded-lg border border-ops-line bg-ops-panel px-4 py-3 ring-1 ring-inset xl:flex-row xl:items-center xl:gap-6 ${final ? LABEL_TONE[final.label].ring : ""}`}
+            <Actions
+              status={verdict && !decided && changes.length === 0 ? <VerdictLine verdict={verdict} /> : null}
+              ring={report.urgent ? "ring-red-500/60" : final ? LABEL_TONE[final.label].ring : ""}
+              reportId={report.id}
+              analysisId={analysis.id}
+              final={final ?? null}
+              focusId={focusId}
+              askFor={photos.length === 0 ? "photo" : "wider_context"}
+              decided={decided}
+              stale={changes.length > 0}
+              verify={verifiable ? { analysisId: analysis!.id, running: verifying, again: runs.length > 0 } : null}
+              verifyLimit={verifyLimit}
+              brief={briefable ? { analysisId: analysis!.id, again: briefs.length > 0 } : null}
+              briefLimit={briefLimit}
             >
               {final && (
-                <div className="min-w-0 flex-1">
+                <>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <OpsLabel label={final.label} />
                     <p className="text-lg font-semibold tracking-tight text-white">{headline(final.label, final.incident_id)}</p>
+                  </div>
+                  {lastReason && <p className="mt-1 text-sm text-ops-text">{readable(lastReason)}</p>}
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
                     {final.incident_id && (
                       <Link
                         href={`/admin/incidents/${final.incident_id}`}
-                        className="font-mono text-xs text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white"
+                        className="text-xs text-ops-dim underline decoration-ops-line underline-offset-2 hover:text-white hover:decoration-white"
                       >
-                        {final.incident_id} →
+                        <span className="font-mono text-ops-text">{final.incident_id}</span>
+                        {suggestedIncident?.title ? `, ${suggestedIncident.title}` : ""} →
                       </Link>
                     )}
-                  </div>
-                  <div className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-                    {lastReason && (
-                      <p className="min-w-0 flex-1 text-sm text-ops-dim md:truncate" title={readable(lastReason)}>
-                        {readable(lastReason)}
-                      </p>
-                    )}
                     {/* The confidence is the fast path's; once verification changed the answer it is not this answer's. */}
-                    {decision && !answerChanged && <Confidence value={decision.confidence} />}
+                    {decision && !answerChanged && decision.confidence > 0 && <Confidence value={decision.confidence} />}
                   </div>
                   {decision && answerChanged && (
                     <p className="mt-1 text-xs text-ops-dim">
@@ -268,153 +292,149 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                       </span>
                     </p>
                   )}
-                </div>
+                </>
               )}
-              <Actions
-                reportId={report.id}
-                analysisId={analysis.id}
-                final={final ?? null}
-                focusId={focusId}
-                askFor={photos.length === 0 ? "photo" : "wider_context"}
-                decided={decided}
-                stale={changes.length > 0}
-                verify={verifiable ? { analysisId: analysis!.id, running: verifying, again: runs.length > 0 } : null}
-                verifyLimit={verifyLimit}
-                brief={briefable ? { analysisId: analysis!.id, again: briefs.length > 0 } : null}
-                briefLimit={briefLimit}
-              />
-            </section>
+            </Actions>
             <VerifyProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} runningSince={verifying ? String(report.verify_claimed_at) : null} />
             <BriefProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} />
           </div>
           {changes.length > 0 && <OutOfDate changes={changes} reportId={report.id} analysisId={analysis.id} />}
-          {verdict && !decided && changes.length === 0 && <VerdictCard verdict={verdict} />}
-          {latestBrief && <BriefCard stored={latestBrief} stale={latestBrief.analysis_id !== analysis.id} names={names} />}
 
           <div className="mt-2 grid gap-4 xl:grid-cols-[1fr_380px]">
             <div className="min-w-0 space-y-4">
-              {/* Evidence */}
-              <div className={`grid gap-4 ${ruledOut ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2"}`}>
-                <Panel title="New report" aside={`seen ${when(report.observed_at)}`}>
-                  {photos.length === 0 ? (
-                    <div className="flex aspect-[3/2] items-center justify-center rounded-md border border-dashed border-ops-line p-6 text-center text-sm text-ops-dim">
-                      No photo. Words and GPS cannot tell this place from a look-alike nearby, so nothing was matched.
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <MaskedPhoto
-                        variant="ops"
-                        src={`/api/images/${photos[0]!.id}?w=960`}
-                        width={photos[0]!.width}
-                        height={photos[0]!.height}
-                        maskPath={seg(photos[0]!.id)?.mask_svg_path}
-                        box={seg(photos[0]!.id)?.box as Box | null}
-                        synthetic={photos[0]!.is_synthetic}
-                      />
-                      {photos.length > 1 && (
-                        <div className="grid grid-cols-3 gap-2">
-                          {photos.slice(1).map((p) => (
-                            <MaskedPhoto
-                              key={p.id}
-                              variant="ops"
-                              src={`/api/images/${p.id}?w=480`}
-                              width={p.width}
-                              height={p.height}
-                              maskPath={seg(p.id)?.mask_svg_path}
-                              box={seg(p.id)?.box as Box | null}
-                              synthetic={p.is_synthetic}
-                              caption="sent when asked"
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Panel>
-                {ruledOut && focus && shownMatch?.result ? (
-                  <Panel
-                    title={`Ruled out: incident ${focus.id}`}
-                    aside={<MatchChip verdict="different" confidence={shownMatch.result.asset_match.confidence} crops={shownMatch.stage === 2} />}
-                  >
-                    <p className="text-sm text-ops-text">
-                      The nearest {focus.title ?? "incident"}
-                      {focusDistance !== undefined ? `, ${Math.round(focusDistance)} m away,` : ""} is a different place or fixture, so this report was kept
-                      apart from it.
-                    </p>
-                    <ul className="mt-3 space-y-1.5 text-[13px] text-ops-dim">
-                      {shownMatch.result.asset_match.evidence.slice(0, 3).map((e, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-rose-300" />
-                          {photoWords(e, focus.id)}
-                        </li>
-                      ))}
-                    </ul>
-                    {candidatePhoto && (
-                      <details className="group mt-4">
-                        <summary className="cursor-pointer select-none text-[13px] font-medium text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white">
-                          <span className="group-open:hidden">Show its photo</span>
-                          <span className="hidden group-open:inline">Hide its photo</span>
-                        </summary>
-                        <div className="mt-3">
-                          <MaskedPhoto
-                            variant="ops"
-                            src={`/api/images/${candidatePhoto}?w=480`}
-                            width={candidateFacts?.width ?? 1920}
-                            height={candidateFacts?.height ?? 1280}
-                            maskPath={seg(candidatePhoto)?.mask_svg_path}
-                            box={seg(candidatePhoto)?.box as Box | null}
-                            synthetic={candidateFacts?.is_synthetic ?? false}
-                            caption={`${focus.id}, not this report`}
-                          />
-                        </div>
-                      </details>
-                    )}
-                  </Panel>
-                ) : (
-                  <Panel
-                    title={
-                      focus
-                        ? linked
-                          ? `Linked incident ${focus.id}`
-                          : compared
-                            ? `Compared with incident ${focus.id}`
-                            : `Nearest incident ${focus.id}`
-                        : "No incident nearby"
-                    }
-                    aside={
-                      focus ? (
-                        <span className="flex items-center gap-2">
-                          {shownMatch?.result && (
-                            <MatchChip
-                              verdict={shownMatch.result.asset_match.verdict}
-                              confidence={shownMatch.result.asset_match.confidence}
-                              crops={shownMatch.stage === 2}
-                            />
-                          )}
-                          {`${focus.status}${compared ? "" : " · not compared"}`}
-                        </span>
-                      ) : undefined
-                    }
-                  >
-                    {candidatePhoto ? (
-                      <MaskedPhoto
-                        variant="ops"
-                        src={`/api/images/${candidatePhoto}?w=960`}
-                        width={candidateFacts?.width ?? 1920}
-                        height={candidateFacts?.height ?? 1280}
-                        maskPath={seg(candidatePhoto)?.mask_svg_path}
-                        box={seg(candidatePhoto)?.box as Box | null}
-                        synthetic={candidateFacts?.is_synthetic ?? false}
-                        caption={focus?.title}
-                      />
+              {/* Evidence: both photos side by side when the suggestion rests on a comparison with this incident. */}
+              {sideBySide && focus && candidatePhoto && best?.result ? (
+                <PhotoComparison
+                  report={{ observed: report.observed_at, photos, newImageId: best.new_image_id }}
+                  incident={{ id: focus.id, title: focus.title, status: focus.status, resolved: focus.resolved_at, photo: candidatePhoto, facts: candidateFacts }}
+                  comparison={best}
+                  linked={linked}
+                  segmentations={segmentations}
+                  names={names}
+                />
+              ) : (
+                <div className={`grid gap-4 ${ruledOut ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2"}`}>
+                  <Panel title="New report" aside={`seen ${when(report.observed_at)}`}>
+                    {photos.length === 0 ? (
+                      <div className="flex min-h-32 items-center justify-center rounded-md border border-dashed border-ops-line p-6 text-center text-sm text-ops-dim">
+                        {noPhotoText(decision?.reasons.at(-1)?.rule_id)}
+                      </div>
                     ) : (
-                      <div className="flex aspect-[3/2] items-center justify-center rounded-md border border-dashed border-ops-line text-sm text-ops-dim">
-                        Nothing of this kind within the search radius.
+                      <div className="space-y-3">
+                        <MaskedPhoto
+                          variant="ops"
+                          src={`/api/images/${photos[0]!.id}?w=960`}
+                          width={photos[0]!.width}
+                          height={photos[0]!.height}
+                          maskPath={seg(photos[0]!.id)?.mask_svg_path}
+                          box={seg(photos[0]!.id)?.box as Box | null}
+                          synthetic={photos[0]!.is_synthetic}
+                        />
+                        {photos.length > 1 && (
+                          <div className="grid grid-cols-3 gap-2">
+                            {photos.slice(1).map((p) => (
+                              <MaskedPhoto
+                                key={p.id}
+                                variant="ops"
+                                src={`/api/images/${p.id}?w=480`}
+                                width={p.width}
+                                height={p.height}
+                                maskPath={seg(p.id)?.mask_svg_path}
+                                box={seg(p.id)?.box as Box | null}
+                                synthetic={p.is_synthetic}
+                                caption="sent when asked"
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </Panel>
-                )}
-              </div>
+                  {ruledOut && focus && shownMatch?.result ? (
+                    <Panel
+                      title={`Ruled out: incident ${focus.id}`}
+                      aside={<MatchChip verdict="different" confidence={shownMatch.result.asset_match.confidence} crops={shownMatch.stage === 2} />}
+                    >
+                      <p className="text-sm text-ops-text">
+                        The nearest {focus.title ?? "incident"}
+                        {focusDistance !== undefined ? `, ${Math.round(focusDistance)} m away,` : ""} is a different place or fixture, so this report was kept
+                        apart from it.
+                      </p>
+                      <ul className="mt-3 space-y-1.5 text-[13px] text-ops-dim">
+                        {shownMatch.result.asset_match.evidence.slice(0, 3).map((e, i) => (
+                          <li key={i} className="flex gap-2">
+                            <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-rose-300" />
+                            {photoWords(e, focus.id)}
+                          </li>
+                        ))}
+                      </ul>
+                      {candidatePhoto && (
+                        <details className="group mt-4">
+                          <summary className="cursor-pointer select-none text-[13px] font-medium text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white">
+                            <span className="group-open:hidden">Show its photo</span>
+                            <span className="hidden group-open:inline">Hide its photo</span>
+                          </summary>
+                          <div className="mt-3">
+                            <MaskedPhoto
+                              variant="ops"
+                              src={`/api/images/${candidatePhoto}?w=480`}
+                              width={candidateFacts?.width ?? 1920}
+                              height={candidateFacts?.height ?? 1280}
+                              maskPath={seg(candidatePhoto)?.mask_svg_path}
+                              box={seg(candidatePhoto)?.box as Box | null}
+                              synthetic={candidateFacts?.is_synthetic ?? false}
+                              caption={`${focus.id}, not this report`}
+                            />
+                          </div>
+                        </details>
+                      )}
+                    </Panel>
+                  ) : (
+                    <Panel
+                      title={
+                        focus
+                          ? linked
+                            ? `Linked incident ${focus.id}`
+                            : compared
+                              ? `Compared with incident ${focus.id}`
+                              : `Nearest incident ${focus.id}`
+                          : "No incident nearby"
+                      }
+                      aside={
+                        focus ? (
+                          <span className="flex items-center gap-2">
+                            {shownMatch?.result && (
+                              <MatchChip
+                                verdict={shownMatch.result.asset_match.verdict}
+                                confidence={shownMatch.result.asset_match.confidence}
+                                crops={shownMatch.stage === 2}
+                              />
+                            )}
+                            {`${focus.status}${compared ? "" : " · not compared"}`}
+                          </span>
+                        ) : undefined
+                      }
+                    >
+                      {candidatePhoto ? (
+                        <MaskedPhoto
+                          variant="ops"
+                          src={`/api/images/${candidatePhoto}?w=960`}
+                          width={candidateFacts?.width ?? 1920}
+                          height={candidateFacts?.height ?? 1280}
+                          maskPath={seg(candidatePhoto)?.mask_svg_path}
+                          box={seg(candidatePhoto)?.box as Box | null}
+                          synthetic={candidateFacts?.is_synthetic ?? false}
+                          caption={focus?.title}
+                        />
+                      ) : (
+                        <div className="flex min-h-32 items-center justify-center rounded-md border border-dashed border-ops-line p-6 text-center text-sm text-ops-dim">
+                          {focus ? "No photo of this incident to show." : "Nothing of this kind within the search radius."}
+                        </div>
+                      )}
+                    </Panel>
+                  )}
+                </div>
+              )}
 
               <PipelineTrace
                 hasMessage={Boolean(report.description || report.audio_path)}
@@ -441,7 +461,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               {candidates.length > 0 && (
                 <Panel title="Nearby incidents checked" aside={`${candidates.length} within the search radius`}>
                   <table className="w-full text-[13px]">
-                    <thead className="text-left text-[11px] uppercase tracking-wider text-ops-dim">
+                    <thead className="text-left text-xs text-ops-dim">
                       <tr>
                         <th className="pb-2 font-normal">Incident</th>
                         <th className="pb-2 font-normal">Status</th>
@@ -507,7 +527,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                       <li key={i} className={`flex gap-2.5 ${last ? "rounded-md bg-ops-raised px-2.5 py-2" : "px-2.5"}`}>
                         <span className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full ${last ? "bg-white" : "bg-ops-dim"}`} />
                         <span className="min-w-0 flex-1">
-                          {last && <span className="mb-0.5 block text-[10px] font-semibold uppercase tracking-[0.12em] text-ops-dim">Result</span>}
+                          {last && <span className="mb-0.5 block text-xs text-ops-dim">Result</span>}
                           <span className={last ? "font-medium text-white" : "text-ops-text"}>{readable(r.text)}</span>
                         </span>
                         <span className="shrink-0 pt-px font-mono text-[10px] text-ops-dim" title={`Rule ${r.rule_id}`}>
@@ -517,9 +537,9 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                     );
                   })}
                 </ol>
-                {best?.result && (
+                {best?.result && !sideBySide && !ruledOut && (
                   <>
-                    <h3 className="mt-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-ops-dim">What the photos show</h3>
+                    <h3 className="mt-4 text-[13px] font-medium text-ops-text">What the photos show</h3>
                     <p className="mt-1 text-[11px] text-ops-dim">
                       From the {best.stage === 2 && !best.fallback ? "cut-out" : "whole photo"} comparison of {names[best.new_image_id] ?? "the report's photo"} with{" "}
                       {names[best.candidate_image_id] ?? `${best.incident_id}'s photo`}, model confidence {pct(best.result.asset_match.confidence)}.
@@ -537,6 +557,10 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 )}
               </Panel>
 
+              {/* What the agents found sits beside the evidence, never between the decision and the photos. */}
+              {verdict && !decided && changes.length === 0 && <VerdictCard verdict={verdict} />}
+              {latestBrief && <BriefCard stored={latestBrief} stale={latestBrief.analysis_id !== analysis.id} names={names} />}
+
               {(report.description || report.audio_path || intake) && (
                 <Panel title="Resident's message">
                   {report.description && <p className="text-sm">“{report.description}”</p>}
@@ -545,7 +569,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                     <div className="mt-2 space-y-2">
                       <audio controls src={`/api/reports/${report.id}/audio`} className="h-9 w-full" />
                       <p className="text-[13px] text-ops-dim">
-                        <span className="text-[11px] uppercase tracking-wider">Muse Voice Transcribe</span>
+                        <span className="text-xs">Transcribed by Muse Voice Transcribe</span>
                         <br />
                         {report.transcript ? `“${report.transcript}”` : "not yet transcribed"}
                       </p>
@@ -567,7 +591,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 <Panel title="Questions to the resident">
                   {questions.map((q) => (
                     <div key={q.id} className="text-[13px]">
-                      <span className={`font-mono text-[10px] uppercase ${q.status === "pending" ? "text-violet-300" : "text-ops-dim"}`}>
+                      <span className={`text-xs ${q.status === "pending" ? "text-amber-300" : "text-ops-dim"}`}>
                         {q.source === "staff"
                           ? "asked by staff"
                           : q.source === "agent"
@@ -610,13 +634,176 @@ function MatchChip({ verdict, confidence, crops }: { verdict: string; confidence
   );
 }
 
+type PhotoRow = { id: string; width: number; height: number; is_synthetic: boolean };
+type SegRow = { noun_phrase: string; mask_svg_path: string | null; box: unknown; object_crop_id: string | null; context_crop_id: string | null };
+
+// The comparison the suggestion rests on, read left to right: both photos, the cut-outs the model compared,
+// and what it said about the fixture and about the problem. Dates are not here on purpose; the rules add them.
+function PhotoComparison({
+  report,
+  incident,
+  comparison,
+  linked,
+  segmentations,
+  names,
+}: {
+  report: { observed: string; photos: PhotoRow[]; newImageId: string };
+  incident: { id: string; title: string | null; status: string; resolved: string | null; photo: string; facts: { width: number; height: number; is_synthetic: boolean } | undefined };
+  comparison: Comparison;
+  linked: boolean;
+  segmentations: Record<string, SegRow | undefined>;
+  names: Record<string, string>;
+}) {
+  const result = comparison.result!;
+  const seg = (id: string) => segmentations[id];
+  const crops = comparison.stage === 2 && !comparison.fallback;
+  const reportCrops = crops ? seg(report.newImageId) : undefined;
+  const incidentCrops = crops ? seg(comparison.candidate_image_id) : undefined;
+  const showCrops = Boolean(reportCrops?.object_crop_id && incidentCrops?.object_crop_id);
+  const [first, ...more] = report.photos;
+  const fixed = incident.status === "resolved" || incident.status === "closed";
+  const words = (text: string) => photoWords(text, incident.id);
+  return (
+    <Panel
+      title={linked ? `Compared with ${incident.id}, the incident it suggests` : `Compared with ${incident.id}`}
+      aside={<MatchChip verdict={result.asset_match.verdict} confidence={result.asset_match.confidence} crops={crops} />}
+    >
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="min-w-0 space-y-2">
+          <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+            <span className="font-medium text-white">This report</span>
+            <span className="text-xs text-ops-dim">seen {when(report.observed)}</span>
+          </p>
+          <MaskedPhoto
+            variant="ops"
+            className="mx-auto"
+            style={upToLandscape(first!.width, first!.height)}
+            src={`/api/images/${first!.id}?w=960`}
+            width={first!.width}
+            height={first!.height}
+            maskPath={seg(first!.id)?.mask_svg_path}
+            box={seg(first!.id)?.box as Box | null}
+            synthetic={first!.is_synthetic}
+          />
+          {more.length > 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {more.map((p) => (
+                <MaskedPhoto
+                  key={p.id}
+                  variant="ops"
+                  src={`/api/images/${p.id}?w=480`}
+                  width={p.width}
+                  height={p.height}
+                  maskPath={seg(p.id)?.mask_svg_path}
+                  box={seg(p.id)?.box as Box | null}
+                  synthetic={p.is_synthetic}
+                  caption="sent when asked"
+                />
+              ))}
+            </div>
+          )}
+          {showCrops && <Crops seg={reportCrops!} synthetic={first!.is_synthetic} />}
+        </div>
+        <div className="min-w-0 space-y-2">
+          <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+            <Link href={`/admin/incidents/${incident.id}`} className="font-mono font-medium text-white underline decoration-ops-line underline-offset-2 hover:decoration-white">
+              {incident.id}
+            </Link>
+            <span className="text-xs text-ops-dim">{[incident.title, fixed ? `fixed ${when(incident.resolved)}` : incident.status].filter(Boolean).join(" · ")}</span>
+          </p>
+          <MaskedPhoto
+            variant="ops"
+            className="mx-auto"
+            style={upToLandscape(incident.facts?.width ?? 1920, incident.facts?.height ?? 1280)}
+            src={`/api/images/${incident.photo}?w=960`}
+            width={incident.facts?.width ?? 1920}
+            height={incident.facts?.height ?? 1280}
+            maskPath={seg(incident.photo)?.mask_svg_path}
+            box={seg(incident.photo)?.box as Box | null}
+            synthetic={incident.facts?.is_synthetic ?? false}
+          />
+          {showCrops && <Crops seg={incidentCrops!} synthetic={incident.facts?.is_synthetic ?? false} />}
+        </div>
+      </div>
+      <div className="mt-4 grid gap-4 border-t border-ops-line pt-4 md:grid-cols-2">
+        <Finding question="Same place or fixture?" verdict={result.asset_match.verdict} lines={result.asset_match.evidence.map(words)} />
+        <Finding question="Same problem?" verdict={result.damage.same_damage_signature} lines={result.damage.evidence.map(words)} />
+      </div>
+      <p className="mt-3 text-xs text-ops-dim">
+        Muse Spark compared {crops ? "the SAM 3.1 cut-outs" : "the whole photos"} of {names[comparison.new_image_id] ?? "the report's photo"} and{" "}
+        {names[comparison.candidate_image_id] ?? `${incident.id}'s photo`} without seeing any dates. {words(result.summary)}
+      </p>
+    </Panel>
+  );
+}
+
+// The two cut-outs SAM made from one photo: what triage named (a hydrant, but for a place problem the pothole or
+// pile itself), and a crop three times its size that keeps the landmarks around it.
+function Crops({ seg, synthetic }: { seg: SegRow; synthetic: boolean }) {
+  const parts = [
+    { what: seg.noun_phrase, object: true, id: seg.object_crop_id },
+    { what: "surroundings", object: false, id: seg.context_crop_id },
+  ].filter((p): p is { what: string; object: boolean; id: string } => p.id !== null);
+  return (
+    <div className="flex gap-2">
+      {parts.map((p) => (
+        <figure key={p.id} className={p.object ? "w-28 shrink-0" : "min-w-0 flex-1"}>
+          <div className="relative h-28 overflow-hidden rounded-md border border-ops-line bg-black">
+            {/* eslint-disable-next-line @next/next/no-img-element -- crops come from our own image route, already sized */}
+            <img src={`/api/images/${p.id}?w=480`} alt={`SAM 3.1 cut-out: ${p.what}`} className={`h-full w-full ${p.object ? "object-contain" : "object-cover"}`} />
+            {/* Bottom corner: the top of a fixture (caps, dome, lamp) is usually what tells two apart. */}
+            {synthetic && (
+              <span className="absolute bottom-1 left-1">
+                <SyntheticBadge />
+              </span>
+            )}
+          </div>
+          <figcaption className="mt-1 truncate text-[11px] text-ops-dim" title={p.object ? `SAM 3.1 cut out "${p.what}", with a 10% margin` : "Three times the size of the cut-out, so the landmarks around it stay in view"}>
+            Cut-out: {p.what}
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
+function Finding({ question, verdict, lines }: { question: string; verdict: string; lines: string[] }) {
+  const tone = verdict === "same" ? "text-white" : verdict === "different" ? "text-rose-300" : "text-amber-300";
+  return (
+    <div>
+      <p className="flex items-baseline gap-2 text-sm">
+        <span className="text-ops-dim">{question}</span>
+        <span className={`font-semibold ${tone}`}>{VERDICT_TEXT[verdict] ?? verdict}</span>
+      </p>
+      <ul className="mt-1.5 space-y-1 text-[13px] text-ops-text">
+        {lines.map((line, i) => (
+          <li key={i} className="flex gap-2">
+            <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-ops-dim" />
+            {line}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// A photo taller than 3:2 is narrowed until it is no taller than a 3:2 one of the full width.
+const upToLandscape = (width: number, height: number) => (width / height < 1.5 ? { maxWidth: `${((width / height) / 1.5) * 100}%` } : undefined);
+
+// Why a report without a photo was not matched: the rule that stopped it, not only the missing photo.
+function noPhotoText(rule: string | undefined): string {
+  if (rule === "R0e") return "No photo. Matching was skipped because this may be an emergency.";
+  if (rule === "R0s") return "No photo. Reports about people or behavior are never matched by image.";
+  return "No photo. Words and GPS cannot tell this place from a look-alike nearby, so nothing was matched.";
+}
+
 function Notice({ children }: { children: React.ReactNode }) {
   return <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">{children}</div>;
 }
 
 function Confidence({ value }: { value: number }) {
   return (
-    <span className="ml-auto flex items-center gap-2 text-[11px] text-ops-dim" title="The comparison model's own confidence in the verdict this suggestion rests on. Not a measured accuracy.">
+    <span className="flex items-center gap-2 text-xs text-ops-dim" title="The comparison model's own confidence in the verdict this suggestion rests on. Not a measured accuracy.">
       model confidence
       <span className="relative h-1.5 w-24 overflow-hidden rounded-full bg-ops-raised">
         <span className="absolute inset-y-0 left-0 rounded-full bg-zinc-300" style={{ width: pct(value) }} />
@@ -703,9 +890,18 @@ function PipelineTrace(props: {
       tone: guard ? (guard.passed ? "ok" : "stop") : "skip",
     },
   ];
+  // Collapsed: staff read the suggestion and the photos first; the stages are for whoever checks the run.
   return (
-    <div className="rounded-lg border border-ops-line bg-ops-panel p-1">
-      <ol className="flex flex-wrap items-stretch">
+    <details className="group rounded-lg border border-ops-line bg-ops-panel">
+      <summary className="flex cursor-pointer select-none list-none items-center gap-3 px-4 py-2.5 text-[13px] [&::-webkit-details-marker]:hidden">
+        <svg viewBox="0 0 12 12" aria-hidden className="h-3 w-3 text-ops-dim transition group-open:rotate-90">
+          <path d="M4.5 2.5 8 6l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="font-medium text-ops-text">How the pipeline got here</span>
+        <span className="text-xs text-ops-dim">message, photo check, search, SAM 3.1, comparison, rules, verification</span>
+        {decision && <span className="ml-auto hidden font-mono text-[11px] text-ops-dim sm:inline">{decision.reasons.map((r) => r.rule_id).join(" → ")}</span>}
+      </summary>
+      <ol className="flex flex-wrap items-stretch border-t border-ops-line p-1">
         {steps.map((s, i) => (
           <li key={s.name} className="flex items-center">
             <div className={`m-2 min-w-[118px] rounded-md border-l-2 bg-ops-raised px-3 py-2 ${STEP_TONE[s.tone]}`}>
@@ -724,7 +920,7 @@ function PipelineTrace(props: {
           </li>
         )}
       </ol>
-    </div>
+    </details>
   );
 }
 
@@ -739,26 +935,53 @@ function TimeBar({ observed, submitted, created, resolved }: { observed: string;
   const times = marks.map((m) => new Date(m.t).getTime());
   const [min, max] = [Math.min(...times), Math.max(...times)];
   const pos = (t: string) => (max === min ? 50 : ((new Date(t).getTime() - min) / (max - min)) * 100);
+  // The stretch between the repair and the resident's sighting is the whole question: before it, a late
+  // report; after it, the problem may be back.
+  const gap = resolved
+    ? (() => {
+        const after = Date.parse(observed) > Date.parse(resolved);
+        const [from, to] = after ? [resolved, observed] : [observed, resolved];
+        return { left: pos(from), width: pos(to) - pos(from), after, text: `${span(Date.parse(to) - Date.parse(from))} ${after ? "after" : "before"} the repair` };
+      })()
+    : null;
   return (
     <Panel title="Timeline">
-      <div className="relative mx-3 mb-20 mt-3 h-px bg-ops-line">
+      <div className="relative mx-3 mb-20 mt-10 h-px bg-ops-line">
+        {gap && (
+          <>
+            <div className={`absolute -top-px h-[3px] rounded-full ${gap.after ? "bg-rose-400" : "bg-sky-400"}`} style={{ left: `${gap.left}%`, width: `${gap.width}%` }} />
+            <div
+              className={`absolute -top-8 -translate-x-1/2 whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium ${gap.after ? "bg-rose-500/15 text-rose-200" : "bg-sky-500/15 text-sky-200"}`}
+              style={{ left: `${Math.min(88, Math.max(12, gap.left + gap.width / 2))}%` }}
+            >
+              Seen {gap.text}
+            </div>
+          </>
+        )}
         {marks.map((m, i) => (
           <div key={m.text} className="absolute -top-1.5" style={{ left: `${pos(m.t)}%` }}>
             <div className={`h-3 w-3 -translate-x-1/2 rounded-full ring-4 ring-ops-panel ${m.color}`} />
             {/* Labels alternate between two rows so close marks do not overlap, and hug the ends of the bar. */}
             <div
-              className={`absolute w-32 text-[11px] leading-tight ${pos(m.t) > 85 ? "right-0 text-right" : pos(m.t) < 15 ? "left-0 text-left" : "-translate-x-1/2 text-center"}`}
+              className={`absolute w-32 text-xs leading-tight ${pos(m.t) > 85 ? "right-0 text-right" : pos(m.t) < 15 ? "left-0 text-left" : "-translate-x-1/2 text-center"}`}
               style={{ top: i % 2 ? 52 : 16 }}
             >
               <span className="text-ops-text">{m.text}</span>
               <br />
-              <span className="font-mono text-ops-dim">{when(m.t)}</span>
+              <span className="text-ops-dim tabular-nums">{when(m.t)}</span>
             </div>
           </div>
         ))}
       </div>
     </Panel>
   );
+}
+
+function span(ms: number): string {
+  const min = Math.round(ms / 60_000);
+  if (min < 60) return `${min} min`;
+  const h = Math.round(min / 60);
+  return h < 48 ? `${h}h` : `${Math.round(h / 24)} days`;
 }
 
 function Investigation({ runs, currentRunId }: { runs: Run[]; currentRunId: number | null }) {
@@ -855,19 +1078,34 @@ const VERDICT_TONE: Record<Verdict["kind"], { box: string; dot: string; title: s
   unsettled: { box: "border-ops-line bg-ops-panel", dot: "bg-zinc-400", title: "text-zinc-100" },
 };
 
-// What the verification found, in one card: the answer first, then the comparisons behind it.
+// The verification's answer in one line under the decision; the comparisons behind it are in the card beside the evidence.
+function VerdictLine({ verdict }: { verdict: Verdict }) {
+  const tone = VERDICT_TONE[verdict.kind];
+  return (
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      <span className={`h-2 w-2 shrink-0 rounded-full ${tone.dot}`} />
+      <span className={`font-medium ${tone.title}`}>{verdict.title}</span>
+      {verdict.kind === "confirmed" && verdict.detail && <span className="text-ops-dim">{verdict.detail}</span>}
+      <a href="#verification" className="text-xs text-ops-dim underline decoration-ops-line underline-offset-2 hover:text-white">
+        Details
+      </a>
+    </p>
+  );
+}
+
+// What the verification found: the answer first, then the comparisons behind it.
 function VerdictCard({ verdict }: { verdict: Verdict }) {
   const tone = VERDICT_TONE[verdict.kind];
   return (
-    <section className={`mt-2 rounded-lg border px-4 py-3 ${tone.box}`}>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+    <section id="verification" className={`scroll-mt-72 rounded-lg border px-4 py-3 ${tone.box}`}>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span className={`h-2 w-2 shrink-0 rounded-full ${tone.dot}`} />
         <p className={`font-semibold ${tone.title}`}>{verdict.title}</p>
-        <span className="text-[11px] text-ops-dim">Verification agent, requested by staff</span>
       </div>
-      {verdict.detail && <p className="mt-1 text-sm text-ops-text">{verdict.detail}</p>}
+      <p className="mt-0.5 text-xs text-ops-dim">Verification agent, requested by staff</p>
+      {verdict.detail && <p className="mt-2 text-sm text-ops-text">{verdict.detail}</p>}
       {(verdict.against.length > 0 || verdict.agree.length > 0) && (
-        <ul className="mt-2 grid gap-x-6 gap-y-1 text-[12px] sm:grid-cols-2">
+        <ul className="mt-2 space-y-1 text-[13px]">
           {verdict.against.map((line) => (
             <li key={line} className="flex gap-2 text-orange-200">
               <span className="w-3 shrink-0 text-center">✕</span>
@@ -884,8 +1122,8 @@ function VerdictCard({ verdict }: { verdict: Verdict }) {
       )}
       <p className="mt-2 text-[11px] text-ops-dim">
         {verdict.kind === "confirmed"
-          ? "The checks back the suggestion. The white button above applies it."
-          : "Decide from the evidence below. The full run is under Verification agent."}
+          ? "The checks back the suggestion. The suggested decision above applies it."
+          : "Decide from the evidence beside this. The full run is under Verification agent."}
       </p>
     </section>
   );

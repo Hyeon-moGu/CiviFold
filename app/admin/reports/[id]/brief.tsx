@@ -10,7 +10,7 @@ import { createContext, useContext, useEffect, useState, useTransition, type Rea
 import type { BriefEvent, BriefResult } from "@/lib/server/briefs";
 import type { BriefFact } from "@/lib/agent/brief";
 import type { Brief } from "@/lib/tools/write-brief";
-import { Panel } from "@/app/_ui/console";
+import { when } from "@/app/_ui/format";
 import { plural, summarize, TOOL_TEXT, type StepView } from "./steps";
 import { clockOf, Spinner, useElapsed } from "./verify";
 
@@ -162,21 +162,25 @@ const SECTION_TEXT: Record<string, string> = {
 };
 
 // Fact texts and step results carry image ids; staff read names instead. A dataset id names the photo's state,
-// so an id without a name is still hidden.
+// so an id without a name is still hidden. Their UTC timestamps are shown in the zone the rest of the page uses.
 const LEFTOVER_ID = /\b(?:syn_[A-Za-z0-9_]+|img_[0-9a-f]+)\b/g;
+const ISO_TIME = /\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\b/g;
 
 function nameIds(text: string, names: Record<string, string>): string {
   let out = text;
   for (const id of Object.keys(names).sort((a, b) => b.length - a.length)) out = out.split(id).join(names[id]);
-  return out.replace(LEFTOVER_ID, "a photo");
+  out = out.replace(LEFTOVER_ID, "a photo").replace(ISO_TIME, (t) => when(t));
+  // A name put in place of an id can open the sentence ("this report shows ..."); an id itself keeps its case.
+  return /^(?:this|the) /.test(out) ? out.charAt(0).toUpperCase() + out.slice(1) : out;
 }
 
 type OpenChip = { open: string | null; toggle: (key: string) => void };
 
-// The refs behind an item. Each chip opens a popover with the fact or tool result it names; one is open at a time.
-function Refs({ id, refs, explain, chip }: { id: string; refs: string[]; explain: (ref: string) => string; chip: OpenChip }) {
+// The refs behind an item, as small numbers. Each opens a popover with the fact or tool result it names;
+// one is open at a time. Numbers follow first appearance in the brief, so the same evidence keeps its number.
+function Refs({ id, refs, number, explain, chip }: { id: string; refs: string[]; number: (ref: string) => number; explain: (ref: string) => string; chip: OpenChip }) {
   return (
-    <span className="ml-1.5 inline-flex flex-wrap gap-1 align-middle">
+    <sup className="ml-0.5 inline-flex gap-0.5 align-super">
       {refs.map((ref) => {
         const key = `${id}-${ref}`;
         const open = chip.open === key;
@@ -187,33 +191,41 @@ function Refs({ id, refs, explain, chip }: { id: string; refs: string[]; explain
               onClick={() => chip.toggle(key)}
               aria-expanded={open}
               aria-controls={open ? `brief-ref-${key}` : undefined}
-              className={`rounded border px-1 font-mono text-[10px] leading-4 transition ${open ? "border-violet-300 bg-violet-500/30 text-white" : "border-violet-500/40 bg-violet-500/10 text-violet-200 hover:bg-violet-500/20"}`}
+              aria-label={`Evidence ${number(ref)}: ${ref.replace("_", " ")}`}
+              className={`min-w-[1.1rem] rounded px-1 font-mono text-[10px] leading-4 transition ${open ? "bg-violet-400 text-slate-950" : "bg-violet-500/20 text-violet-200 hover:bg-violet-500/35"}`}
             >
-              {ref.replace("_", " ")}
+              {number(ref)}
             </button>
             {open && (
               <span
                 id={`brief-ref-${key}`}
                 role="note"
-                className="absolute left-0 top-full z-20 mt-1 block w-72 max-w-[80vw] rounded-md border border-ops-line bg-ops-raised px-3 py-2 text-left text-[12px] font-normal leading-relaxed text-ops-text shadow-lg shadow-black/40"
+                className="absolute right-0 top-full z-20 mt-1 block w-72 max-w-[80vw] rounded-md border border-ops-line bg-ops-raised px-3 py-2 text-left text-[12px] font-normal leading-relaxed text-ops-text shadow-lg shadow-black/40"
               >
-                <span className="mb-0.5 block font-mono text-[10px] uppercase tracking-wider text-violet-300">{ref.replace("_", " ")}</span>
+                <span className="mb-0.5 block font-mono text-[10px] text-violet-300">
+                  {number(ref)} · {ref.replace("_", " ")}
+                </span>
                 {explain(ref)}
               </span>
             )}
           </span>
         );
       })}
-    </span>
+    </sup>
   );
 }
 
-/** The latest stored brief: the summary, its sections, and every item's evidence a click away. */
+// What the brief adds to the screen. The other sections retell the photos, the nearby incidents and the
+// history that the page already shows, so they wait behind "Show all".
+const UP_FRONT = new Set(["missing", "next"]);
+
+/** The latest stored brief beside the evidence: the summary and what is still open, the rest one click away. */
 export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale: boolean; names: Record<string, string> }) {
   const brief = stored.brief as Brief | null;
   const steps = stored.steps as StepView[];
   const facts = stored.facts as BriefFact[];
   const [open, setOpen] = useState<string | null>(null);
+  const [all, setAll] = useState(false);
   useEffect(() => {
     if (open === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -231,63 +243,75 @@ export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale
     return step ? `${TOOL_TEXT[step.tool] ?? step.tool}: ${clean(summarize(step))}` : ref;
   };
   const sections = Object.keys(SECTION_TEXT).map((key) => ({ key, items: (brief?.items ?? []).filter((i) => i.section === key) })).filter((s) => s.items.length > 0);
+  const order = [...(brief?.summary?.evidence_refs ?? []), ...sections.flatMap((s) => s.items.flatMap((i) => i.evidence_refs))];
+  const numbers = new Map([...new Set(order)].map((ref, i) => [ref, i + 1]));
+  const number = (ref: string) => numbers.get(ref) ?? 0;
+  const shown = sections.filter((s) => all || UP_FRONT.has(s.key));
+  const hidden = sections.filter((s) => !UP_FRONT.has(s.key)).reduce((n, s) => n + s.items.length, 0);
   const reads = steps.filter((s) => s.ok && s.tool !== "write_brief").length;
   const called = steps.some((s) => s.tool !== "write_brief");
   return (
-    <Panel
-      title="Case brief"
-      aside={
-        <span className="font-mono">
-          Muse Spark · {called ? plural(reads, "read") : "from the stored facts, no tool calls needed"} · ${stored.cost_usd.toFixed(3)} · {(stored.latency_ms / 1000).toFixed(1)}s
-        </span>
-      }
-      className="border-violet-500/40"
-    >
-      {brief ? (
-        <div className="space-y-4">
-          {brief.summary && (
-            <p className="text-[15px] leading-relaxed text-white">
-              {clean(brief.summary.text)}
-              <Refs id="summary" refs={brief.summary.evidence_refs} explain={explain} chip={chip} />
-            </p>
-          )}
-          {sections.map((s) => (
-            <div key={s.key}>
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-violet-300">{SECTION_TEXT[s.key]}</h3>
-              <ul className="mt-1 space-y-1 text-[13px] text-ops-text">
-                {s.items.map((item, i) => (
-                  <li key={i} className="leading-relaxed">
-                    {clean(item.text)}
-                    <Refs id={`${s.key}-${i}`} refs={item.evidence_refs} explain={explain} chip={chip} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-          {brief.items.length === 0 && <p className="text-sm text-amber-200">Every item the agent wrote lacked evidence, so nothing is shown.</p>}
+    <section id="brief" className="scroll-mt-72 rounded-lg border border-violet-500/40 bg-ops-panel">
+      <header className="flex items-center gap-3 border-b border-ops-line px-4 py-2.5">
+        <h2 className="text-[13px] font-medium text-ops-text">Case brief</h2>
+        <span className="ml-auto text-xs text-ops-dim">Muse Spark · {called ? plural(reads, "read") : "from the stored facts"}</span>
+      </header>
+      <div className="space-y-4 p-4">
+        {brief ? (
+          <>
+            {brief.summary && (
+              <p className="text-[14px] leading-relaxed text-white">
+                {clean(brief.summary.text)}
+                <Refs id="summary" refs={brief.summary.evidence_refs} number={number} explain={explain} chip={chip} />
+              </p>
+            )}
+            {shown.map((s) => (
+              <div key={s.key}>
+                <h3 className="text-[13px] font-medium text-violet-200">{SECTION_TEXT[s.key]}</h3>
+                <ul className="mt-1 space-y-1.5 text-[13px] leading-relaxed text-ops-text">
+                  {s.items.map((item, i) => (
+                    <li key={i}>
+                      {clean(item.text)}
+                      <Refs id={`${s.key}-${i}`} refs={item.evidence_refs} number={number} explain={explain} chip={chip} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            {hidden > 0 && (
+              <button type="button" onClick={() => setAll((a) => !a)} className="text-[13px] font-medium text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white">
+                {all ? "Show less" : `Show all ${plural(brief.items.length, "item")}`}
+              </button>
+            )}
+            {brief.items.length === 0 && <p className="text-sm text-amber-200">Every item the agent wrote lacked evidence, so nothing is shown.</p>}
+          </>
+        ) : (
+          <p className="text-sm text-amber-200">The brief was not finished ({stored.status.replace("_", " ")}{stored.error ? `: ${clean(stored.error)}` : ""}). Its reads are recorded below.</p>
+        )}
+        <div className="space-y-1 border-t border-ops-line pt-2 text-[11px] text-ops-dim">
+          <p>Every item cites a tool result or a pipeline fact; tap a number to read it. The brief decides nothing.</p>
+          {stored.dropped > 0 && <p className="text-amber-300">{plural(stored.dropped, "item")} deleted for lacking evidence.</p>}
+          {stale && <p className="text-amber-300">Written on an earlier analysis of this report.</p>}
         </div>
-      ) : (
-        <p className="text-sm text-amber-200">The brief was not finished ({stored.status.replace("_", " ")}{stored.error ? `: ${clean(stored.error)}` : ""}). Its reads are recorded below.</p>
-      )}
-      <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-ops-line pt-2 text-[11px] text-ops-dim">
-        <span>Every item cites a tool result or a pipeline fact; click a ref to read it.</span>
-        {stored.dropped > 0 && <span className="text-amber-300">{plural(stored.dropped, "item")} deleted for lacking evidence.</span>}
-        {stale && <span className="text-amber-300">Written on an earlier analysis of this report.</span>}
-        <span className="ml-auto">It does not decide anything.</span>
-      </p>
-      {steps.length > 0 && (
-        <ol className="mt-3 space-y-1 text-[12px]">
-          {steps.map((s) => (
-            <li key={s.ref} className="flex gap-2.5">
-              <span className="w-12 shrink-0 font-mono text-[10px] text-ops-dim">{s.ref.replace("_", " ")}</span>
-              <span className="min-w-0">
-                <span className="font-medium text-white">{TOOL_TEXT[s.tool] ?? s.tool}</span>
-                <span className={`ml-2 break-words ${s.ok ? "text-ops-text" : "text-rose-300"}`}>{clean(summarize(s))}</span>
-              </span>
-            </li>
-          ))}
-        </ol>
-      )}
-    </Panel>
+        {steps.length > 0 && (
+          <details className="group text-[12px]">
+            <summary className="cursor-pointer select-none text-ops-dim hover:text-white">
+              What the agent read ({plural(steps.length, "step")}, ${stored.cost_usd.toFixed(3)}, {(stored.latency_ms / 1000).toFixed(1)}s)
+            </summary>
+            <ol className="mt-2 space-y-1">
+              {steps.map((st) => (
+                <li key={st.ref} className="flex gap-2.5">
+                  <span className="w-12 shrink-0 font-mono text-[10px] text-ops-dim">{st.ref.replace("_", " ")}</span>
+                  <span className="min-w-0">
+                    <span className="font-medium text-white">{TOOL_TEXT[st.tool] ?? st.tool}</span>
+                    <span className={`ml-2 break-words ${st.ok ? "text-ops-text" : "text-rose-300"}`}>{clean(summarize(st))}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </details>
+        )}
+      </div>
+    </section>
   );
 }

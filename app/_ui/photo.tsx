@@ -14,6 +14,8 @@ export function MaskedPhoto({
   synthetic,
   caption,
   variant = "light",
+  className = "",
+  style,
 }: {
   src: string;
   width: number;
@@ -23,11 +25,13 @@ export function MaskedPhoto({
   synthetic?: boolean;
   caption?: string;
   variant?: "light" | "ops";
+  className?: string;
+  style?: React.CSSProperties;
 }) {
   const frame = variant === "ops" ? "overflow-hidden rounded-md border border-ops-line bg-black" : "overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50";
   const captionTone = variant === "ops" ? "text-ops-dim" : "text-zinc-600";
   return (
-    <figure className={frame}>
+    <figure className={`${frame} ${className}`} style={style}>
       <div className="relative">
         {/* eslint-disable-next-line @next/next/no-img-element -- photos come from our own image route, already sized */}
         <img src={src} alt={caption ?? "Report photo"} className="block h-auto w-full" />
