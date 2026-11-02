@@ -181,6 +181,8 @@ export async function composeBrief(
 
 // What the stored analysis and the preload already show, numbered so the brief can cite each line.
 // Database reads only, no model calls; times stay ISO so a replayed run's first turn matches its recording.
+// The brief itself writes no dates, only times relative to each other (prompts/brief.md): a replayed brief
+// is replayed word for word on a later day, and staff read dates in the demo's zone, not in UTC.
 function briefFacts(report: ReportInput, a: Analysis, known: Known): BriefFact[] {
   const t = a.triage;
   const d = a.decision;

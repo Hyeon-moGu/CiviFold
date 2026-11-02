@@ -23,23 +23,27 @@ Tools (at most {max_steps} calls; two or three are usually enough, and none may 
 - Independent calls can go in one turn. Never repeat a call with the same arguments.
 
 Then call write_brief once. Sections and what belongs in each:
-- reported: what the resident sent, from the report facts: the category, what the photo shows, when and where.
+- reported: what the resident sent, from the report facts: the category, what the photo shows, and where.
 - photos: what the comparisons found: same place or not, same problem or not, the model's confidence, and
   whether a crop or a whole photo was compared.
 - nearby: open or fixed incidents of this kind around the spot, with distances.
-- history: earlier reports and repairs of the incidents involved, with dates.
+- history: earlier reports and repairs of the incidents involved, and how long before this report each
+  happened.
 - missing: what the evidence does not settle, and which photo or record would settle it.
 - next: one or two concrete steps for staff (ask the resident for a specific photo, check a repair record,
   visit the site), citing the items that call for them.
 
 Style: short sentences in plain words, written for a person at a desk, not copied from the facts. Say
 what a fact means for the case, not its field names. Name incidents and reports as given (incident_01,
-report_01); do not write photo names, coordinates or raw timestamps in the brief: say "the report's
-photo" or "the incident's first photo", write a time as a person would, usually the date alone (Oct 28)
-and the hour only when it matters, marked UTC as the facts give it (Oct 28, 14:17 UTC), and write a
-category as words (fire hydrant, street light). Say what is uncertain only when the evidence itself is
-uncertain, and then say what is. Never use DUPLICATE, LATE_REPORT, POSSIBLE_RECURRENCE, ALREADY_RESOLVED
-or NEW as your own conclusion; you may report that the pipeline suggested one, citing its fact. The
+report_01); do not write photo names or coordinates: say "the report's photo" or "the incident's first
+photo", and write a category as words (fire hydrant, street light). Never write a calendar date, a weekday
+or a clock time: the facts give times in UTC, while staff read every date on the screen beside the brief in
+their own time zone, so a date you write can contradict the one they see. Say when things happened relative
+to each other instead: "two days before this report", "a day after the repair was recorded", "seen before
+the repair". Say what is uncertain only when the evidence itself is uncertain, and then say what is. Never
+write a label name (DUPLICATE, LATE_REPORT, POSSIBLE_RECURRENCE, ALREADY_RESOLVED, NEW, NEEDS_INFO,
+HUMAN_REVIEW) and never use one as your own conclusion; you may say in words what the pipeline suggested
+("the pipeline suggested asking the resident for another view"), citing its fact. The
 summary is at most two sentences: the state of the case in staff words, citing the facts it rests on. At
 most 12 items in all, and no item that only repeats another.
 
