@@ -8,7 +8,7 @@ import { at, cand, cmp } from "../pipeline/__fixtures__/builders";
 import { memoryData, type IncidentRow } from "../tools/data";
 import { memoryImages } from "../tools/images";
 import type { ToolContext } from "../tools/types";
-import { geoBaseline, withStage } from "./ablations";
+import { geoBaseline, locationOnly, withStage } from "./ablations";
 
 const HERE = { lat: 37.5665, lng: 126.978 };
 const REPORT: ReportInput = { report_id: "r", image_id: "img_new", ...HERE, observed_at: at("+2d"), description: null, category_hint: "fire_hydrant", already_asked: false };
@@ -44,6 +44,14 @@ describe("geoBaseline", () => {
 
   it("calls a report with nothing nearby new", async () => {
     expect((await geoBaseline(REPORT, ctx([incident("away", 200)]))).decision).toMatchObject({ label: "NEW", incident_id: null });
+  });
+});
+
+describe("locationOnly", () => {
+  // The demo shows this next to each suggestion; it is the same rule geoBaseline decides by.
+  it("names the nearest candidate, whatever its state, or none", () => {
+    expect(locationOnly([cand("I2", "resolved"), cand("I5", "open")])).toEqual({ label: "DUPLICATE", incident_id: "I2" });
+    expect(locationOnly([])).toEqual({ label: "NEW", incident_id: null });
   });
 });
 

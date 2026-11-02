@@ -12,6 +12,8 @@ import { and, asc, desc, eq, inArray, like } from "drizzle-orm";
 import { messageSample } from "../dataset/messages";
 import { sample } from "../dataset/static";
 import { briefs, incidentEvents, incidents, reportAnalyses, reports, staffDecisions } from "../db/schema";
+import { locationOnly } from "../eval/ablations";
+import type { Candidate } from "../pipeline/decide";
 import { seedIncidentId } from "./seed";
 import type { Label } from "../tools/types";
 import { briefReport } from "../server/briefs";
@@ -319,9 +321,41 @@ export async function runStep(rt: Runtime, scenarioId: string, index: number) {
   return analyzed(rt, created);
 }
 
+/**
+ * Runs every step of every scenario, in order, on a freshly seeded world, so a visitor finds the results
+ * already there. Staff decisions are left out: approving a suggestion is the visitor's to do, in the staff
+ * view. A step that fails is reported and the rest still run.
+ */
+export async function playAll(rt: Runtime): Promise<Array<{ step: string; error?: string }>> {
+  const ran: Array<{ step: string; error?: string }> = [];
+  for (const scenario of SCENARIOS) {
+    for (let i = 0; i < scenario.steps.length; i++) {
+      if (scenario.steps[i]!.kind === "decide") continue;
+      const step = `${scenario.id}:${i}`;
+      try {
+        const error = ((await runStep(rt, scenario.id, i)) as { error?: string }).error;
+        ran.push(error ? { step, error } : { step });
+      } catch (err) {
+        ran.push({ step, error: err instanceof Error ? err.message : String(err) });
+      }
+    }
+  }
+  return ran;
+}
+
 export type BriefOutcome = { status: string; kept: number; dropped: number };
+// location_only: what the evaluation's location-only rule says for the same report (no model call), so each
+// case shows the answer CiviFold replaces next to its own.
 export type StepOutcome =
-  | { report_id: string; tracking_code: string; label?: Label; brief?: BriefOutcome; decided?: { action: string; incident_id: string | null } }
+  | {
+      report_id: string;
+      tracking_code: string;
+      label?: Label;
+      incident_id?: string | null;
+      location_only?: ReturnType<typeof locationOnly>;
+      brief?: BriefOutcome;
+      decided?: { action: string; incident_id: string | null };
+    }
   | { done: string };
 
 const briefOutcome = (run: { status: string; brief: { kept: number; dropped: number } | null }): BriefOutcome => ({ status: run.status, kept: run.brief?.kept ?? 0, dropped: run.brief?.dropped ?? 0 });
@@ -366,7 +400,7 @@ export async function demoState(rt: Runtime): Promise<Record<string, StepOutcome
   const ids = tagged.map((r) => r.id);
   const analyses = ids.length
     ? await database
-        .select({ report_id: reportAnalyses.report_id, pipeline_config: reportAnalyses.pipeline_config, final: reportAnalyses.final })
+        .select({ report_id: reportAnalyses.report_id, pipeline_config: reportAnalyses.pipeline_config, final: reportAnalyses.final, candidates: reportAnalyses.candidates })
         .from(reportAnalyses)
         .where(inArray(reportAnalyses.report_id, ids))
         .orderBy(asc(reportAnalyses.id))
@@ -409,7 +443,15 @@ export async function demoState(rt: Runtime): Promise<Record<string, StepOutcome
       const mine = analyses.filter((a) => a.report_id === report.id);
       const fast = mine.filter((a) => a.pipeline_config !== "C_rules+verify");
       const found = own ? fast[0] : step.kind === "answer" ? fast[1] : mine.find((a) => a.pipeline_config === "C_rules+verify");
-      if (found) out[key] = { report_id: report.id, tracking_code: report.tracking_code, label: (found.final as { label: Label }).label };
+      if (!found) return;
+      const final = found.final as { label: Label; incident_id: string | null };
+      out[key] = {
+        report_id: report.id,
+        tracking_code: report.tracking_code,
+        label: final.label,
+        incident_id: final.incident_id,
+        ...(step.kind === "verify" ? {} : { location_only: locationOnly((found.candidates as Candidate[] | null) ?? []) }),
+      };
     });
   }
   return out;

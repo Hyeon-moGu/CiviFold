@@ -6,14 +6,20 @@
 // photo they asked for and C_rules did not.
 import { decideInputOf, toCandidate, type Analysis, type ReportInput } from "../pipeline/analyze";
 import { SEARCH_CONFIG } from "../pipeline/config";
-import { decide } from "../pipeline/decide";
+import { decide, type Candidate } from "../pipeline/decide";
 import { searchIncidents } from "../tools/search-incidents";
 import { Category, type ToolContext } from "../tools/types";
 
 /**
  * The common rule a location-only system applies: any incident of the kind within the search radius
  * means the report is a duplicate of the nearest one, whatever its state or what the photo shows.
+ * Candidates come nearest first, as the search returns them.
  */
+export function locationOnly(candidates: readonly Candidate[]): { label: "DUPLICATE" | "NEW"; incident_id: string | null } {
+  const nearest = candidates[0];
+  return nearest ? { label: "DUPLICATE", incident_id: nearest.incident_id } : { label: "NEW", incident_id: null };
+}
+
 export async function geoBaseline(report: ReportInput, ctx: ToolContext): Promise<Analysis> {
   const start = Date.now();
   const hint = Category.safeParse(report.category_hint);
@@ -29,7 +35,7 @@ export async function geoBaseline(report: ReportInput, ctx: ToolContext): Promis
     ctx,
   );
   const candidates = found.incidents.slice(0, SEARCH_CONFIG.max_candidates).map(toCandidate);
-  const nearest = candidates[0];
+  const geo = locationOnly(candidates);
   return {
     pipeline_config: "C_rules",
     prompt_hash: { triage: "", compare: "" },
@@ -50,8 +56,8 @@ export async function geoBaseline(report: ReportInput, ctx: ToolContext): Promis
     comparisons: [],
     after_fix: null,
     errors: [],
-    decision: nearest
-      ? { label: "DUPLICATE", incident_id: nearest.incident_id, rule_id: "geo", reasons: [{ rule_id: "geo", text: `Nearest incident within ${SEARCH_CONFIG.radius_m[category]} m.` }], confidence: 1, missing_info: [] }
+    decision: geo.incident_id
+      ? { label: "DUPLICATE", incident_id: geo.incident_id, rule_id: "geo", reasons: [{ rule_id: "geo", text: `Nearest incident within ${SEARCH_CONFIG.radius_m[category]} m.` }], confidence: 1, missing_info: [] }
       : { label: "NEW", incident_id: null, rule_id: "geo", reasons: [{ rule_id: "geo", text: "No incident nearby." }], confidence: 1, missing_info: [] },
     cost_usd: 0,
     latency_ms: Date.now() - start,

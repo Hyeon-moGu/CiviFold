@@ -60,7 +60,14 @@ describe("demo scenarios", () => {
     expect(sent.label).toBe("NEW");
     await runStep(rt, "after-repair", 0);
     const state = await demoState(rt);
-    expect(state["lookalike:0"]).toEqual({ report_id: sent.report_id, tracking_code: sent.tracking_code, label: "NEW" });
+    // No incident among the analysis' candidates: the location-only rule would call it new as well.
+    expect(state["lookalike:0"]).toEqual({
+      report_id: sent.report_id,
+      tracking_code: sent.tracking_code,
+      label: "NEW",
+      incident_id: null,
+      location_only: { label: "NEW", incident_id: null },
+    });
     expect(state["after-repair:0"]).toEqual({ done: "Staff record yesterday's repair" });
     expect(state["after-repair:1"]).toBeUndefined();
     expect(state["duplicate:0"]).toBeUndefined();

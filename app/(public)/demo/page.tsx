@@ -36,12 +36,11 @@ function view(): ScenarioView[] {
 export default function DemoPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Try CiviFold in a few clicks</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Seven cases, already run</h1>
       <p className="mt-2 max-w-2xl text-sm text-zinc-600">
-        Sixteen places in a fictional district each have one open incident. Each scenario sends resident reports (synthetic photos, typed messages or
-        synthetic voice recordings) and shows what the system suggests to city staff. Model results are replayed from recorded runs, so the public demo
-        makes no new model calls. The world is shared with other visitors: steps already run show their result, and Reset puts everything back to the
-        start.
+        Sixteen places in a fictional district each have one open incident. Each case sends resident reports (synthetic photos, typed messages or
+        synthetic voice recordings) and shows what CiviFold suggests to city staff, next to what grouping by location alone would do. Model results are
+        replayed from recorded runs, so nothing here calls a model. One thing is left for you: approve a suggestion as staff.
       </p>
       <DemoRunner scenarios={view()} />
     </main>
