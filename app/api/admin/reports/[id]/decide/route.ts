@@ -3,6 +3,7 @@
 
 import { z } from "zod";
 import { handle } from "@/lib/server/http";
+import { limit } from "@/lib/server/rate-limit";
 import { staffDecide, UserError } from "@/lib/server/reports";
 import { runtime as app } from "@/lib/server/runtime";
 import { RequestItem } from "@/lib/tools/types";
@@ -23,7 +24,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const body = Body.safeParse(await req.json().catch(() => null));
     if (!body.success) throw new UserError("Unknown action, or the request does not say which suggestion it was made on. Reload the page.");
     const { action, incident_id, item, analysis_id, facts_changed_seen } = body.data;
-    await staffDecide(await app(), (await params).id, action, incident_id, item, { analysis_id, facts_changed_seen });
+    const rt = await app();
+    await limit(rt.database, req, "staff");
+    await staffDecide(rt, (await params).id, action, incident_id, item, { analysis_id, facts_changed_seen });
     return { ok: true };
   });
 }

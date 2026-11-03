@@ -475,7 +475,7 @@ describe("reports", () => {
       const other = (await newReport()).report_id;
       fastSays({ label: "NEW", incident_id: null, rule_id: "R1", missing_info: [] });
       await analyzeReport(rt, other);
-      await expect(staffDecide(rt, other, "link", "inc_nope")).rejects.toThrow(/Unknown incident/);
+      await expect(staffDecide(rt, other, "link", "inc_nope")).rejects.toThrow(/no longer exists/);
       await expect(staffDecide(rt, other, "recurrence", "inc_h1")).rejects.toThrow(/still open/);
     });
 

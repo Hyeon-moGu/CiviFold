@@ -31,15 +31,6 @@ const DEFS: Array<Omit<MessageSample, "lat" | "lng">> = [
     category_hint: null,
   },
   {
-    id: "msg_W1_voice_ko",
-    kind: "voice",
-    asset_id: "W1",
-    title: "Voice (Korean): trash dumped by the barber",
-    text: "이발소 앞에 쓰레기가 잔뜩 버려져 있어요. 매트리스도 있어요.",
-    voice: "Yuna",
-    category_hint: null,
-  },
-  {
     id: "msg_S1_voice_smoke",
     kind: "voice",
     asset_id: "S1",

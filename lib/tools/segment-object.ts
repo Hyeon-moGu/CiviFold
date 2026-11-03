@@ -191,7 +191,10 @@ async function saveCrop(source: ImageRow, bytes: Buffer, kind: ImageKind, rect: 
 function maskPath(masks: readonly SegmentationMaskRecord[], objectId: string): string | null {
   const mask = masks.filter((m) => m.objectId === objectId).sort((a, b) => b.revision - a.revision)[0];
   if (!mask) return null;
-  const sx = (mask.bounds.right - mask.bounds.left) / mask.mask.width;
-  const sy = (mask.bounds.bottom - mask.bounds.top) / mask.mask.height;
-  return `<path d="${decodeMaskToSVGPath(mask.mask)}" transform="translate(${mask.bounds.left} ${mask.bounds.top}) scale(${sx} ${sy})"/>`;
+  // Numbers only, whatever the parser hands back: the string is drawn as markup (safeMask checks it again).
+  const [left, top, right, bottom] = [mask.bounds.left, mask.bounds.top, mask.bounds.right, mask.bounds.bottom].map(Number) as [number, number, number, number];
+  const sx = (right - left) / Number(mask.mask.width);
+  const sy = (bottom - top) / Number(mask.mask.height);
+  if (![left, top, sx, sy].every(Number.isFinite)) return null;
+  return `<path d="${decodeMaskToSVGPath(mask.mask)}" transform="translate(${left} ${top}) scale(${sx} ${sy})"/>`;
 }

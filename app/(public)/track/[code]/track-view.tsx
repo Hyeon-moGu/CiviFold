@@ -4,6 +4,7 @@
 "use client";
 
 import Link from "next/link";
+import { pauseFrom, usePaused, type PauseKind } from "@/app/_ui/pause";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ResidentView } from "@/lib/server/views";
 import type { RequestItem } from "@/lib/tools/types";
@@ -60,13 +61,14 @@ export function TrackView({ code }: { code: string }) {
   const load = useCallback(() => fetchView(code).then(show), [code, show]);
 
   const run = useCallback(
-    async (request: () => Promise<Response>, withPhoto = false) => {
+    async (request: () => Promise<Response>, withPhoto = false, kind?: PauseKind) => {
       setWorking(true);
       setPhotoRun(withPhoto);
       setStartedAt(Date.now());
       setError(null);
       try {
         const res = await request();
+        if (kind) pauseFrom(res, kind);
         const body = (await res.json()) as { error?: string };
         if (!res.ok || body.error) setError(body.error ?? "Something went wrong.");
       } catch {
@@ -89,6 +91,13 @@ export function TrackView({ code }: { code: string }) {
       }
     });
   }, [load, run]);
+
+  // A check started elsewhere (this page opened again, another tab) ends without this page knowing: look again.
+  useEffect(() => {
+    if (working || !view || !["analyzing", "answered"].includes(view.status)) return;
+    const t = setInterval(() => void load(), 4000);
+    return () => clearInterval(t);
+  }, [working, view, load]);
 
   if (error && !view) return <p className="rounded-lg bg-rose-50 px-3 py-2 text-rose-800">{error}</p>;
   if (!view) return <p className="text-zinc-500">Loading…</p>;
@@ -129,8 +138,15 @@ export function TrackView({ code }: { code: string }) {
         {error && <p className="mt-3 text-sm text-rose-700">{error}</p>}
       </section>
 
-      {view.question && !working && (
-        <Answer view={view} onAnswer={(form) => run(() => fetch(`/api/reports/${view.report_id}/answer`, { method: "POST", body: form }), form.has("photo") || form.has("sample_id"))} />
+      {view.question && (
+        // Hidden, not unmounted, while the answer is checked: an answer refused (a wrong code) keeps its photo and code.
+        <div hidden={working}>
+          <Answer
+            key={view.question.question}
+            view={view}
+            onAnswer={(form) => run(() => fetch(`/api/reports/${view.report_id}/answer`, { method: "POST", body: form }), form.has("photo") || form.has("sample_id"), "report")}
+          />
+        </div>
       )}
 
       {view.status === "unavailable" && !working && (
@@ -142,6 +158,8 @@ export function TrackView({ code }: { code: string }) {
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({ access_code: code }),
               }),
+              false,
+              "live",
             )
           }
         />
@@ -189,7 +207,7 @@ export function TrackView({ code }: { code: string }) {
   );
 }
 
-// How long the check has run. A live one (Muse Spark and SAM 3.1 called now) takes 20 seconds to a minute.
+// How long the check has run. A live one (Muse Spark and SAM 3.1 called now) takes about a minute, more for a large photo.
 function Elapsed({ since, live }: { since: number; live: boolean }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -199,7 +217,7 @@ function Elapsed({ since, live }: { since: number; live: boolean }) {
   const seconds = Math.max(0, Math.floor((now - since) / 1000));
   return (
     <p className="mt-3 font-mono text-xs text-zinc-500">
-      {live ? "Live check with Muse Spark and SAM 3.1, usually 20 seconds to a minute" : "Checking"} · {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
+      {live ? "Live check with Muse Spark and SAM 3.1, usually about a minute" : "Checking"} · {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
     </p>
   );
 }
@@ -207,10 +225,11 @@ function Elapsed({ since, live }: { since: number; live: boolean }) {
 // A report the public demo could not check: the access code runs it live, or the guided demo shows recorded cases.
 function RunLive({ onRun }: { onRun: (code: string) => Promise<void> }) {
   const [code, setCode] = useState("");
+  const paused = usePaused("live");
   return (
     <section className="rounded-2xl border border-zinc-200 p-5">
       <h2 className="font-medium">Run the check live</h2>
-      <p className="mt-1 text-sm text-zinc-600">Hackathon judges find the access code in the submission notes. With it, Muse Spark and SAM 3.1 check this report now.</p>
+      <p className="mt-1 text-sm text-zinc-600">With the demo access code, Muse Spark and SAM 3.1 check this report now.</p>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -219,7 +238,7 @@ function RunLive({ onRun }: { onRun: (code: string) => Promise<void> }) {
         className="mt-3 flex flex-wrap gap-2"
       >
         <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Access code" className="min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm" />
-        <button disabled={!code.trim()} className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-40">
+        <button disabled={!code.trim() || paused} className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-40">
           Run it live
         </button>
       </form>
@@ -262,6 +281,7 @@ function Answer({ view, onAnswer }: { view: ResidentView; onAnswer: (form: FormD
   const [code, setCode] = useState("");
   const [problem, setProblem] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const paused = usePaused("report");
 
   function choose(f: File | null) {
     if (preview) URL.revokeObjectURL(preview);
@@ -352,7 +372,7 @@ function Answer({ view, onAnswer }: { view: ResidentView; onAnswer: (form: FormD
               {needsCode && (
                 <label className="block text-sm font-medium">
                   Demo access code
-                  <input value={code} onChange={(e) => setCode(e.target.value)} className="mt-1.5 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-[15px] font-normal" placeholder="Given to hackathon judges" />
+                  <input value={code} onChange={(e) => setCode(e.target.value)} className="mt-1.5 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-[15px] font-normal" placeholder="Access code" />
                   <span className="mt-1 block text-xs font-normal text-zinc-500">Your own photo is analyzed live, so it needs the code. Anyone on the staff console can see it.</span>
                 </label>
               )}
@@ -361,7 +381,7 @@ function Answer({ view, onAnswer }: { view: ResidentView; onAnswer: (form: FormD
         </>
       )}
       {problem && <p className="text-sm text-rose-700">{problem}</p>}
-      <button disabled={!ready || sending} className="w-full rounded-lg bg-violet-700 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 sm:w-auto sm:px-8">
+      <button disabled={!ready || sending || paused} className="w-full rounded-lg bg-violet-700 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50 sm:w-auto sm:px-8">
         {sending ? "Sending…" : "Send answer"}
       </button>
     </form>

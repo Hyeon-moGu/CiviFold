@@ -6,13 +6,17 @@ import { MAX_DESCRIPTION_CHARS } from "../limits";
 import { checkWav } from "../meta/voice";
 import { photoMeta } from "./photo-meta";
 import { Category } from "../tools/types";
+import { RateLimited } from "./rate-limit";
 import { UserError, type Photo, type Voice } from "./reports";
 
-/** JSON response for a route; a UserError becomes a 400 with its message, anything else a 500. */
+/** JSON response for a route; a UserError becomes a 400 (409 stale, 429 over a limit) with its message, anything else a 500. */
 export async function handle(fn: () => Promise<unknown>): Promise<Response> {
   try {
     return Response.json(await fn());
   } catch (err) {
+    if (err instanceof RateLimited) {
+      return Response.json({ error: err.message, code: "rate", retry_after: err.retryAfterS }, { status: 429, headers: { "Retry-After": String(err.retryAfterS) } });
+    }
     if (err instanceof UserError) return Response.json({ error: err.message, ...(err.code ? { code: err.code } : {}) }, { status: err.code === "stale" ? 409 : 400 });
     console.error(err);
     return Response.json({ error: "Something went wrong on our side." }, { status: 500 });

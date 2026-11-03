@@ -17,5 +17,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     .from(images)
     .where(eq(images.id, (await params).id));
   if (!row) return new Response("Not found", { status: 404 });
-  return imageResponse(await storedBytes(row, store), row.mime, new URL(req.url).searchParams.get("w"), row.is_synthetic);
+  let bytes: Buffer;
+  try {
+    bytes = await storedBytes(row, store);
+  } catch (err) {
+    // A row whose file is gone (a reset racing this read, or a lost upload) is a missing photo, not a server fault.
+    console.error(`image ${row.storage_path ?? "(inline)"} unreadable:`, (err as Error).message);
+    return new Response("Not found", { status: 404 });
+  }
+  return imageResponse(bytes, row.mime, new URL(req.url).searchParams.get("w"), row.is_synthetic);
 }

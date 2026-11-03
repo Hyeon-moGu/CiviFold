@@ -13,6 +13,7 @@ import type { Brief } from "@/lib/tools/write-brief";
 import { cost, when } from "@/app/_ui/format";
 import { plural, summarize, TOOL_TEXT, type StepView } from "./steps";
 import { clockOf, intoView, liveText, pacer, Spinner, useElapsed, withNames, type LiveRun } from "./verify";
+import { pauseFrom } from "@/app/_ui/pause";
 
 type Phase = "idle" | "running" | "finished";
 type State = { phase: Phase; steps: StepView[]; startedAt: number; note: { tone: "info" | "warn" | "error"; text: string } | null };
@@ -40,6 +41,7 @@ export function BriefProvider({ reportId, paceMs = 0, children }: { reportId: st
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ analysis_id: analysisId }),
       });
+      pauseFrom(res, "live");
       if (!res.ok || !res.body) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
         return finish({ tone: "error", text: body.error ?? "Could not write the brief." });
@@ -177,8 +179,10 @@ function nameIds(text: string, names: Record<string, string>): string {
   let out = text;
   for (const id of Object.keys(names).sort((a, b) => b.length - a.length)) out = out.split(id).join(names[id]);
   out = out.replace(LEFTOVER_ID, "a photo").replace(ISO_TIME, (t) => when(t));
-  // A name put in place of an id can open the sentence ("this report shows ..."); an id itself keeps its case.
-  return /^(?:this|the) /.test(out) ? out.charAt(0).toUpperCase() + out.slice(1) : out;
+  // The agent may name a thing twice ("Report report_01 shows", "Incident incident_01 opened"): keep the name alone.
+  out = out.replace(/\b[Rr]eport (this report)\b/g, "$1").replace(/\b[Ii]ncident (the )/g, "$1");
+  // A name put in place of an id can open a sentence ("this report shows ..."); an id itself keeps its case.
+  return out.replace(/(^|[.!?]\s+)(this|the) /g, (_, before: string, word: string) => `${before}${word.charAt(0).toUpperCase()}${word.slice(1)} `);
 }
 
 type OpenChip = { open: string | null; toggle: (key: string) => void };

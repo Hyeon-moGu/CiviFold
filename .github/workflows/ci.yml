@@ -21,3 +21,5 @@ jobs:
       - run: npm run lint
       # Tests use an in-memory Postgres and recorded model replies: no API key, no network.
       - run: npm test
+      # The production build, with no environment: it must not need a database or a key to compile.
+      - run: npm run build

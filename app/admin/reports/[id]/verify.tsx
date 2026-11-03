@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useState, useTransition, type ReactNode } from "react";
 import type { VerifyEvent, VerifyResult } from "@/lib/server/reports";
 import { plural, summarize, TOOL_TEXT, type StepView } from "./steps";
+import { pauseFrom } from "@/app/_ui/pause";
 
 type Phase = "idle" | "running" | "finished";
 type State = { phase: Phase; steps: StepView[]; startedAt: number; note: { tone: "info" | "warn" | "error"; text: string } | null };
@@ -49,6 +50,7 @@ export function VerifyProvider({ reportId, paceMs = 0, children }: { reportId: s
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ analysis_id: analysisId }),
       });
+      pauseFrom(res, "live");
       if (!res.ok || !res.body) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
         return finish({ tone: "error", text: body.error ?? "Could not run the verification." });
@@ -248,6 +250,7 @@ export function ReanalyzeButton({ reportId, analysisId }: { reportId: string; an
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ analysis_id: analysisId }),
       });
+      pauseFrom(res, "live");
       const body = (await res.json().catch(() => ({}))) as { status?: string; message?: string; error?: string };
       if (!res.ok) return setMessage(body.error ?? "Could not analyze it again.");
       if (body.status === "not_started") return setMessage(body.message ?? "The analysis could not run. The current suggestion is unchanged.");

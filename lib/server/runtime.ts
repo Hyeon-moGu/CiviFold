@@ -29,8 +29,12 @@ export async function runtime(): Promise<Runtime> {
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
-/** The daily cap on live model spend; 0 keeps a deployment on replays alone. */
-export const liveDailyUsd = () => Number(process.env.LIVE_DAILY_USD || 2);
+/** The daily cap on live model spend; 0 keeps a deployment on replays alone, and so does a deployment that sets none. */
+export function liveDailyUsd(): number {
+  const set = Number(process.env.LIVE_DAILY_USD);
+  if (process.env.LIVE_DAILY_USD?.trim() && Number.isFinite(set) && set >= 0) return set;
+  return process.env.VERCEL ? 0 : 2;
+}
 
 /** What is left of today's live model budget. */
 export async function liveBudgetLeft(database: Db): Promise<number> {

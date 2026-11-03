@@ -13,6 +13,7 @@ import type { Sample } from "@/lib/dataset/static";
 import type { Category } from "@/lib/tools/types";
 import { SyntheticBadge } from "@/app/_ui/labels";
 import type { MapPlace } from "@/app/_ui/pin-map";
+import { pauseFrom, usePaused } from "@/app/_ui/pause";
 import { EXIF_SLICE, isHeic, shrinkForUpload } from "@/app/_ui/shrink";
 import { Recorder } from "./recorder";
 
@@ -199,6 +200,7 @@ export function ReportForm({
       if (category) form.set("category_hint", category);
       if (description) form.set("description", description);
       const res = await fetch("/api/reports", { method: "POST", body: form });
+      pauseFrom(res, "report");
       const body = (await res.json()) as { tracking_code?: string; error?: string };
       if (!res.ok || !body.tracking_code) return setError(body.error ?? "The report could not be sent.");
       router.push(`/track/${body.tracking_code}`);
@@ -211,6 +213,7 @@ export function ReportForm({
   }
 
   const needsCode = source === "upload" || recording !== null;
+  const paused = usePaused("report");
   const chip = (active: boolean) =>
     `shrink-0 rounded-full px-3 py-1.5 text-sm transition ${active ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"}`;
   const input = "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-[15px] focus:border-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-900/10";
@@ -234,7 +237,7 @@ export function ReportForm({
               {(
                 [
                   ["sample", "Sample photo", "Demo images"],
-                  ["upload", "My photo", "Judges: code in submission notes"],
+                  ["upload", "My photo", "Needs an access code"],
                   ["none", "No photo", "Text or voice"],
                 ] as const
               ).map(([id, title, sub]) => (
@@ -293,7 +296,7 @@ export function ReportForm({
                   <img src={preview} alt="Your photo" className="max-h-64 rounded-lg object-contain" />
                 ) : (
                   <>
-                    <span className="text-3xl text-zinc-400">＋</span>
+                    <span className="text-3xl text-zinc-400">+</span>
                     <span className="text-sm font-medium">Take or choose a photo</span>
                   </>
                 )}
@@ -304,8 +307,9 @@ export function ReportForm({
             {source === "upload" && (
               <div className="mt-3 rounded-xl bg-zinc-50 px-3.5 py-3 text-xs text-zinc-600">
                 <p className="mb-2 rounded-lg bg-white px-2.5 py-2 text-zinc-700 ring-1 ring-zinc-200">
-                  Your own photo runs live: Muse Spark and SAM 3.1 check it in 20 seconds to a minute. Hackathon judges find the access code in the submission
-                  notes and enter it in the last step. To be compared with an incident, put the pin on one of its dots in the next step.
+                  Your own photo runs live: Muse Spark and SAM 3.1 check it in about a minute, with the demo access code entered in the last step. To
+                  be compared with an incident, put the pin on one of its dots in the next step. Without the code, pick a sample photo, or use &ldquo;Run it
+                  live&rdquo; on the demo page.
                 </p>
                 <p className="font-medium text-zinc-900">What makes a photo easy to match</p>
                 <p className="mt-1">
@@ -400,7 +404,11 @@ export function ReportForm({
             {nearest && (
               <p className="mt-1.5 text-xs text-zinc-600">
                 Nearest incident on file: the {nearest.place.title}, {Math.round(nearest.m)} m away.{" "}
-                {nearest.m <= COMPARE_RADIUS_M ? "Your photo will be compared with it." : `Only incidents within about ${COMPARE_RADIUS_M} m are compared, so this would be a new report.`}
+                {source === "none"
+                  ? "Without a photo nothing is compared; staff see the incidents nearby."
+                  : nearest.m <= COMPARE_RADIUS_M
+                    ? "Your photo will be compared with it."
+                    : `Only incidents within about ${COMPARE_RADIUS_M} m are compared, so this would be a new report.`}
               </p>
             )}
             {source === "sample" && picked && <Note tone="ok">Set from the sample photo.</Note>}
@@ -475,16 +483,15 @@ export function ReportForm({
               ) : (
                 <Recorder value={recording} onChange={record} />
               )}
-              <p className="mt-1.5 text-xs text-zinc-500">Recordings are transcribed by Muse Voice Transcribe, in any language.</p>
+              <p className="mt-1.5 text-xs text-zinc-500">Recordings are transcribed by Muse Voice Transcribe. Your own recording needs the access code; the sample recordings do not.</p>
             </div>
 
             {needsCode && (
               <label className="mt-5 block text-sm font-medium">
                 Demo access code
-                <input value={accessCode} onChange={(e) => setAccessCode(e.target.value)} className={`${input} mt-1.5 font-normal`} placeholder="Given to hackathon judges" />
+                <input value={accessCode} onChange={(e) => setAccessCode(e.target.value)} className={`${input} mt-1.5 font-normal`} placeholder="Access code" />
                 <span className="mt-1 block text-xs font-normal text-zinc-500">
-                  Hackathon judges find the code in the submission notes. Your own photo or recording is analyzed live, so it needs the code. Anyone on the
-                  staff console can see it.
+                  Your own photo or recording is analyzed live, so it needs the code. Anyone on the staff console can see it.
                 </span>
               </label>
             )}
@@ -510,7 +517,7 @@ export function ReportForm({
             Back
           </button>
         )}
-        <button disabled={busy} className="flex-1 rounded-lg bg-zinc-900 px-4 py-3 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-50 sm:flex-none sm:px-8">
+        <button disabled={busy || (paused && step === STEPS.length - 1)} className="flex-1 rounded-lg bg-zinc-900 px-4 py-3 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-50 sm:flex-none sm:px-8">
           {step < STEPS.length - 1 ? "Next" : busy ? "Sending…" : "Send report"}
         </button>
       </div>

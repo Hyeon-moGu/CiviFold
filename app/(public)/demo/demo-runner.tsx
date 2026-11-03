@@ -5,9 +5,11 @@
 
 import Link from "next/link";
 import { LinkPending } from "@/app/_ui/link-pending";
+import { pauseFrom, usePaused } from "@/app/_ui/pause";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { Label } from "@/lib/tools/types";
 import { SyntheticBadge, UrgentBadge } from "@/app/_ui/labels";
+import { safeMask } from "@/app/_ui/photo";
 
 export type CaseView = {
   key: string; // the scenario step that sends the case's report
@@ -129,6 +131,7 @@ async function sendStep(key: string, live: boolean): Promise<Sent> {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ scenario, step: Number(step), live }),
     });
+    pauseFrom(res, live ? "live" : "replay");
     const body = (await res.json().catch(() => ({}))) as Sent;
     return res.ok ? body : { error: body.error ?? "Could not send it." };
   } catch {
@@ -147,22 +150,23 @@ function Plain({ label, size = "lg", urgent = false }: { label: Label; size?: "l
 }
 
 function Photo({ src, caption, cutout }: { src: string; caption: string; cutout?: Cutout }) {
+  const mask = safeMask(cutout?.mask);
   return (
     <figure>
       <div className="relative overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100">
         {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
         <img src={src} alt={caption} loading="lazy" className="block aspect-[3/2] w-full object-cover" />
-        {cutout?.mask && (
-          // The path is built on our server from SAM's mask, in the photo's pixels; "slice" crops it as object-cover crops the photo.
+        {cutout && mask && (
+          // In the photo's pixels; "slice" crops it as object-cover crops the photo.
           <svg viewBox={`0 0 ${cutout.width} ${cutout.height}`} preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 h-full w-full">
-            <g fill="none" stroke="rgba(0,0,0,0.6)" strokeWidth={4} className="[&_path]:[vector-effect:non-scaling-stroke]" dangerouslySetInnerHTML={{ __html: cutout.mask }} />
-            <g fill="rgba(255,255,255,0.12)" stroke="#ffffff" strokeWidth={1.5} className="[&_path]:[vector-effect:non-scaling-stroke]" dangerouslySetInnerHTML={{ __html: cutout.mask }} />
+            <g fill="none" stroke="rgba(0,0,0,0.6)" strokeWidth={4} className="[&_path]:[vector-effect:non-scaling-stroke]" dangerouslySetInnerHTML={{ __html: mask }} />
+            <g fill="rgba(255,255,255,0.12)" stroke="#ffffff" strokeWidth={1.5} className="[&_path]:[vector-effect:non-scaling-stroke]" dangerouslySetInnerHTML={{ __html: mask }} />
           </svg>
         )}
         <span className="absolute left-2 top-2">
           <SyntheticBadge />
         </span>
-        {cutout?.mask && <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 font-mono text-[10px] text-white">outlined by SAM 3.1</span>}
+        {mask && <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 font-mono text-[10px] text-white">outlined by SAM 3.1</span>}
       </div>
       <figcaption className="mt-1.5 text-xs text-zinc-600 sm:text-sm">{caption}</figcaption>
     </figure>
@@ -215,10 +219,15 @@ function RunLine({
   onLive?: () => void;
   compare?: (label: Label) => ReactNode;
 }) {
+  const paused = usePaused("live");
   const run = sent?.run;
   if (!run) return null;
   const live = (
-    <button onClick={onLive} className="ml-2 rounded-md border border-zinc-300 bg-white px-2 py-0.5 font-sans text-xs font-medium text-zinc-900 hover:bg-zinc-50">
+    <button
+      onClick={onLive}
+      disabled={paused}
+      className="ml-2 rounded-md border border-zinc-300 bg-white px-2 py-0.5 font-sans text-xs font-medium text-zinc-900 hover:bg-zinc-50 disabled:opacity-40"
+    >
       Run it live
     </button>
   );
@@ -258,6 +267,9 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
   const [startedAt, setStartedAt] = useState<Record<string, number>>({});
   const [liveRun, setLiveRun] = useState<Record<string, boolean>>({}); // key -> whether its current run is live
   const [resetting, setResetting] = useState(false);
+  const pausedReplay = usePaused("replay");
+  const pausedLive = usePaused("live");
+  const pausedReset = usePaused("reset");
   const [resetNote, setResetNote] = useState<string | null>(null);
 
   const readWorld = useCallback(async () => {
@@ -319,6 +331,7 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
     setResetNote(null);
     try {
       const res = await fetch("/api/demo/reset", { method: "POST" });
+      pauseFrom(res, "reset");
       const body = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) setResetNote(body.error ?? "The reset failed. Try again.");
       else {
@@ -356,7 +369,7 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
             </p>
           ) : (
             <>
-              <button onClick={sendAll} className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800">
+              <button onClick={sendAll} disabled={pausedReplay} className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-40">
                 Send the other {unsent.length} reports at once
               </button>
               <p className="text-sm text-zinc-600">
@@ -506,7 +519,7 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
                 {mine?.briefed ? (
                   <p className="mx-5 mt-1.5 flex gap-2 text-sm text-zinc-700">
                     <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500" />
-                    <span>Case brief for staff: {mine.briefed} items, each citing a fact or a tool result.</span>
+                    <span>Case brief for staff: {mine.briefed} items, each citing a fact or a tool result. Read it in the staff view.</span>
                   </p>
                 ) : null}
               </>
@@ -515,7 +528,7 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
             ) : (
               <div className="mx-5 mt-4 flex flex-col items-start gap-3 rounded-xl border border-dashed border-zinc-300 px-4 py-4 sm:flex-row sm:items-center">
                 <p className="min-w-0 flex-1 text-[15px] text-zinc-700">Same problem, or not? Send the report to see what location alone does and what CiviFold suggests.</p>
-                <button onClick={() => send(c.key, stages.length)} className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800">
+                <button onClick={() => send(c.key, stages.length)} disabled={pausedReplay} className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-40">
                   Send this report
                 </button>
               </div>
@@ -545,7 +558,7 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
                     </Link>
                   )}
                   {!preview && (
-                    <button onClick={() => send(c.key, stages.length)} className="ml-auto text-zinc-500 underline underline-offset-2 hover:text-zinc-900">
+                    <button onClick={() => send(c.key, stages.length)} disabled={pausedReplay} className="ml-auto text-zinc-500 underline underline-offset-2 hover:text-zinc-900 disabled:opacity-40">
                       Send it again
                     </button>
                   )}
@@ -641,7 +654,11 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
                           </>
                         )}
                         {answerable && (
-                          <button onClick={() => send(o.then!, 1, Boolean(r?.run?.live))} className="rounded-md border border-zinc-300 px-2 py-1 font-medium hover:bg-zinc-50">
+                          <button
+                            onClick={() => send(o.then!, 1, Boolean(r?.run?.live))}
+                            disabled={r?.run?.live ? pausedLive : pausedReplay}
+                            className="rounded-md border border-zinc-300 px-2 py-1 font-medium hover:bg-zinc-50 disabled:opacity-40"
+                          >
                             {o.thenSend}
                           </button>
                         )}
@@ -652,7 +669,7 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
                         )}
                       </>
                     ) : !ready ? null : (
-                      <button onClick={() => send(o.key, 1)} className="rounded-md bg-zinc-900 px-2.5 py-1 font-semibold text-white hover:bg-zinc-800">
+                      <button onClick={() => send(o.key, 1)} disabled={pausedReplay} className="rounded-md bg-zinc-900 px-2.5 py-1 font-semibold text-white hover:bg-zinc-800 disabled:opacity-40">
                         {o.send}
                       </button>
                     )}
@@ -692,10 +709,10 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
 
       <p className="text-center text-sm text-zinc-500">
         The demo world is shared with other visitors.{" "}
-        <button onClick={resetWorld} disabled={resetting} className="font-medium text-zinc-900 underline underline-offset-2 disabled:opacity-50">
+        <button onClick={resetWorld} disabled={resetting || pausedReset} className="font-medium text-zinc-900 underline underline-offset-2 disabled:opacity-50">
           {resetting ? "Resetting and replaying the recorded cases…" : "Reset it to the start"}
         </button>{" "}
-        (once a minute).
+        (at most three times in 15 minutes).
         {resetNote && <span className="mt-1 block">{resetNote}</span>}
       </p>
     </div>

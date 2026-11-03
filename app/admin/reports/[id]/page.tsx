@@ -69,11 +69,13 @@ const STATUS_WORDS: Record<string, string> = {
 
 // The suggestion in one sentence, as staff would say it.
 // Suggestions that tie the report to an incident; HUMAN_REVIEW may name one without tying the report to it.
+type Fix = "repair" | "cleanup";
 const LINKS: ReadonlySet<Label> = new Set(["DUPLICATE", "LATE_REPORT", "ALREADY_RESOLVED", "POSSIBLE_RECURRENCE"]);
 // A replayed agent run is shown one tool call at a time, this far apart.
 const REPLAY_PACE_MS = 900;
 
-function headline(label: Label, incident: string | null): string {
+// A dumped pile is cleared, not repaired: the word staff would use for what happened before the report.
+function headline(label: Label, incident: string | null, fix: Fix): string {
   switch (label) {
     case "DUPLICATE":
       return `Same problem as ${incident}`;
@@ -84,7 +86,7 @@ function headline(label: Label, incident: string | null): string {
     case "NEW":
       return "A new problem";
     case "POSSIBLE_RECURRENCE":
-      return `Back after the repair of ${incident}?`;
+      return `Back after the ${fix} of ${incident}?`;
     case "NEEDS_INFO":
       return "Waiting for one more thing from the resident";
     case "HUMAN_REVIEW":
@@ -98,6 +100,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   if (!detail) notFound();
   const { report, analysis, runs, questions, photos, incidents, incidentPhotos, imageFacts, segmentations, briefs } = detail;
   const triage = (analysis?.triage as TriageResult | null | undefined) ?? undefined;
+  const fix: Fix = triage?.category === "trash" ? "cleanup" : "repair";
   const intake = (analysis?.intake as IntakeResult | null | undefined) ?? null;
   const unread = wordsNotRead(analysis?.errors);
   const decision = analysis?.decision as Decision | undefined;
@@ -177,7 +180,11 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
         .flatMap((s) => (s.ok && s.tool === "compare_images" ? [(s.data as { candidate_incident_id: string }).candidate_incident_id] : [])),
     ),
   ];
-  const incidentNames = await incidentTitles(rt, comparedIds);
+  // Incidents an agent only read about (a brief reads an incident's history) are named too.
+  const readIds = JSON.stringify([latestBrief, runs]).match(/\binc_[a-z0-9_]+/g) ?? [];
+  const incidentNames = await incidentTitles(rt, [
+    ...new Set([...comparedIds, ...readIds, ...changes.map((c) => c.incident_id), ...(report.incident_id ? [report.incident_id] : []), ...(opened?.recurrence_of ? [opened.recurrence_of] : [])]),
+  ]);
   const incidentLabels = {
     ...Object.fromEntries(incidents.map((i) => [i.id, `the ${i.title}`])),
     ...Object.fromEntries(Object.entries(incidentNames).map(([id, title]) => [id, `the ${title}`])),
@@ -216,7 +223,8 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
           <span className="ml-auto font-mono text-[11px] text-ops-dim">
             {/* After a staff-requested check the latest analysis is the check's, its cost the agent's run included. */}
             {analysis.pipeline_config === "C_rules+verify" ? "check" : "analysis"} {cost(analysis.cost_usd)} · {(analysis.latency_ms / 1000).toFixed(1)}s ·{" "}
-            {report.is_synthetic ? "synthetic sample" : "resident upload"}
+            {/* A report with only typed words carries no media, so it is neither a sample photo nor an upload. */}
+            {report.is_synthetic ? "synthetic sample" : report.channel === "text" ? "typed message" : "resident upload"}
           </span>
         )}
       </div>
@@ -230,7 +238,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               {intake?.emergency_reason ? `: ${intake.emergency_reason}` : ""}
             </p>
             <p className="mt-0.5 text-red-200/80">
-              Act on it now. The resident was told to call the emergency number; matching to existing incidents was skipped.
+              Act on it now. The resident was told to call 911; matching to existing incidents was skipped.
             </p>
           </div>
         </div>
@@ -278,7 +286,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 href={`/admin/incidents/${report.incident_id}`}
                 className="text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white"
               >
-                {report.incident_id}
+                {incidentLabels[report.incident_id] ?? "an incident"}
               </Link>{" "}
               from this report before the demo begins. It is part of the starting history that new reports are compared with, so it never went through the
               automatic check.
@@ -312,7 +320,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               agentsOff={agentsOff}
               agentsElsewhere={agentsElsewhere === report.id ? null : agentsElsewhere}
               demoAnchor={demoAnchor}
-              decidedNote={decidedNote(report.status, report.incident_id, incidents, opened?.recurrence_of ?? null)}
+              decidedNote={decidedNote(report.status, report.incident_id, [...incidents, ...Object.entries(incidentNames).map(([id, title]) => ({ id, title }))], opened?.recurrence_of ?? null)}
               stale={changes.length > 0}
               verify={verifiable ? { analysisId: analysis!.id, running: verifying, again: runs.length > 0 } : null}
               verifyLimit={verifyLimit}
@@ -323,11 +331,11 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 <>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <OpsLabel label={final.label} />
-                    <p className="text-lg font-semibold tracking-tight text-white">{headline(final.label, suggestedIncident?.title ? `the ${suggestedIncident.title}` : final.incident_id)}</p>
+                    <p className="text-lg font-semibold tracking-tight text-white">{headline(final.label, suggestedIncident?.title ? `the ${suggestedIncident.title}` : final.incident_id, fix)}</p>
                   </div>
                   {/* The headline names the suggested incident; the sentence under it calls it "the incident". */}
                   {lastReason && (
-                    <p className="mt-1 text-sm text-ops-text">{final.incident_id ? readable(lastReason).replaceAll(final.incident_id, "the incident") : readable(lastReason)}</p>
+                    <p className="mt-1 text-sm text-ops-text">{byName(final.incident_id ? readable(lastReason).replaceAll(final.incident_id, "the incident") : readable(lastReason), incidentLabels)}</p>
                   )}
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
                     {final.incident_id && (
@@ -359,7 +367,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
             <VerifyProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} runningSince={verifying ? String(report.verify_claimed_at) : null} live={report.live ? "always" : !verifyReplays ? "maybe" : null} names={incidentLabels} />
             <BriefProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} live={report.live ? "always" : !briefReplays ? "maybe" : null} names={incidentLabels} />
           </div>
-          {changes.length > 0 && <OutOfDate changes={changes} reportId={report.id} analysisId={analysis.id} />}
+          {changes.length > 0 && <OutOfDate changes={changes} reportId={report.id} analysisId={analysis.id} names={incidentLabels} />}
 
           <div className="mt-2 grid gap-4 xl:grid-cols-[1fr_380px]">
             <div className="min-w-0 space-y-4">
@@ -507,6 +515,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
 
               <PipelineTrace
                 hasMessage={Boolean(report.description || report.audio_path)}
+                hasPhoto={photos.length > 0}
                 intake={intake}
                 unread={unread !== null}
                 triage={triage}
@@ -525,62 +534,72 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 submitted={report.submitted_at}
                 created={ruledOut ? null : (focus?.created_at ?? null)}
                 resolved={ruledOut ? null : (focus?.resolved_at ?? null)}
+                fix={fix}
               />
 
               {candidates.length > 0 && (
                 <Panel title="Nearby incidents checked" aside={`${candidates.length} within the search radius`}>
-                  <table className="w-full text-[13px]">
-                    <thead className="text-left text-xs text-ops-dim">
-                      <tr>
-                        <th className="pb-2 font-normal">Incident</th>
-                        <th className="pb-2 font-normal">Status</th>
-                        <th className="pb-2 font-normal">Distance</th>
-                        <th className="pb-2 font-normal">Whole photo</th>
-                        <th className="pb-2 font-normal">Cut-out (SAM)</th>
-                        <th className="pb-2 font-normal">Result</th>
-                      </tr>
-                    </thead>
-                    <tbody className="font-mono">
-                      {candidates.map((c) => {
-                        const verdict = (stage: 1 | 2) => {
-                          const rs = comparisons.filter((x) => x.incident_id === c.incident_id && x.stage === stage && x.result && !x.fallback);
-                          const top = rs.sort((a, b) => b.result!.asset_match.confidence - a.result!.asset_match.confidence)[0];
-                          if (!top) return <span className="text-ops-dim">n/a</span>;
-                          const v = top.result!.asset_match.verdict;
-                          const tone = v === "same" ? "text-white" : v === "different" ? "text-rose-300" : "text-amber-300";
-                          return <span className={tone}>{`${VERDICT_TEXT[v] ?? v} · ${pct(top.result!.asset_match.confidence)}`}</span>;
-                        };
-                        const ran = comparisons.some((x) => x.incident_id === c.incident_id && x.result);
-                        const result =
-                          final && LINKS.has(final.label) && final.incident_id === c.incident_id ? (
-                            <span className="text-sky-300">linked</span>
-                          ) : final?.incident_id === c.incident_id ? (
-                            <span className="text-amber-300">staff decides</span>
-                          ) : ran ? (
-                            <span className="text-ops-text">kept apart</span>
-                          ) : (
-                            <span className="text-ops-dim">not compared</span>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[640px] text-[13px]">
+                      <thead className="text-left text-xs text-ops-dim">
+                        <tr>
+                          <th className="pb-2 font-normal">Incident</th>
+                          <th className="pb-2 font-normal">Status</th>
+                          <th className="pb-2 font-normal">Distance</th>
+                          <th className="pb-2 font-normal">Whole photo</th>
+                          <th className="pb-2 font-normal">Cut-out (SAM)</th>
+                          <th className="pb-2 font-normal">Result</th>
+                        </tr>
+                      </thead>
+                      <tbody className="font-mono">
+                        {candidates.map((c) => {
+                          const verdict = (stage: 1 | 2) => {
+                            const rs = comparisons.filter((x) => x.incident_id === c.incident_id && x.stage === stage && x.result && !x.fallback);
+                            const top = rs.sort((a, b) => b.result!.asset_match.confidence - a.result!.asset_match.confidence)[0];
+                            if (!top) return <span className="text-ops-dim">n/a</span>;
+                            const v = top.result!.asset_match.verdict;
+                            const tone = v === "same" ? "text-white" : v === "different" ? "text-rose-300" : "text-amber-300";
+                            return <span className={tone}>{`${VERDICT_TEXT[v] ?? v} · ${pct(top.result!.asset_match.confidence)}`}</span>;
+                          };
+                          const ran = comparisons.some((x) => x.incident_id === c.incident_id && x.result);
+                          const result =
+                            final && LINKS.has(final.label) && final.incident_id === c.incident_id ? (
+                              final.label === "POSSIBLE_RECURRENCE" ? (
+                                <span className="text-rose-300">possible recurrence</span>
+                              ) : (
+                                <span className="text-sky-300">linked</span>
+                              )
+                            ) : final?.incident_id === c.incident_id ? (
+                              <span className="text-amber-300">staff decides</span>
+                            ) : ran && comparisons.some((x) => x.incident_id === c.incident_id && x.result?.asset_match.verdict === "uncertain") ? (
+                              // An unsure comparison is not a decision to keep the report apart.
+                              <span className="text-amber-300">unsure</span>
+                            ) : ran ? (
+                              <span className="text-ops-text">kept apart</span>
+                            ) : (
+                              <span className="text-ops-dim">not compared</span>
+                            );
+                          return (
+                            <tr key={c.incident_id} className={`border-t border-ops-line ${c.incident_id === focusId ? "bg-ops-raised" : ""}`}>
+                              <td className="py-1.5">
+                                <Link
+                                  href={`/admin/incidents/${c.incident_id}`}
+                                  className="text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white"
+                                >
+                                  {incidents.find((i) => i.id === c.incident_id)?.title ?? c.incident_id}
+                                </Link>
+                              </td>
+                              <td className="text-ops-dim">{c.status}</td>
+                              <td className="tabular-nums">{Math.round(c.distance_m)} m</td>
+                              <td>{verdict(1)}</td>
+                              <td>{verdict(2)}</td>
+                              <td className="font-sans">{result}</td>
+                            </tr>
                           );
-                        return (
-                          <tr key={c.incident_id} className={`border-t border-ops-line ${c.incident_id === focusId ? "bg-ops-raised" : ""}`}>
-                            <td className="py-1.5">
-                              <Link
-                                href={`/admin/incidents/${c.incident_id}`}
-                                className="text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white"
-                              >
-                                {incidents.find((i) => i.id === c.incident_id)?.title ?? c.incident_id}
-                              </Link>
-                            </td>
-                            <td className="text-ops-dim">{c.status}</td>
-                            <td className="tabular-nums">{Math.round(c.distance_m)} m</td>
-                            <td>{verdict(1)}</td>
-                            <td>{verdict(2)}</td>
-                            <td className="font-sans">{result}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </Panel>
               )}
             </div>
@@ -640,7 +659,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
 
               {/* What the agents found sits beside the evidence, never between the decision and the photos. */}
               {verdict && !decided && changes.length === 0 && <VerdictCard verdict={verdict} />}
-              {latestBrief && <BriefCard stored={latestBrief} stale={latestBrief.analysis_id !== analysis.id} names={names} />}
+              {latestBrief && <BriefCard stored={latestBrief} stale={latestBrief.analysis_id !== analysis.id} names={{ ...names, ...incidentLabels }} />}
 
               {(report.description || report.audio_path || intake) && (
                 <Panel title="Resident's message">
@@ -723,7 +742,7 @@ function decidedNote(status: string, incidentId: string | null, near: Array<{ id
       <>
         Linked to{" "}
         <Link href={`/admin/incidents/${incidentId}`} title={incidentId} className="text-white underline decoration-emerald-400/60 underline-offset-2 hover:decoration-white">
-          {title ? `the ${title}` : incidentId}
+          {title ? `the ${title}` : "the incident"}
         </Link>
         .
       </>
@@ -731,7 +750,7 @@ function decidedNote(status: string, incidentId: string | null, near: Array<{ id
   }
   if (status === "new_incident" && recurrenceOf) {
     const was = near.find((i) => i.id === recurrenceOf)?.title;
-    return `Opened as a recurrence of ${was ? `the ${was}` : recurrenceOf}, kept apart from the fixed incident.`;
+    return `Opened as a recurrence of ${was ? `the ${was}` : "an earlier incident"}, kept apart from the fixed incident.`;
   }
   if (status === "new_incident") return "Opened as a new incident.";
   if (status === "dismissed") return "Dismissed.";
@@ -932,6 +951,7 @@ const STEP_TONE: Record<StepTone, string> = {
 // Every stage the report went through, left to right, so staff see where the doubt came from.
 function PipelineTrace(props: {
   hasMessage: boolean;
+  hasPhoto: boolean; // an emergency skips the photo check: it was there, just not looked at
   intake: IntakeResult | null;
   unread: boolean; // the words went unread (WORDS_NOT_READ)
   triage: TriageResult | undefined;
@@ -959,7 +979,7 @@ function PipelineTrace(props: {
     },
     {
       name: "Triage",
-      value: triage ? `${triage.category.replace("_", " ")} · ${triage.image_quality.replace("_", " ")}` : "no photo",
+      value: triage ? `${triage.category.replace("_", " ")} · ${triage.image_quality.replace("_", " ")}` : props.hasPhoto ? "skipped" : "no photo",
       tone: triage ? (triage.image_quality === "ok" ? "ok" : "warn") : "skip",
     },
     {
@@ -1042,12 +1062,12 @@ function PipelineTrace(props: {
 }
 
 // Observation, arrival and repair on one axis: a late report and a recurrence differ only in where the dots fall.
-function TimeBar({ observed, submitted, created, resolved }: { observed: string; submitted: string; created: string | null; resolved: string | null }) {
+function TimeBar({ observed, submitted, created, resolved, fix }: { observed: string; submitted: string; created: string | null; resolved: string | null; fix: Fix }) {
   // Seen and sent within the same minute: one mark, not two labels with the same time.
   const together = Math.abs(Date.parse(observed) - Date.parse(submitted)) < 60_000;
   const marks = [
     { t: created, text: "Incident opened", color: "bg-zinc-400" },
-    { t: resolved, text: "Repair recorded", color: "bg-emerald-400" },
+    { t: resolved, text: fix === "cleanup" ? "Cleanup recorded" : "Repair recorded", color: "bg-emerald-400" },
     ...(together
       ? [{ t: submitted, text: "Seen and reported", color: "bg-white" }]
       : [
@@ -1064,7 +1084,7 @@ function TimeBar({ observed, submitted, created, resolved }: { observed: string;
     ? (() => {
         const after = Date.parse(observed) > Date.parse(resolved);
         const [from, to] = after ? [resolved, observed] : [observed, resolved];
-        return { left: pos(from), width: pos(to) - pos(from), after, text: `${span(Date.parse(to) - Date.parse(from))} ${after ? "after" : "before"} the repair` };
+        return { left: pos(from), width: pos(to) - pos(from), after, text: `${span(Date.parse(to) - Date.parse(from))} ${after ? "after" : "before"} the ${fix}` };
       })()
     : null;
   return (
@@ -1073,9 +1093,17 @@ function TimeBar({ observed, submitted, created, resolved }: { observed: string;
         {gap && (
           <>
             <div className={`absolute -top-px h-[3px] rounded-full ${gap.after ? "bg-rose-400" : "bg-sky-400"}`} style={{ left: `${gap.left}%`, width: `${gap.width}%` }} />
+            {/* Centered over the gap, but held to the gap's own end when that is near an edge of the bar: on a phone a
+                centered label at the end would run off the screen. */}
             <div
-              className={`absolute -top-8 -translate-x-1/2 whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium ${gap.after ? "bg-rose-500/15 text-rose-200" : "bg-sky-500/15 text-sky-200"}`}
-              style={{ left: `${Math.min(88, Math.max(12, gap.left + gap.width / 2))}%` }}
+              className={`absolute -top-8 whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium ${gap.left + gap.width / 2 > 70 || gap.left + gap.width / 2 < 30 ? "" : "-translate-x-1/2"} ${gap.after ? "bg-rose-500/15 text-rose-200" : "bg-sky-500/15 text-sky-200"}`}
+              style={
+                gap.left + gap.width / 2 > 70
+                  ? { right: `${100 - gap.left - gap.width}%` }
+                  : gap.left + gap.width / 2 < 30
+                    ? { left: `${gap.left}%` }
+                    : { left: `${gap.left + gap.width / 2}%` }
+              }
             >
               Seen {gap.text}
             </div>
@@ -1298,22 +1326,25 @@ function VerdictCard({ verdict }: { verdict: Verdict }) {
   );
 }
 
-function changeText(c: FactChange): string {
+function changeText(c: FactChange, names: Record<string, string>): string {
   const open = (status: string) => status === "open" || status === "in_progress";
-  if (open(c.was.status) && !open(c.now.status)) return `${c.incident_id} was marked fixed ${when(c.now.resolved_at)}, after this suggestion was made.`;
-  if (!open(c.was.status) && open(c.now.status)) return `${c.incident_id} was reopened after this suggestion was made.`;
-  return `The repair time of ${c.incident_id} changed to ${when(c.now.resolved_at)} after this suggestion was made.`;
+  // Staff read incidents by name ("the round pothole by the curb"), as everywhere else on the page.
+  const name = names[c.incident_id] ?? "The incident";
+  const Name = name.charAt(0).toUpperCase() + name.slice(1);
+  if (open(c.was.status) && !open(c.now.status)) return `${Name} was marked fixed ${when(c.now.resolved_at)}, after this suggestion was made.`;
+  if (!open(c.was.status) && open(c.now.status)) return `${Name} was reopened after this suggestion was made.`;
+  return `The repair time of ${name === "The incident" ? "the incident" : name} changed to ${when(c.now.resolved_at)} after this suggestion was made.`;
 }
 
 // A suggestion made before an incident changed reads old facts; the fast path on the current ones replaces it.
-function OutOfDate({ changes, reportId, analysisId }: { changes: FactChange[]; reportId: string; analysisId: number }) {
+function OutOfDate({ changes, reportId, analysisId, names }: { changes: FactChange[]; reportId: string; analysisId: number; names: Record<string, string> }) {
   return (
     <section className="mt-2 flex flex-col gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1 text-sm">
         <p className="font-semibold text-amber-100">This suggestion is out of date</p>
         {changes.map((c) => (
           <p key={c.incident_id} className="mt-0.5 text-amber-100/85">
-            {changeText(c)}
+            {changeText(c, names)}
           </p>
         ))}
         <p className="mt-0.5 text-[12px] text-amber-100/70">

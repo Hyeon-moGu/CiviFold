@@ -53,10 +53,11 @@ export type NewReport = {
 };
 
 // code "stale": the screen acted on a suggestion that is no longer the latest; it should reload, not retry.
+// code "rate": the visitor is over a limit (rate-limit.ts); trying again later works.
 export class UserError extends Error {
   constructor(
     message: string,
-    readonly code?: "stale",
+    readonly code?: "stale" | "rate",
   ) {
     super(message);
   }
@@ -91,8 +92,12 @@ export async function createReport(rt: Runtime, input: NewReport): Promise<{ rep
   const { photo, voice } = input;
   const live = accessCodeValid(input.access_code);
   if (!photo && !voice && !input.description) throw new UserError("Add a photo, a message or a recording.");
-  if (photo && !("sample_id" in photo) && !live) throw new UserError("Uploading your own photo needs the demo access code. Pick a sample photo instead.");
-  if (voice && !("sample_id" in voice) && !live) throw new UserError("Sending your own recording needs the demo access code. Pick a sample message instead.");
+  // A code given but wrong is said as such, not as a missing one.
+  const wrongCode = Boolean(input.access_code?.trim()) && !live;
+  if (photo && !("sample_id" in photo) && !live)
+    throw new UserError(wrongCode ? "That access code is not right." : "Uploading your own photo needs the demo access code. Pick a sample photo instead.");
+  if (voice && !("sample_id" in voice) && !live)
+    throw new UserError(wrongCode ? "That access code is not right." : "Sending your own recording needs the demo access code. Pick a sample message instead.");
   if (voice && "sample_id" in voice && messageSample(voice.sample_id)?.kind !== "voice") throw new UserError(`Unknown sample recording ${voice.sample_id}`);
   const reportId = id("rep");
   const code = trackingCode();
@@ -542,7 +547,7 @@ export async function answerReport(rt: Runtime, reportId: string, answer: { obse
   const [before] = await database.select({ live: reports.live }).from(reports).where(eq(reports.id, reportId));
   if (!before) throw new UserError(`Unknown report ${reportId}`);
   if ("photo" in answer && !("sample_id" in answer.photo) && !before.live && !accessCodeValid(answer.access_code)) {
-    throw new UserError("Uploading your own photo needs the demo access code. Pick a sample photo instead.");
+    throw new UserError(answer.access_code?.trim() ? "That access code is not right." : "Uploading your own photo needs the demo access code. Pick a sample photo instead.");
   }
   // An uploaded file may be left orphaned in the blob store if the answer loses; its row never exists.
   const row = "photo" in answer ? await photoRow(rt, reportId, answer.photo) : null;
@@ -601,9 +606,9 @@ export async function staffDecide(
     if (action === "request_info" && report.status === "needs_info") throw new UserError("The resident has an open question already.");
     if (action === "link" || action === "recurrence") {
       if (!incidentId) throw new UserError(action === "link" ? "Linking needs an incident." : "A recurrence needs the incident it recurs from.");
-      const [target] = await tx.select({ status: incidents.status }).from(incidents).where(eq(incidents.id, incidentId));
-      if (!target) throw new UserError(`Unknown incident ${incidentId}`);
-      if (action === "recurrence" && (target.status === "open" || target.status === "in_progress")) throw new UserError(`${incidentId} is still open, so nothing can recur from it yet.`);
+      const [target] = await tx.select({ status: incidents.status, title: incidents.title }).from(incidents).where(eq(incidents.id, incidentId));
+      if (!target) throw new UserError("That incident no longer exists. Reload the page.");
+      if (action === "recurrence" && (target.status === "open" || target.status === "in_progress")) throw new UserError(`The ${target.title} is still open, so nothing can recur from it yet.`);
     }
     const [analysis] = await tx.select().from(reportAnalyses).where(eq(reportAnalyses.report_id, reportId)).orderBy(desc(reportAnalyses.id)).limit(1);
     if (seen && (analysis?.id ?? null) !== seen.analysis_id) {
@@ -648,7 +653,8 @@ export async function staffDecide(
         incident_id: newId,
         type: recurrenceOf ? "recurrence_created" : "created",
         actor: "staff",
-        summary: recurrenceOf ? `Opened as a recurrence of ${recurrenceOf}` : `Opened from report ${report.tracking_code}`,
+        // Staff read incidents by name; the id stays in recurrence_of.
+        summary: recurrenceOf ? `Opened as a recurrence of the ${parent?.title ?? "earlier incident"}` : `Opened from report ${report.tracking_code}`,
       });
       return newId;
     };
@@ -698,7 +704,10 @@ export async function recordRepair(rt: Runtime, incidentId: string, at = new Dat
       .set({ status: "resolved", resolved_at: at })
       .where(and(eq(incidents.id, incidentId), inArray(incidents.status, ["open", "in_progress"])))
       .returning({ id: incidents.id });
-    if (fixed.length === 0) throw new UserError(`${incidentId} is not open, so its repair time stays as recorded.`);
+    if (fixed.length === 0) {
+      const [incident] = await tx.select({ title: incidents.title }).from(incidents).where(eq(incidents.id, incidentId));
+      throw new UserError(incident ? `The ${incident.title} is not open, so its repair time stays as recorded.` : "That incident no longer exists. Reload the page.");
+    }
     await tx.insert(incidentEvents).values({ incident_id: incidentId, type: "repair_recorded", actor: "staff", summary: "Repair recorded by staff", created_at: at });
   });
 }

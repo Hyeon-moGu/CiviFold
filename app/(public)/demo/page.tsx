@@ -8,7 +8,7 @@ import { ASSET_FILE } from "@/lib/dataset/static";
 import { SCENARIOS } from "@/lib/demo/scenarios";
 import { defaultMode } from "@/lib/meta/call";
 import { liveDailyUsd } from "@/lib/server/runtime";
-import { SEARCH_CONFIG } from "@/lib/pipeline/config";
+import { HELD_OUT, Scoreboard } from "@/app/_ui/scoreboard";
 import type { Label } from "@/lib/tools/types";
 import { DemoRunner, type CaseView, type OtherView } from "./demo-runner";
 
@@ -126,30 +126,26 @@ export default function DemoPage() {
   const live = defaultMode() !== "cached" || liveDailyUsd() > 0;
   return (
     <main className="mx-auto max-w-5xl px-4 pb-10 pt-8">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Is it the same problem?</h1>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Same spot isn&apos;t the same problem.</h1>
       <p className="mt-2 max-w-3xl text-lg leading-relaxed text-zinc-700">
-        A resident&apos;s photo report lands near an incident already on file. Merge it, or keep it apart? Grouping by location alone merges anything
-        nearby.
+        Grouping duplicate reports by location also folds in the look-alike next door and the hydrant that broke again after its repair, and either
+        can be closed without anyone going back out. CiviFold checks the photos first. Staff make the call.
       </p>
-      <div className="mt-4 grid gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
-        <p className="text-sm text-zinc-600">
-          <span className="block text-2xl font-semibold tracking-tight text-rose-700">24 of 33</span>
-          reports that needed a person, merged away by location alone ({SEARCH_CONFIG.radius_m.fire_hydrant} m, same kind)
+      <div className="mt-4 max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <Scoreboard />
+        <p className="border-t border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500">
+          Pre-registered held-out test of 80 synthetic reports; every merge is a suggestion until staff approve it. Location alone also merged{" "}
+          {HELD_OUT.location.wrongIncident} duplicates into the wrong incident; CiviFold none.{" "}
+          {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} came after one follow-up question, answered by a simulated resident;
+          earlier test sets had 1 to 3 wrong merges. The other 8 reports were already fixed and sit in neither row.{" "}
+          <Link href="/#results" className="font-medium text-zinc-900 underline underline-offset-2">
+            How it was measured →
+          </Link>
         </p>
-        <p className="text-sm text-zinc-600">
-          <span className="block text-2xl font-semibold tracking-tight text-emerald-700">0 of 33</span>
-          by CiviFold, which compares the photos with Muse Spark and SAM 3.1 (1 to 3 on earlier test sets)
-        </p>
-        <Link href="/#results" className="text-sm font-medium text-zinc-900 underline underline-offset-2">
-          How it was measured →
-        </Link>
       </div>
       <p className="mt-3 text-sm text-zinc-500">
         Synthetic photos, made with Muse Image. Each case replays its recorded run in seconds
-        {live ? <>; &ldquo;Run it live&rdquo; calls the models now</> : null}. Staff make the final call.{" "}
-        <Link href="/report?source=upload" className="font-medium text-zinc-900 underline underline-offset-2">
-          Try your own photo →
-        </Link>
+        {live ? <>; &ldquo;Run it live&rdquo; calls the models now</> : null}.
       </p>
       <DemoRunner cases={CASES} others={OTHERS} live={live} />
     </main>

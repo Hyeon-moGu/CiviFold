@@ -67,7 +67,7 @@ The latest holdout has 80 reports from 16 assets (8 fixtures or places and their
 | Left to staff without a suggestion | 0 / 80 | **3 / 80** | 12 / 80 |
 | API spend and time per report, live | $0 | $0.053, about 24 s | $0.053 + $0.025 |
 
-¹ Verification run on every closing suggestion (`D_hybrid`). It does not measure the app's staff-requested mode.
+¹ Verification run on every closing suggestion (`D_hybrid`), second run, with the neutral names the agent now sees (the first run, with identifiers visible: 49, 66 and 8). It does not measure the app's staff-requested mode.
 
 - **0 / 33 is an observation, not a guarantee.** A second live run of the fast path repeated it (67 / 80 correct after answers); earlier sets had 1 to 3 misses. The baseline proposes the nearest incident of the same kind as a duplicate and stands for no city's actual system.
 - **It asks rather than guesses.** The fast path asked one question (a wider shot, another angle, a close-up or the time) on 23 reports, and 21 ended correct after the simulated answer. Simulated residents always answer; reports nobody answers stay with staff.
@@ -84,7 +84,7 @@ The latest holdout has 80 reports from 16 assets (8 fixtures or places and their
 - **Fixtures far away.** SAM sometimes misses a thin street light pole from across the street, and the report then needs a second photo. Boxing fixtures with Muse Spark found them, but once matched a look-alike of the same model on the pole alone, so fixtures keep SAM's noun phrase.
 - **Coarse evidence.** The evidence check counts lines, not independent features, and a problem is visible or not, with no "not observable" state. Search uses the type the resident chose, the analysis the type read from the photo.
 - **Agents.** Staff-requested verification and the case brief have no separate evaluation. On holdout3 the fast path ran twice before the later change and once after, and the automatic agent twice; holdout2 was partly re-run after a harness fix; every other configuration ran once per set.
-- **Demo deployment.** No login, no undo and no audit trail: anyone with the URL can act as staff, and anyone can reset the demo world (once a minute).
+- **Demo deployment.** No login, no undo and no audit trail: anyone with the URL can act as staff, and anyone can reset the demo world (once a minute, and three times in 15 minutes from one network). Every action that writes or calls the models is paced per network, and repeated overuse holds that action back for an hour.
 
 ## Run locally
 

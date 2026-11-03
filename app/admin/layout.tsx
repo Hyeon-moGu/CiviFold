@@ -23,10 +23,10 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
             CiviFold <span className="hidden font-normal text-ops-dim sm:inline">/ staff console</span>
           </Link>
           <Link href="/demo" className="text-ops-dim hover:text-white">
-            Demo scenarios
+            Demo<span className="hidden sm:inline"> scenarios</span>
           </Link>
           <span className="ml-auto flex items-center gap-3 font-mono text-[11px] text-ops-dim">
-            <span className="flex items-center gap-1.5">
+            <span className="hidden items-center gap-1.5 sm:flex">
               <span className={`h-1.5 w-1.5 rounded-full ${mode === "cached" ? "bg-amber-400" : "bg-emerald-400"}`} />
               models: {models}
             </span>

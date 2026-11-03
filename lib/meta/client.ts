@@ -28,11 +28,14 @@ function apiKey(): string {
   return key;
 }
 
+// No single attempt waits longer than this; withRetry decides whether to try again.
+export const CALL_TIMEOUT_MS = 120_000;
+
 let client: OpenAI | undefined;
 
 // SDK retries are off: withRetry in retry.ts is the only retry layer, so cost is counted once per attempt.
 export function meta(): OpenAI {
-  client ??= new OpenAI({ apiKey: apiKey(), baseURL: META_BASE_URL, maxRetries: 0 });
+  client ??= new OpenAI({ apiKey: apiKey(), baseURL: META_BASE_URL, maxRetries: 0, timeout: CALL_TIMEOUT_MS });
   return client;
 }
 
@@ -42,8 +45,8 @@ export async function metaPost<T>(path: string, body: unknown, signal?: AbortSig
 }
 
 /** Multipart POST (fetch sets the boundary header itself). */
-export async function metaPostForm<T>(path: string, form: FormData): Promise<T> {
-  return send<T>(path, form, {});
+export async function metaPostForm<T>(path: string, form: FormData, signal?: AbortSignal): Promise<T> {
+  return send<T>(path, form, {}, signal);
 }
 
 async function send<T>(path: string, body: string | FormData, headers: Record<string, string>, signal?: AbortSignal): Promise<T> {
@@ -51,7 +54,7 @@ async function send<T>(path: string, body: string | FormData, headers: Record<st
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey()}`, Accept: "application/json", ...headers },
     body,
-    signal,
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(CALL_TIMEOUT_MS)]) : AbortSignal.timeout(CALL_TIMEOUT_MS),
   });
   const text = await res.text();
   if (!res.ok) throw new MetaHttpError(res.status, `${path} → HTTP ${res.status}: ${text.slice(0, 800)}`);

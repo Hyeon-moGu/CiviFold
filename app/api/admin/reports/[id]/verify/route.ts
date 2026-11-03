@@ -3,6 +3,7 @@
 
 import { z } from "zod";
 import { UserError, verifyReport, type VerifyEvent } from "@/lib/server/reports";
+import { limitResponse } from "@/lib/server/rate-limit";
 import { runtime as app } from "@/lib/server/runtime";
 
 export const runtime = "nodejs";
@@ -18,6 +19,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const body = Body.safeParse(await req.json().catch(() => null));
   if (!body.success) return Response.json({ error: "Which analysis to verify is missing." }, { status: 400 });
   const [rt, { id }] = await Promise.all([app(), params]);
+  const held = await limitResponse(rt.database, req, "live");
+  if (held) return held;
   const encoder = new TextEncoder();
   let watching = true;
   const stream = new ReadableStream<Uint8Array>({

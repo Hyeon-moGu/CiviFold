@@ -2,6 +2,7 @@
 // Created: 2026-10-27
 
 import { category, handle, isoTime, location, message, photoFrom, text, voiceFrom } from "@/lib/server/http";
+import { limit } from "@/lib/server/rate-limit";
 import { createReport, UserError } from "@/lib/server/reports";
 import { runtime as app } from "@/lib/server/runtime";
 
@@ -9,7 +10,11 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   return handle(async () => {
+    const rt = await app();
+    await limit(rt.database, req, "report");
     const form = await req.formData();
+    // A report sent with the access code runs live.
+    if (text(form, "access_code")) await limit(rt.database, req, "live");
     const [photo, voice] = await Promise.all([photoFrom(form), voiceFrom(form)]);
     const description = message(form, "description");
     if (!photo && !voice && !description) throw new UserError("Add a photo, a message or a recording.");
@@ -20,7 +25,7 @@ export async function POST(req: Request) {
     const now = new Date().toISOString();
     const observed = text(form, "observed_at") ?? meta?.taken_at ?? null;
     const exifTime = text(form, "observed_at") ? text(form, "observed_at_source") === "exif" : Boolean(meta?.taken_at);
-    return createReport(await app(), {
+    return createReport(rt, {
       photo,
       voice,
       lat,

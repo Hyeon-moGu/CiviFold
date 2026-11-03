@@ -21,6 +21,7 @@ const SUGGESTION_TEXT: Record<Label, string> = {
 };
 
 const URGENT_TEXT = "If anyone is in danger, call 911 now. We sent your report to staff as urgent.";
+const DECIDED = new Set(["linked", "new_incident", "dismissed"]);
 
 const WORDS_UNREAD_TEXT: Record<WordsUnread, string> = {
   no_recording: "Staff will read your message themselves. It was not checked automatically: the public demo has no recorded reading of it.",
@@ -71,7 +72,8 @@ export function residentView(d: Detail): ResidentView {
     report_id: d.report.id,
     tracking_code: d.report.tracking_code,
     status,
-    status_text: urgent ? URGENT_TEXT : status === "under_review" && final ? SUGGESTION_TEXT[final.label] : (STATUS_TEXT[status] ?? "Received."),
+    // Once staff decide, the resident hears the decision, an urgent report included.
+    status_text: DECIDED.has(status) ? STATUS_TEXT[status]! : urgent ? URGENT_TEXT : status === "under_review" && final ? SUGGESTION_TEXT[final.label] : (STATUS_TEXT[status] ?? "Received."),
     submitted_at: new Date(d.report.submitted_at).toISOString(),
     observed_at: new Date(d.report.observed_at).toISOString(),
     channel: d.report.channel as Channel,

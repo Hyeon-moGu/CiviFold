@@ -4,6 +4,7 @@
 import { z } from "zod";
 import { runStep } from "@/lib/demo/scenarios";
 import { handle } from "@/lib/server/http";
+import { limit } from "@/lib/server/rate-limit";
 import { UserError } from "@/lib/server/reports";
 import { runtime as app } from "@/lib/server/runtime";
 
@@ -16,7 +17,9 @@ export async function POST(req: Request) {
   return handle(async () => {
     const body = Body.safeParse(await req.json().catch(() => null));
     if (!body.success) throw new UserError("Unknown demo step.");
+    const rt = await app();
+    await limit(rt.database, req, body.data.live === true ? "live" : "replay");
     // A send replays the recorded run; "Run it live" calls the models now, while today's budget holds.
-    return runStep(await app(), body.data.scenario, body.data.step, { live: body.data.live === true });
+    return runStep(rt, body.data.scenario, body.data.step, { live: body.data.live === true });
   });
 }

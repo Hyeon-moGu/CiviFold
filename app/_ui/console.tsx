@@ -74,13 +74,15 @@ export const readable = (text: string) =>
     .replace(/^All 1 nearby incidents show /, "The one nearby incident shows ")
     .replace('Photo quality is "object_not_visible".', "The photo does not show the fixture or spot clearly, so nothing was compared yet.")
     .replace('Photo quality is "blurry".', "The photo is too blurry to compare, so nothing was compared yet.")
-    .replace("The problem is judged from the whole-photo comparison of the same photo.", "The fixture was matched on the cut-outs; the problem was read from the whole photos.")
+    .replace("The problem is judged from the whole-photo comparison of the same photo.", "The cut-outs matched; the problem was read from the whole photos.")
     .replace("The problem is judged from the cut-out comparison of the same photo.", "The fixture was matched on the whole photos; the problem was read from the cut-outs.")
     .replace(/^The problem is judged from /, "The problem was read from ")
     .replace(/Same place or fixture as (\S+) \((0(?:\.\d+)?|1(?:\.0+)?)\)/g, (_, id: string, x: string) => `Same place as ${id} in the photos (model confidence ${pct(Number(x))})`)
     .replace(/problem looks same/g, "the problem looks the same")
     .replace(/problem looks uncertain/g, "unclear if the problem is the same")
-    .replace(/\((0(?:\.\d+)?|1(?:\.0+)?)\)/g, (_, x: string) => `(model confidence ${pct(Number(x))})`);
+    .replace(/\((0(?:\.\d+)?|1(?:\.0+)?)\)/g, (_, x: string) => `(model confidence ${pct(Number(x))})`)
+    // The rules count whole hours: "0h before" is under an hour.
+    .replace(/\b0h (before|after)\b/g, "less than an hour $1");
 
 /** What one image comparison concluded: is it the same fixture or spot? */
 export const VERDICT_TEXT: Record<string, string> = { same: "same", different: "not the same", uncertain: "unsure" };

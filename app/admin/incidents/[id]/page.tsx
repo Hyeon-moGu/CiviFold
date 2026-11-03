@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { incidentDetail } from "@/lib/server/reports";
+import { incidentDetail, incidentTitles } from "@/lib/server/reports";
 import { runtime } from "@/lib/server/runtime";
 import { when } from "@/app/_ui/format";
 import { SyntheticBadge } from "@/app/_ui/labels";
@@ -24,9 +24,14 @@ const EVENT_DOT: Record<string, string> = {
 };
 
 export default async function IncidentDetail({ params }: { params: Promise<{ id: string }> }) {
-  const detail = await incidentDetail(await runtime(), (await params).id);
+  const rt = await runtime();
+  const detail = await incidentDetail(rt, (await params).id);
   if (!detail) notFound();
-  const { incident, events, reports, photos, recurrences } = detail;
+  const { incident, reports, photos, recurrences } = detail;
+  // Older event summaries name an incident by id ("Opened as a recurrence of inc_..."): staff read its name.
+  const ids = [...new Set(detail.events.flatMap((e) => e.summary?.match(/\binc_[a-z0-9_]+/g) ?? []))];
+  const titles = await incidentTitles(rt, ids);
+  const events = detail.events.map((e) => ({ ...e, summary: e.summary?.replace(/\binc_[a-z0-9_]+/g, (id) => (titles[id] ? `the ${titles[id]}` : "an earlier incident")) ?? e.summary }));
   const open = incident.status === "open" || incident.status === "in_progress";
   const mapReports = reports.map((r) => ({ id: r.id, code: r.tracking_code, lat: r.lat, lng: r.lng, label: null, urgent: r.urgent, incident_id: incident.id, n: null }));
 

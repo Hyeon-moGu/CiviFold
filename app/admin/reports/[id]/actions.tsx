@@ -9,6 +9,7 @@ import { useEffect, useRef, useState, useTransition, type ReactNode } from "reac
 import type { Label, RequestItem } from "@/lib/tools/types";
 import { useBrief } from "./brief";
 import { Spinner, useVerify } from "./verify";
+import { pauseFrom, usePaused } from "@/app/_ui/pause";
 
 type Action = "link" | "new_incident" | "recurrence" | "request_info" | "dismiss";
 // approve: the button text when this is the suggested decision, in the words the public demo uses.
@@ -77,6 +78,8 @@ export function Actions({
   const [refreshing, startRefresh] = useTransition();
   const saving = pending ?? (refreshing ? lastAction : null);
   const [error, setError] = useState<string | null>(null);
+  const pausedStaff = usePaused("staff");
+  const pausedLive = usePaused("live");
   const suggested = final && !stale ? SUGGESTED[final.label] : undefined;
   const verifying = checking?.state.phase === "running";
   const writing = briefing?.state.phase === "running";
@@ -100,6 +103,7 @@ export function Actions({
           facts_changed_seen: stale,
         }),
       });
+      pauseFrom(res, "staff");
       const body = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
       if (!res.ok) {
         setError(body.error ?? "Could not save that.");
@@ -126,7 +130,7 @@ export function Actions({
   ];
   const primary = choices.find((c) => c.action === suggested);
   const open = choices.filter((c) => !c.needs || focusId);
-  const blocked = (c: Choice) => deciding !== null || Boolean(c.needs && !focusId);
+  const blocked = (c: Choice) => deciding !== null || pausedStaff || Boolean(c.needs && !focusId);
   const agents = Boolean((verify && checking) || verifyLimit !== null || (brief && briefing) || briefLimit !== null);
   const note = verifying
     ? "Decisions wait until the check finishes."
@@ -189,7 +193,7 @@ export function Actions({
           )}
           {verify && checking && (
             <AgentButton
-              disabled={busy !== null || verify.running}
+              disabled={busy !== null || verify.running || pausedLive}
               running={verifying || verify.running}
               onClick={() => checking.start(verify.analysisId)}
               title="Muse Spark looks for evidence against this suggestion with the pipeline's tools. It can only make the suggestion more cautious."
@@ -204,7 +208,7 @@ export function Actions({
           )}
           {brief && briefing && (
             <AgentButton
-              disabled={busy !== null}
+              disabled={busy !== null || pausedLive}
               running={writing}
               onClick={() => briefing.start(brief.analysisId)}
               title="Muse Spark reads the pipeline's facts, the incident's history and what is open nearby, and writes a brief in which every item cites its evidence. It never changes the suggestion."

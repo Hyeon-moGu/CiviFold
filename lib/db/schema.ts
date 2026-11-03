@@ -210,6 +210,19 @@ export const demoResets = pgTable("demo_resets", {
   created_at: createdAt(),
 });
 
+// Requests per visitor (a hashed address) and action, counted in fixed windows, and the actions held back from a
+// visitor after repeated overuse. A reset of the demo world leaves both alone, so it cannot clear them.
+export const rateCounts = pgTable("rate_counts", {
+  key: text("key").primaryKey(), // action, visitor, window length and window number
+  count: integer("count").notNull().default(0),
+  expires_at: at("expires_at").notNull(),
+});
+
+export const rateBlocks = pgTable("rate_blocks", {
+  key: text("key").primaryKey(), // action and visitor
+  until: at("until").notNull(),
+});
+
 // Live model spend per UTC day, so a public deployment can stop at a cap.
 export const spend = pgTable("spend", {
   day: text("day").primaryKey(), // YYYY-MM-DD
