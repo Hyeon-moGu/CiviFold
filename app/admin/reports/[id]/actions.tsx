@@ -184,7 +184,7 @@ export function Actions({
           {agents && <span className="text-xs text-ops-dim">Ask an agent</span>}
           {agentsOff && agentsElsewhere && (
             <Link href={`/admin/reports/${agentsElsewhere}`} className="text-xs text-violet-200 underline decoration-violet-400/50 underline-offset-2 hover:text-white">
-              See what the verification agent and the case brief found on this case →
+              See the recorded agent run on the demo&apos;s own copy of this case →
             </Link>
           )}
           {verify && checking && (

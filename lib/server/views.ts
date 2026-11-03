@@ -23,8 +23,8 @@ const SUGGESTION_TEXT: Record<Label, string> = {
 const URGENT_TEXT = "If anyone is in danger, call 911 now. We sent your report to staff as urgent.";
 
 const WORDS_UNREAD_TEXT: Record<WordsUnread, string> = {
-  no_recording: "Staff will read your message themselves. The automatic check did not: the public demo has no recorded reading of it.",
-  budget: "Staff will read your message themselves. The automatic check did not: live model calls are paused for today.",
+  no_recording: "Staff will read your message themselves. It was not checked automatically: the public demo has no recorded reading of it.",
+  budget: "Staff will read your message themselves. It was not checked automatically: live model calls are paused for today.",
 };
 
 const STATUS_TEXT: Record<string, string> = {

@@ -37,7 +37,7 @@ export default async function IncidentDetail({ params }: { params: Promise<{ id:
           ← Queue
         </Link>
         <span className="text-ops-line">/</span>
-        <span className="font-mono text-ops-dim">{incident.id}</span>
+        <span className="text-ops-dim">Incident</span>
       </div>
 
       <header className="mt-3 flex flex-wrap items-center gap-3">

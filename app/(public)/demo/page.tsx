@@ -6,11 +6,14 @@ import { imageId } from "@/lib/dataset/assets";
 import { messageSample } from "@/lib/dataset/messages";
 import { ASSET_FILE } from "@/lib/dataset/static";
 import { SCENARIOS } from "@/lib/demo/scenarios";
+import { defaultMode } from "@/lib/meta/call";
+import { liveDailyUsd } from "@/lib/server/runtime";
 import { SEARCH_CONFIG } from "@/lib/pipeline/config";
 import type { Label } from "@/lib/tools/types";
 import { DemoRunner, type CaseView, type OtherView } from "./demo-runner";
 
 export const metadata = { title: "Demo · CiviFold" };
+export const dynamic = "force-dynamic";
 
 const assets = new Map(ASSET_FILE.assets.map((a) => [a.id, a]));
 const place = (assetId: string) => {
@@ -119,6 +122,8 @@ const OTHERS: OtherView[] = [
 ];
 
 export default function DemoPage() {
+  // A replay-only deployment with no live budget offers no live run, rather than one that falls back to the replay.
+  const live = defaultMode() !== "cached" || liveDailyUsd() > 0;
   return (
     <main className="mx-auto max-w-5xl px-4 pb-10 pt-8">
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Is it the same problem?</h1>
@@ -140,13 +145,13 @@ export default function DemoPage() {
         </Link>
       </div>
       <p className="mt-3 text-sm text-zinc-500">
-        Synthetic photos, made with Muse Image. Each case replays its recorded run in seconds; &ldquo;Run it live&rdquo; calls the models now. Staff make
-        the final call.{" "}
+        Synthetic photos, made with Muse Image. Each case replays its recorded run in seconds
+        {live ? <>; &ldquo;Run it live&rdquo; calls the models now</> : null}. Staff make the final call.{" "}
         <Link href="/report?source=upload" className="font-medium text-zinc-900 underline underline-offset-2">
           Try your own photo →
         </Link>
       </p>
-      <DemoRunner cases={CASES} others={OTHERS} />
+      <DemoRunner cases={CASES} others={OTHERS} live={live} />
     </main>
   );
 }

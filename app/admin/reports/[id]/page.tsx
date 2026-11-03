@@ -587,6 +587,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
 
             {/* Reasons column */}
             <aside className="space-y-4">
+              {(decision?.reasons.some((r) => r.text.trim()) || zoomed.length > 0 || best) && (
               <Panel title="Why">
                 {/* The rules read in order; the last one decided. Rule ids stay for whoever checks the decision table. */}
                 <ol className="space-y-2 text-[13px]">
@@ -635,6 +636,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   </>
                 )}
               </Panel>
+              )}
 
               {/* What the agents found sits beside the evidence, never between the decision and the photos. */}
               {verdict && !decided && changes.length === 0 && <VerdictCard verdict={verdict} />}

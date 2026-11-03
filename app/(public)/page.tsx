@@ -115,7 +115,11 @@ export default function Home() {
         <p className="mt-3 max-w-2xl text-xs text-zinc-500">
           Synthetic photos generated with Muse Image. First run on each set; each set was unseen when it ran. Rules were changed after the test set and
           the first unseen set, so those two rows used earlier rules. Later, Muse Spark began boxing road damage and dumped piles for SAM; re-run on
-          holdout3 after that change (photos already seen), the current version again made 0 of 33. Every run is in the evaluation notes.
+          holdout3 after that change (photos already seen), the current version again made 0 of 33. Every run is in the{" "}
+          <a href="https://github.com/Hyeon-moGu/CiviFold/blob/main/eval/README.md" className="underline underline-offset-2 hover:text-zinc-900">
+            evaluation notes
+          </a>
+          .
         </p>
       </section>
 

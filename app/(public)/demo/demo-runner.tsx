@@ -250,7 +250,7 @@ function Spinner() {
   return <span aria-hidden className="inline-block h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-zinc-400 border-r-transparent" />;
 }
 
-export function DemoRunner({ cases, others }: { cases: CaseView[]; others: OtherView[] }) {
+export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[]; others: OtherView[]; live: boolean }) {
   const [sent, setSent] = useState<Record<string, Sent>>({});
   const [ready, setReady] = useState(false); // what this tab sent is read after the first render
   const [world, setWorld] = useState<Record<string, Sent>>({});
@@ -359,7 +359,9 @@ export function DemoRunner({ cases, others }: { cases: CaseView[]; others: Other
               <button onClick={sendAll} className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800">
                 Send the other {unsent.length} reports at once
               </button>
-              <p className="text-sm text-zinc-600">Each replays its recorded run in seconds. &ldquo;Run it live&rdquo; on any card then calls Muse Spark and SAM 3.1 now.</p>
+              <p className="text-sm text-zinc-600">
+                Each replays its recorded run in seconds.{liveOn && <> &ldquo;Run it live&rdquo; on any card then calls Muse Spark and SAM 3.1 now.</>}
+              </p>
             </>
           )}
         </div>
@@ -450,7 +452,7 @@ export function DemoRunner({ cases, others }: { cases: CaseView[]; others: Other
                 <RunLine
                   sent={preview ? { run: { live: false, usd: 0, ms: 0 } } : r}
                   className="mx-5 mt-2"
-                  onLive={() => send(c.key, stages.length, true)}
+                  onLive={liveOn ? () => send(c.key, stages.length, true) : undefined}
                   compare={(label) => <Plain label={label} size="sm" />}
                 />
                 {r?.seen && r.seen.length > 0 && (
@@ -656,7 +658,7 @@ export function DemoRunner({ cases, others }: { cases: CaseView[]; others: Other
                     )}
                   </div>
                   {!running && (
-                    <RunLine sent={then?.run ? then : r} className="mt-1" onLive={() => send(o.key, 1, true)} compare={(label) => <Plain label={label} size="sm" />} />
+                    <RunLine sent={then?.run ? then : r} className="mt-1" onLive={liveOn ? () => send(o.key, 1, true) : undefined} compare={(label) => <Plain label={label} size="sm" />} />
                   )}
                   {r?.asked && r.label === "NEEDS_INFO" && !running && (
                     <p className="mt-1.5 rounded-md bg-amber-50 px-2 py-1 text-[13px] text-amber-900">
