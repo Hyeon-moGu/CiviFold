@@ -112,7 +112,7 @@
 
   <!-- 4. Decide -->
   <rect x="722" y="108" width="206" height="312" rx="10" class="card"/>
-  <text x="736" y="132" class="label">RULES, NO MODEL</text>
+  <text x="736" y="132" class="label">NO MODEL</text>
   <rect x="864" y="118" width="50" height="18" rx="9" fill="#e2e8f0"/>
   <text x="889" y="131" class="pill" text-anchor="middle" fill="#334155">Rules</text>
   <text x="736" y="154" class="body">Observation time against</text>

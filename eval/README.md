@@ -158,7 +158,7 @@ Three ways were tried, each on dev, val and test only:
 | Join the touching pieces of a pile (trash only) | On the 56 trash cases: no wrong closing suggestion, correct at once 34 → 45, after answers 47 → 49 (runs 300 and 301) |
 | Spark box, then SAM, for every kind | On all 222 cases: correct at once 148 → 171, after answers 196 → 203, but **one wrong closing suggestion**: a street-light look-alike whose boxed pole alone matched the incident's light of the same model (`S6-lookalike-open`). Hydrants did not improve. Not used for fixtures (run 320) |
 
-The version kept boxes road damage and trash only (run 321; run 310 is the version before, replayed):
+The version kept boxes road damage and trash only (run 321). All three columns were run with the same harness on the same day, the first two replayed from their recorded calls: the frozen fast path is run 310 for hydrants, street lights and road damage with run 300 for trash, and "piles joined" is run 310. In the October 27 run of the frozen fast path (run 11), one case was a safe error where the replay defers it.
 
 | dev, val and test, 222 cases | Frozen fast path | Piles joined | **Kept: Spark box for road and trash** |
 |---|---|---|---|

@@ -8,7 +8,7 @@
 
 CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Every link and closure is a suggestion until a staff member approves it.
 
-On a pre-registered holdout of 80 synthetic reports, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) suggested closing **none of the 33 reports that needed a person**, in each of two live runs, and again when the current version was re-run on it after one later change. Grouping by location alone would have closed 24 ([results](#results)).
+On a pre-registered holdout of 80 synthetic reports, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) suggested closing **none of the 33 reports that needed a person**. Two live runs and a re-run after one later change all gave 0 of 33. Grouping by location alone would have closed 24 ([results](#results)).
 
 **Try it in three minutes:** open the [demo](https://civi-fold.vercel.app/demo) and send the cases (or press "Run it live" on one) · open case 3 in the staff view and press "Verify with the agent" · approve, and the demo card and the resident's page show the decision.
 
@@ -30,9 +30,9 @@ CiviFold is for the staff who review incoming reports at a 311 center or public 
 
 ## What staff see
 
-![Staff console: a possible recurrence with its suggested decision, two hydrant photos with SAM outlines and cut-outs, what the comparison found about the fixture and the problem, and the rule behind the suggestion.](media/staff-review.webp)
+![Staff console: a possible recurrence seen 24 hours after the repair, with its suggested decision, two hydrant photos with SAM outlines and cut-outs, and what the comparison found about the fixture (same) and the problem (not the same).](media/staff-review.webp)
 
-Both photos with their SAM outlines and cut-outs, what the comparison found about the fixture and the problem, and the rule behind the suggestion. Staff accept it in one click or choose another action. *Synthetic sample photos.*
+The suggestion and why (seen 24 hours after the repair, with a new problem), both photos with their SAM outlines and cut-outs, and what the comparison found about the fixture and the problem. Staff accept it in one click or choose another action. *Synthetic sample photos.*
 
 ## How it works
 
@@ -72,7 +72,7 @@ The latest holdout has 80 reports from 16 assets (8 fixtures or places and their
 - **0 / 33 is an observation, not a guarantee.** A second live run of the fast path repeated it (67 / 80 correct after answers); earlier sets had 1 to 3 misses. The baseline proposes the nearest incident of the same kind as a duplicate and stands for no city's actual system.
 - **It asks rather than guesses.** The fast path asked one question (a wider shot, another angle, a close-up or the time) on 23 reports, and 21 ended correct after the simulated answer. Simulated residents always answer; reports nobody answers stay with staff.
 - **Verification stays optional.** On holdout3 it left the critical count unchanged and raised deferrals from 3 to 12. Across all sets it stopped one wrong suggestion.
-- **One change since.** SAM's noun phrase often missed a patched or lifted road surface and cut a dumped pile down to one bag, so those reports got a question even when the whole photos matched. Muse Spark now boxes the damage or the pile, and SAM segments inside the box. On the 222 dev, val and test cases, wrong closing suggestions stayed at 0, correct suggestions before any answer rose from 137 to 166, and after answers from 194 to 202. Re-run on holdout3, whose photos had been seen by then, the current version again made 0 / 33 wrong closing suggestions and got 60 of 80 right before any answer (51 before the change) and 73 after answers (72), asking 14 questions instead of 23 ([details](eval/README.md#after-holdout3-road-damage-and-dumped-piles)).
+- **One change since.** SAM's noun phrase often missed a patched or lifted road surface and cut a dumped pile down to one bag, so those reports got a question even when the whole photos matched. Muse Spark now boxes the damage or the pile, and SAM segments inside the box. Re-run on holdout3, whose photos had been seen by then, the current version again made 0 / 33 wrong closing suggestions, got 60 of 80 right before any answer (51 before) and asked 14 questions instead of 23 ([details and the development-set check](eval/README.md#after-holdout3-road-damage-and-dumped-piles)).
 - **Three real photos** of one dumped pile in Korea, run once with the expectations written first, gave no wrong link and no confirmed duplicate either: the views share no fixed feature, so the fast path asked for a wider shot ([details](eval/README.md#real-world-check)).
 
 **[Methods, ablations, every set and every recorded run →](eval/README.md)**
@@ -83,7 +83,7 @@ The latest holdout has 80 reports from 16 assets (8 fixtures or places and their
 - **Four evaluated categories:** hydrants, street lights, dumped trash and road damage. Signs, benches and graffiti are accepted but not evaluated. Look-alikes in identical surroundings are not tested separately.
 - **Fixtures far away.** SAM sometimes misses a thin street light pole from across the street, and the report then needs a second photo. Boxing fixtures with Muse Spark found them, but once matched a look-alike of the same model on the pole alone, so fixtures keep SAM's noun phrase.
 - **Coarse evidence.** The evidence check counts lines, not independent features, and a problem is visible or not, with no "not observable" state. Search uses the type the resident chose, the analysis the type read from the photo.
-- **Agents.** Staff-requested verification and the case brief have no separate evaluation. The fast path ran on holdout3 twice before the later change and once after; every other run is single.
+- **Agents.** Staff-requested verification and the case brief have no separate evaluation. On holdout3 the fast path ran twice before the later change and once after, and the automatic agent twice; holdout2 was partly re-run after a harness fix; every other configuration ran once per set.
 - **Demo deployment.** No login, no undo and no audit trail: anyone with the URL can act as staff, and anyone can reset the demo world (once a minute).
 
 ## Run locally
