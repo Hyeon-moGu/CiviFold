@@ -23,13 +23,17 @@ describe("verdictOf", () => {
     const v = verdictOf({ status: "proposed", guard: passed, steps: [compare(1, "inc_a", "same"), compare(2, "inc_b", "different"), propose], before, after: before });
     expect(v).toMatchObject({ kind: "confirmed", checks: 2, against: [] });
     expect(v.agree).toHaveLength(2);
+    // Each line keeps the incident photo it compared with, so the card can show the look-alike it ruled out.
+    const shown = verdictOf({ status: "proposed", guard: passed, steps: [{ ...compare(2, "inc_b", "different"), args: { candidate_image_id: "img_b" } }, propose], before, after: before });
+    expect(Object.values(shown.photos)).toEqual(["img_b"]);
+    expect(shown.photos[shown.agree[0]!]).toBe("img_b");
     // Ruling out a look-alike alone does not back the suggested incident.
     expect(verdictOf({ status: "proposed", guard: passed, steps: [compare(1, "inc_b", "different"), propose], before, after: before }).kind).toBe("unchanged");
   });
 
   it("says a blocked proposal did not back the suggestion, even with no checks", () => {
     const v = verdictOf({ status: "blocked", guard: { passed: false, blocked_rules: ["G3"] }, steps: [propose], before, after: before });
-    expect(v).toMatchObject({ kind: "blocked", title: "Verification proposal blocked", checks: 0 });
+    expect(v).toMatchObject({ kind: "blocked", title: "No evidence against it, but the check fell short", checks: 0 });
   });
 
   it("shows evidence against whether or not the answer changed", () => {

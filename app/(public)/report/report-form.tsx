@@ -5,12 +5,14 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import type { MessageSample } from "@/lib/dataset/messages";
+import { haversineM } from "@/lib/geo";
 import { MAX_DESCRIPTION_CHARS } from "@/lib/limits";
 import type { Sample } from "@/lib/dataset/static";
 import type { Category } from "@/lib/tools/types";
 import { SyntheticBadge } from "@/app/_ui/labels";
+import type { MapPlace } from "@/app/_ui/pin-map";
 import { EXIF_SLICE, isHeic, shrinkForUpload } from "@/app/_ui/shrink";
 import { Recorder } from "./recorder";
 
@@ -42,10 +44,21 @@ function localInput(iso: string): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export function ReportForm({ samples, messages }: { samples: Sample[]; messages: MessageSample[] }) {
+export function ReportForm({
+  samples,
+  messages,
+  places,
+  initialSource = "sample",
+}: {
+  samples: Sample[];
+  messages: MessageSample[];
+  places: MapPlace[];
+  initialSource?: "sample" | "upload";
+}) {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [source, setSource] = useState<"sample" | "upload" | "none">("sample");
+  const lastStepAt = useRef(0); // when the form moved to a new step
+  const [source, setSource] = useState<"sample" | "upload" | "none">(initialSource);
   const [filter, setFilter] = useState<Category | "all">("all");
   const [picked, setPicked] = useState<Sample | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -149,12 +162,17 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
   function next() {
     const why = blocker(step);
     setError(why);
-    if (!why) setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    if (!why) {
+      lastStepAt.current = Date.now();
+      setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    }
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (step < STEPS.length - 1) return next();
+    // "Send report" sits where "Next" was: a double click on Next must not send before the last step is read.
+    if (Date.now() - lastStepAt.current < 800) return;
     for (let at = 0; at < STEPS.length; at++) {
       const why = blocker(at);
       if (why) {
@@ -199,6 +217,11 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
   const thumb = picked ? `/api/samples/${picked.id}/image?w=240` : preview;
   const latN = lat && !Number.isNaN(Number(lat)) ? Number(lat) : null;
   const lngN = lng && !Number.isNaN(Number(lng)) ? Number(lng) : null;
+  // The incident on file closest to the pin: a report is compared only with incidents close to it.
+  const nearest =
+    latN !== null && lngN !== null && places.length
+      ? places.map((p) => ({ place: p, m: haversineM({ lat: latN, lng: lngN }, p) })).sort((a, b) => a.m - b.m)[0]!
+      : null;
 
   return (
     <form onSubmit={submit} className="mt-6">
@@ -211,7 +234,7 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
               {(
                 [
                   ["sample", "Sample photo", "Demo images"],
-                  ["upload", "My photo", "Needs access code"],
+                  ["upload", "My photo", "Judges: code in submission notes"],
                   ["none", "No photo", "Text or voice"],
                 ] as const
               ).map(([id, title, sub]) => (
@@ -248,12 +271,15 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
                       className={`group relative overflow-hidden rounded-xl border text-left transition ${picked?.id === s.id ? "border-zinc-900 ring-2 ring-zinc-900" : "border-zinc-200 hover:border-zinc-300"}`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
-                      <img src={`/api/samples/${s.id}/image?w=240`} alt={s.title} loading="lazy" className="aspect-[3/2] w-full object-cover" />
+                      <img src={`/api/samples/${s.id}/image?w=240`} alt={`${tileTitle(s.title).place}, ${tileTitle(s.title).view}`} loading="lazy" className="aspect-[3/2] w-full object-cover" />
                       <span className="absolute left-1.5 top-1.5">
                         <SyntheticBadge />
                       </span>
                       {picked?.id === s.id && <span className="absolute right-1.5 top-1.5 rounded-full bg-zinc-900 px-1.5 text-xs font-bold text-white">✓</span>}
-                      <span className="block truncate px-2 py-1.5 text-xs text-zinc-600">{tileTitle(s.title)}</span>
+                      <span className="block px-2 py-1.5 text-xs leading-snug">
+                        <span className="block truncate text-zinc-500">{tileTitle(s.title).place}</span>
+                        <span className="block truncate font-medium text-zinc-800">{tileTitle(s.title).view}</span>
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -277,6 +303,10 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
             )}
             {source === "upload" && (
               <div className="mt-3 rounded-xl bg-zinc-50 px-3.5 py-3 text-xs text-zinc-600">
+                <p className="mb-2 rounded-lg bg-white px-2.5 py-2 text-zinc-700 ring-1 ring-zinc-200">
+                  Your own photo runs live: Muse Spark and SAM 3.1 check it in 20 seconds to a minute. Hackathon judges find the access code in the submission
+                  notes and enter it in the last step. To be compared with an incident, put the pin on one of its dots in the next step.
+                </p>
                 <p className="font-medium text-zinc-900">What makes a photo easy to match</p>
                 <p className="mt-1">
                   Keep what stays put in the frame: a shop sign, a door, a pole, the curb. That is what tells this spot from the one next to it. A close-up of the
@@ -317,11 +347,15 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
         )}
 
         {step === 1 && (
-          <Step title="Where is it?" hint="Tap the map where the problem is. The closer the pin, the better the match.">
+          <Step
+            title="Where is it?"
+            hint="Tap the map where the problem is. Dots are incidents already on file (red open, green fixed): tap one to report at it, since a report is compared only with incidents near its pin."
+          >
             <div className="relative h-[46vh] min-h-[280px] overflow-hidden rounded-xl border border-zinc-200">
               <PinMap
                 lat={latN}
                 lng={lngN}
+                places={places}
                 onPick={(a, b) => {
                   setLat(a.toFixed(6));
                   setLng(b.toFixed(6));
@@ -336,7 +370,39 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
                 ◎ My location
               </button>
             </div>
-            <p className="mt-2 font-mono text-xs text-zinc-500">{latN !== null && lngN !== null ? `${latN.toFixed(5)}, ${lngN.toFixed(5)}` : "No pin yet"}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+              <label className="text-sm text-zinc-700">
+                Report at an incident on file:{" "}
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const p = places.find((x) => x.id === e.target.value);
+                    if (p) {
+                      setLat(p.lat.toFixed(6));
+                      setLng(p.lng.toFixed(6));
+                      setError(null);
+                    }
+                  }}
+                  className="ml-1 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm"
+                >
+                  <option value="">Choose…</option>
+                  {[...places]
+                    .sort((a, b) => a.title.localeCompare(b.title))
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.title} ({p.open ? "open" : "fixed"})
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <span className="font-mono text-xs text-zinc-500">{latN !== null && lngN !== null ? `${latN.toFixed(5)}, ${lngN.toFixed(5)}` : "No pin yet"}</span>
+            </div>
+            {nearest && (
+              <p className="mt-1.5 text-xs text-zinc-600">
+                Nearest incident on file: the {nearest.place.title}, {Math.round(nearest.m)} m away.{" "}
+                {nearest.m <= COMPARE_RADIUS_M ? "Your photo will be compared with it." : `Only incidents within about ${COMPARE_RADIUS_M} m are compared, so this would be a new report.`}
+              </p>
+            )}
             {source === "sample" && picked && <Note tone="ok">Set from the sample photo.</Note>}
             {source === "upload" && exif && (
               <Note tone={exif.lat && lat === exif.lat && lng === exif.lng ? "ok" : "plain"}>
@@ -371,7 +437,7 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
                 <span className="flex h-12 w-16 items-center justify-center rounded-md bg-zinc-100 text-xs text-zinc-500">No photo</span>
               )}
               <div className="min-w-0 text-xs text-zinc-600">
-                <p className="truncate font-medium text-zinc-900">{picked?.title ?? file?.name ?? "Message only"}</p>
+                <p className="truncate font-medium text-zinc-900">{picked ? `${tileTitle(picked.title).place} · ${tileTitle(picked.title).view}` : (file?.name ?? "Message only")}</p>
                 <p className="font-mono">{latN !== null && lngN !== null ? `${latN.toFixed(5)}, ${lngN.toFixed(5)}` : "not set"}</p>
               </div>
               <button type="button" onClick={() => setStep(0)} className="ml-auto text-xs font-medium text-zinc-900 underline underline-offset-2">
@@ -416,7 +482,10 @@ export function ReportForm({ samples, messages }: { samples: Sample[]; messages:
               <label className="mt-5 block text-sm font-medium">
                 Demo access code
                 <input value={accessCode} onChange={(e) => setAccessCode(e.target.value)} className={`${input} mt-1.5 font-normal`} placeholder="Given to hackathon judges" />
-                <span className="mt-1 block text-xs font-normal text-zinc-500">Your own photo or recording is analyzed live, so it needs the code. Anyone on the staff console can see it.</span>
+                <span className="mt-1 block text-xs font-normal text-zinc-500">
+                  Hackathon judges find the code in the submission notes. Your own photo or recording is analyzed live, so it needs the code. Anyone on the
+                  staff console can see it.
+                </span>
               </label>
             )}
 
@@ -474,9 +543,14 @@ function Progress({ step, onJump }: { step: number; onJump: (at: number) => void
 }
 
 // A tile names the object and the view, not the photo's state: the state is what the system has to find out.
-function tileTitle(title: string): string {
+// The place, and the view that tells the photos of one place apart; the state is left out, so the tile does not
+// give the answer away.
+// The search radius for every kind but benches (30 m); what the form tells a resident before the kind is known.
+const COMPARE_RADIUS_M = 40;
+
+function tileTitle(title: string): { place: string; view: string } {
   const parts = title.split(", ");
-  return parts.length === 3 ? `${parts[0]} · ${parts[2]}` : title;
+  return parts.length === 3 ? { place: parts[0]!, view: parts[2]! } : { place: title, view: "" };
 }
 
 function Step({ title, hint, children }: { title: string; hint: string; children: ReactNode }) {

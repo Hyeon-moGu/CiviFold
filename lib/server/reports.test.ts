@@ -18,8 +18,8 @@ import type { Decision } from "../pipeline/decide";
 import { verifySuggestion, type Verification } from "../pipeline/hybrid";
 import { readIntake, type IntakeResult } from "../pipeline/intake";
 import { transcribe } from "../meta/voice";
-import { analyzeReport, answerReport, changedFacts, createReport, reanalyzeReport, recordRepair, staffDecide, UserError, verifyReport, WORDS_NOT_READ, wordsNotRead } from "./reports";
-import { spendGate, type Runtime } from "./runtime";
+import { analyzeReport, answerReport, changedFacts, createReport, goLive, reanalyzeReport, recordRepair, staffDecide, UserError, verifyReport, WORDS_NOT_READ, wordsNotRead } from "./reports";
+import { runMode, spendGate, type Runtime } from "./runtime";
 import { spend } from "../db/schema";
 
 vi.mock("../pipeline/analyze", async (original) => ({ ...(await original<typeof import("../pipeline/analyze")>()), analyze: vi.fn() }));
@@ -147,6 +147,21 @@ describe("reports", () => {
     expect((await analyzeReport(rt, report_id)).status).toBe("unavailable");
   });
 
+  it("runs a report it could not replay live once the access code is given, and only then", async () => {
+    vi.stubEnv("DEMO_ACCESS_CODE", "judges-only");
+    const { report_id } = await newReport();
+    vi.mocked(analyze).mockRejectedValue(new CacheMissError("no cache"));
+    expect((await analyzeReport(rt, report_id)).status).toBe("unavailable");
+    await expect(goLive(rt, report_id, "guess")).rejects.toThrow(/not right/);
+    await goLive(rt, report_id, "judges-only");
+    const [row] = await rt.database.select({ live: reports.live }).from(reports).where(eq(reports.id, report_id));
+    expect(row!.live).toBe(true);
+    fastSays({ label: "NEW", incident_id: null, rule_id: "R1", missing_info: [] });
+    expect((await analyzeReport(rt, report_id)).status).toBe("under_review");
+    await expect(goLive(rt, report_id, "judges-only")).rejects.toThrow(/not waiting/);
+    vi.unstubAllEnvs();
+  });
+
   it("analyzes the photo alone when the words have no recorded reading, and says so", async () => {
     const { report_id } = await newReport({ description: "Water everywhere" });
     vi.mocked(readIntake).mockRejectedValue(new CacheMissError("no cache"));
@@ -190,7 +205,7 @@ describe("reports", () => {
     await staffDecide(rt, report_id, "recurrence", "inc_h1");
     const [r] = await rt.database.select().from(reports).where(eq(reports.id, report_id));
     const [created] = await rt.database.select().from(incidents).where(eq(incidents.id, r!.incident_id!));
-    expect(created).toMatchObject({ recurrence_of: "inc_h1", status: "open" });
+    expect(created).toMatchObject({ recurrence_of: "inc_h1", status: "open", title: `${h1!.title}, broken again` });
   });
 
   describe("staff-requested verification", () => {
@@ -499,6 +514,21 @@ describe("reports", () => {
       await gate.settle(held.find((h) => h !== null)!, 0.1);
       const [row] = await rt.database.select().from(spend);
       expect(row!.usd).toBeCloseTo(0.7);
+    });
+
+    it("runs a live report live, and otherwise replays first, falling back to live calls only while a whole run fits today's budget", async () => {
+      vi.stubEnv("CIVIFOLD_MODE", "cached");
+      vi.stubEnv("LIVE_DAILY_USD", "1");
+      await rt.database.delete(spend);
+      expect(await runMode(rt.database, { live: true }, 0.2)).toBe("fresh");
+      expect(await runMode(rt.database, { live: false }, 0.2)).toBe("cached_then_live");
+      await rt.database.insert(spend).values({ day: new Date().toISOString().slice(0, 10), usd: 0.9 });
+      expect(await runMode(rt.database, { live: false }, 0.2)).toBe("cached");
+      expect(await runMode(rt.database, { live: true }, 0.2)).toBe("fresh");
+      vi.stubEnv("LIVE_DAILY_USD", "0");
+      await rt.database.delete(spend);
+      expect(await runMode(rt.database, { live: false }, 0.2)).toBe("cached");
+      vi.unstubAllEnvs();
     });
   });
 

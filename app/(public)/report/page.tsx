@@ -2,12 +2,25 @@
 // Created: 2026-10-27
 
 import { messageSamples } from "@/lib/dataset/messages";
-import { samples } from "@/lib/dataset/static";
+import { ASSET_FILE, samples } from "@/lib/dataset/static";
+import { seedIncidentId } from "@/lib/demo/seed";
+import { mapIncidents } from "@/lib/server/reports";
+import { runtime } from "@/lib/server/runtime";
 import { ReportForm } from "./report-form";
 
 export const metadata = { title: "Report a problem · CiviFold" };
+export const dynamic = "force-dynamic";
 
-export default function ReportPage() {
+export default async function ReportPage({ searchParams }: { searchParams: Promise<{ source?: string }> }) {
+  // The demo's "try your own photo live" link opens with the upload chosen.
+  const { source } = await searchParams;
+  // The incidents on file, so a visitor can put the pin on one: a report is compared only with incidents near it.
+  // Named as the demo names them ("hydrant by the BAKERY"), from the dataset asset a seeded incident stands for.
+  const assets = new Map(ASSET_FILE.assets.map((a) => [seedIncidentId(a.id), a]));
+  const places = (await mapIncidents(await runtime())).map((i) => {
+    const a = assets.get(i.id);
+    return { id: i.id, lat: i.lat, lng: i.lng, title: a ? `${a.object_short} by the ${a.sign_texts[0]}` : i.title, open: i.status === "open" || i.status === "in_progress" };
+  });
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
       <h1 className="text-2xl font-semibold tracking-tight">Report a problem</h1>
@@ -16,7 +29,7 @@ export default function ReportPage() {
         This is a hackathon demo. Reports are not sent to any city or 311 service, and anything you send, photos and recordings included, can be seen by
         anyone who opens the staff console. Leave out faces, license plates and personal details.
       </p>
-      <ReportForm samples={samples()} messages={messageSamples()} />
+      <ReportForm samples={samples()} messages={messageSamples()} places={places} initialSource={source === "upload" ? "upload" : "sample"} />
     </main>
   );
 }

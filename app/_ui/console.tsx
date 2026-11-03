@@ -51,8 +51,9 @@ export function Panel({ title, aside, children, className = "" }: { title?: Reac
   return (
     <section className={`rounded-lg border border-ops-line bg-ops-panel ${className}`}>
       {title && (
-        <header className="flex items-center gap-3 border-b border-ops-line px-4 py-2.5">
-          <h2 className="text-[13px] font-medium text-ops-text">{title}</h2>
+        <header className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-ops-line px-4 py-2.5">
+          {/* In a narrow column the aside wraps under a long title instead of squeezing it to a word per line. */}
+          <h2 className="min-w-[10rem] flex-1 text-[13px] font-medium text-ops-text">{title}</h2>
           {aside && <div className="ml-auto text-xs text-ops-dim">{aside}</div>}
         </header>
       )}
@@ -71,6 +72,11 @@ export const pct = (x: number) => `${Math.round(x * 100)}%`;
 export const readable = (text: string) =>
   text
     .replace(/^All 1 nearby incidents show /, "The one nearby incident shows ")
+    .replace('Photo quality is "object_not_visible".', "The photo does not show the fixture or spot clearly, so nothing was compared yet.")
+    .replace('Photo quality is "blurry".', "The photo is too blurry to compare, so nothing was compared yet.")
+    .replace("The problem is judged from the whole-photo comparison of the same photo.", "The fixture was matched on the cut-outs; the problem was read from the whole photos.")
+    .replace("The problem is judged from the cut-out comparison of the same photo.", "The fixture was matched on the whole photos; the problem was read from the cut-outs.")
+    .replace(/^The problem is judged from /, "The problem was read from ")
     .replace(/Same place or fixture as (\S+) \((0(?:\.\d+)?|1(?:\.0+)?)\)/g, (_, id: string, x: string) => `Same place as ${id} in the photos (model confidence ${pct(Number(x))})`)
     .replace(/problem looks same/g, "the problem looks the same")
     .replace(/problem looks uncertain/g, "unclear if the problem is the same")

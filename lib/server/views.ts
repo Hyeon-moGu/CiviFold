@@ -35,7 +35,7 @@ const STATUS_TEXT: Record<string, string> = {
   linked: "Staff linked your report to an existing case.",
   new_incident: "Staff opened a case from your report.",
   dismissed: "Staff closed your report without opening a case.",
-  unavailable: "This report cannot be checked in the public demo.",
+  unavailable: "The public demo has no recorded check for this report. Staff will look at it themselves.",
   failed: "The automatic check failed. A member of staff will look at your report.",
 };
 
@@ -53,6 +53,7 @@ export type ResidentView = {
   has_audio: boolean;
   note: string | null; // when the automatic check did not read the message
   photos: string[];
+  synthetic_photos: string[]; // the photos among them that are synthetic (dataset samples), badged as such
   question: { question: string; requested_items: RequestItem[] } | null;
   // Demo only: the other dataset photos of the same place, so a visitor can answer like a resident would.
   suggested_samples: Sample[];
@@ -80,6 +81,7 @@ export function residentView(d: Detail): ResidentView {
     has_audio: d.report.audio_path !== null,
     note: unread ? WORDS_UNREAD_TEXT[unread] : null,
     photos: d.photos.map((p) => p.id),
+    synthetic_photos: d.photos.filter((p) => p.is_synthetic).map((p) => p.id),
     question: pending ? { question: pending.question, requested_items: pending.requested_items as RequestItem[] } : null,
     suggested_samples: pending && asset ? samples().filter((s) => s.asset_id === asset) : [],
     live: d.report.live,

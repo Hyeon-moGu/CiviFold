@@ -7,13 +7,15 @@ import type { Candidate, Comparison, Decision } from "@/lib/pipeline/decide";
 import type { GuardResult } from "@/lib/pipeline/guard";
 import type { IntakeResult } from "@/lib/pipeline/intake";
 import type { TriageResult } from "@/lib/pipeline/triage";
+import { agentRecorded, recordedAgentReport } from "@/lib/demo/scenarios";
+import { defaultMode } from "@/lib/meta/call";
 import { AGENT_LIMITS } from "@/lib/pipeline/config";
 import { VERIFIED } from "@/lib/pipeline/hybrid";
-import { changedFacts, reportDetail, staleAnalysis, verifyRunning, WORDS_NOT_READ, wordsNotRead, type FactChange } from "@/lib/server/reports";
-import { runtime } from "@/lib/server/runtime";
+import { changedFacts, incidentDetail, incidentTitles, reportDetail, staleAnalysis, verifyRunning, WORDS_NOT_READ, wordsNotRead, type FactChange } from "@/lib/server/reports";
+import { liveBudgetLeft, runtime } from "@/lib/server/runtime";
 import type { Box, Channel, Label, RequestItem } from "@/lib/tools/types";
 import { Fact, OpsLabel, Panel, UrgentTag, LABEL_TONE, pct, readable, VERDICT_TEXT } from "@/app/_ui/console";
-import { when } from "@/app/_ui/format";
+import { cost, when } from "@/app/_ui/format";
 import { LABEL_TEXT, SyntheticBadge } from "@/app/_ui/labels";
 import { MaskedPhoto } from "@/app/_ui/photo";
 import { Actions, RetryButton } from "./actions";
@@ -22,6 +24,7 @@ import { summarize, TOOL_TEXT, verdictOf, type StepView, type Verdict } from "./
 import { ReanalyzeButton, VerifyProgress, VerifyProvider } from "./verify";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Report · Staff console · CiviFold" };
 
 type Final = {
   label: Label;
@@ -38,6 +41,7 @@ type Run = {
   requested_by: string;
   applied: boolean;
   steps: unknown;
+  proposal?: unknown;
   guard: unknown;
   cost_usd: number;
   latency_ms: number;
@@ -66,6 +70,8 @@ const STATUS_WORDS: Record<string, string> = {
 // The suggestion in one sentence, as staff would say it.
 // Suggestions that tie the report to an incident; HUMAN_REVIEW may name one without tying the report to it.
 const LINKS: ReadonlySet<Label> = new Set(["DUPLICATE", "LATE_REPORT", "ALREADY_RESOLVED", "POSSIBLE_RECURRENCE"]);
+// A replayed agent run is shown one tool call at a time, this far apart.
+const REPLAY_PACE_MS = 900;
 
 function headline(label: Label, incident: string | null): string {
   switch (label) {
@@ -87,7 +93,8 @@ function headline(label: Label, incident: string | null): string {
 }
 
 export default async function ReportDetail({ params }: { params: Promise<{ id: string }> }) {
-  const detail = await reportDetail(await runtime(), (await params).id);
+  const rt = await runtime();
+  const detail = await reportDetail(rt, (await params).id);
   if (!detail) notFound();
   const { report, analysis, runs, questions, photos, incidents, incidentPhotos, imageFacts, segmentations, briefs } = detail;
   const triage = (analysis?.triage as TriageResult | null | undefined) ?? undefined;
@@ -97,7 +104,13 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   const final = analysis?.final as Final | undefined;
   const candidates = (analysis?.candidates as Candidate[] | undefined) ?? [];
   const comparisons = (analysis?.comparisons as Comparison[] | undefined) ?? [];
-  const names = { ...photoNames(photos.map((p) => p.id), comparisons), [report.id]: "this report" };
+  const zoomed = Object.entries((analysis?.after_fix as Record<string, { problem_found: boolean; description?: string | null }> | null | undefined) ?? {});
+  // Incident ids by name too ("the red hydrant with white caps"): staff read names, not ids, in texts written by models.
+  const names = {
+    ...photoNames(photos.map((p) => p.id), comparisons, Object.fromEntries(incidents.map((i) => [i.id, i.title]))),
+    ...Object.fromEntries(incidents.map((i) => [i.id, `the ${i.title}`])),
+    [report.id]: "this report",
+  };
 
   // The incident the suggestion points at, else the nearest candidate.
   const focusId = final?.incident_id ?? candidates[0]?.incident_id ?? null;
@@ -122,21 +135,53 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   const answerChanged = Boolean(decision && final && (final.label !== decision.label || final.incident_id !== decision.incident_id));
   // An incident the suggestion relied on changed since (a repair recorded after it): analyze again, not verify.
   const changes = waiting ? changedFacts(candidates, incidents) : [];
+  // A replay-only deployment replays an agent where it holds a recorded run, and otherwise runs it live while
+  // today's budget holds a whole run (runMode); with neither, the button would fail. A report sent with the
+  // access code runs its agents live, like its analysis.
+  const replayOnly = defaultMode() === "cached" && !report.live;
+  const [verifyReplays, briefReplays, liveLeft] = replayOnly
+    ? await Promise.all([agentRecorded(rt, report, "verify"), agentRecorded(rt, report, "brief"), liveBudgetLeft(rt.database)])
+    : [false, false, Infinity];
+  const liveAgents = !replayOnly || liveLeft >= AGENT_LIMITS.max_usd;
+  const [verifyRecorded, briefRecorded] = [verifyReplays || liveAgents, briefReplays || liveAgents];
   // Staff can ask the agent to check a closing suggestion that is waiting for them.
-  const verifiable =
+  const canVerify =
     waiting && changes.length === 0 && final !== undefined && VERIFIED.has(final.label) && analysis!.input !== null && runs.length < AGENT_LIMITS.max_runs_per_report;
+  const verifiable = canVerify && verifyRecorded;
   const verifyLimit =
     waiting && changes.length === 0 && final !== undefined && VERIFIED.has(final.label) && analysis!.input !== null && runs.length >= AGENT_LIMITS.max_runs_per_report
       ? AGENT_LIMITS.max_runs_per_report
       : null;
   const verifying = verifyRunning(report);
   // Staff can ask for a case brief of any analysis that stored its inputs; it reads evidence and decides nothing.
-  const briefable = analysis !== null && analysis !== undefined && analysis.input !== null && !decided && briefs.length < AGENT_LIMITS.max_runs_per_report;
+  const canBrief = analysis !== null && analysis !== undefined && analysis.input !== null && !decided && briefs.length < AGENT_LIMITS.max_runs_per_report;
+  const briefable = canBrief && briefRecorded;
+  // A replayed report would replay the same brief again for the same analysis: no second button for that.
+  const repeatBrief = briefReplays && (briefs as { analysis_id: number }[]).some((b) => b.analysis_id === analysis?.id);
+  const agentsOff = (canVerify && !verifyRecorded) || (canBrief && !briefRecorded);
+  // Where this demo case's recorded agent runs can be read instead, when this send cannot replay them.
+  const agentsElsewhere = agentsOff ? await recordedAgentReport(rt, report.dataset_case_id) : null;
+  const demoAnchor = report.dataset_case_id?.startsWith("demo:") ? `case-${report.dataset_case_id.slice(5).replace(":", "-")}` : null;
+  // An incident staff opened from this report: a recurrence names the one it came back from.
+  const opened = report.status === "new_incident" && report.incident_id ? ((await incidentDetail(rt, report.incident_id))?.incident ?? null) : null;
   const briefLimit = analysis && analysis.input !== null && !decided && briefs.length >= AGENT_LIMITS.max_runs_per_report ? AGENT_LIMITS.max_runs_per_report : null;
   const latestBrief = (briefs as StoredBrief[]).at(-1) ?? null;
   // The latest run's verdict, while its result is the suggestion on screen (no analysis since).
   const lastRun = (runs as Run[]).at(-1);
   const currentRunId = lastRun && analysis?.pipeline_config === "C_rules+verify" ? lastRun.id : null;
+  // The incidents the run compared, by name: it may find one the fast path did not (one staff opened since, say).
+  const comparedIds = [
+    ...new Set(
+      (runs as Run[])
+        .flatMap((r) => r.steps as StepView[])
+        .flatMap((s) => (s.ok && s.tool === "compare_images" ? [(s.data as { candidate_incident_id: string }).candidate_incident_id] : [])),
+    ),
+  ];
+  const incidentNames = await incidentTitles(rt, comparedIds);
+  const incidentLabels = {
+    ...Object.fromEntries(incidents.map((i) => [i.id, `the ${i.title}`])),
+    ...Object.fromEntries(Object.entries(incidentNames).map(([id, title]) => [id, `the ${title}`])),
+  };
   const verdict: Verdict | null =
     lastRun && lastRun.applied && lastRun.requested_by === "staff" && analysis?.pipeline_config === "C_rules+verify" && final && decision
       ? verdictOf({
@@ -145,10 +190,12 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
           steps: lastRun.steps as StepView[],
           before: { label: (lastRun.trigger as { label: Label }).label, incident_id: decision.incident_id },
           after: final,
+          incidentNames,
         })
       : null;
   // Compared and judged a different place or fixture: shown as a checked-and-excluded note, not as a match.
-  const ruledOut = !linked && shownMatch?.result?.asset_match.verdict === "different";
+  // Not while the resident is asked: then the comparisons were unsure, and "kept apart" would contradict the question.
+  const ruledOut = !linked && shownMatch?.result?.asset_match.verdict === "different" && final?.label !== "NEEDS_INFO";
   const focusDistance = candidates.find((c) => c.incident_id === focusId)?.distance_m;
   const suggestedIncident = incidents.find((i) => i.id === final?.incident_id);
   // A report photo compared with the incident's, and not ruled out: the comparison is the evidence, shown whole.
@@ -167,7 +214,9 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
         <span className="text-xs text-ops-dim">{STATUS_WORDS[report.status] ?? report.status.replace("_", " ")}</span>
         {analysis && (
           <span className="ml-auto font-mono text-[11px] text-ops-dim">
-            ${analysis.cost_usd.toFixed(3)} · {(analysis.latency_ms / 1000).toFixed(1)}s · {report.is_synthetic ? "synthetic sample" : "resident upload"}
+            {/* After a staff-requested check the latest analysis is the check's, its cost the agent's run included. */}
+            {analysis.pipeline_config === "C_rules+verify" ? "check" : "analysis"} {cost(analysis.cost_usd)} · {(analysis.latency_ms / 1000).toFixed(1)}s ·{" "}
+            {report.is_synthetic ? "synthetic sample" : "resident upload"}
           </span>
         )}
       </div>
@@ -245,11 +294,13 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               : "Not analyzed yet."}
         </p>
       ) : (
-        <VerifyProvider reportId={report.id}>
-        <BriefProvider reportId={report.id}>
+        <VerifyProvider reportId={report.id} paceMs={verifyReplays ? REPLAY_PACE_MS : 0}>
+        <BriefProvider reportId={report.id} paceMs={briefReplays ? REPLAY_PACE_MS : 0}>
           {/* Verdict and decision: one band that stays under the header while staff look through the evidence. */}
-          <div className="z-[999] -mx-4 mt-4 bg-ops-bg/95 px-4 py-2 backdrop-blur md:sticky md:top-[45px]">
+          {/* Sticky only where the screen is tall enough that the band does not cover the photos it decides on. */}
+          <div className="z-[999] -mx-4 mt-4 bg-ops-bg/95 px-4 py-2 backdrop-blur md:[@media(min-height:900px)]:sticky md:top-[45px]">
             <Actions
+              caution={verdict?.kind === "against"}
               status={verdict && !decided && changes.length === 0 ? <VerdictLine verdict={verdict} /> : null}
               ring={report.urgent ? "ring-red-500/60" : final ? LABEL_TONE[final.label].ring : ""}
               reportId={report.id}
@@ -258,31 +309,41 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               focusId={focusId}
               askFor={photos.length === 0 ? "photo" : "wider_context"}
               decided={decided}
+              agentsOff={agentsOff}
+              agentsElsewhere={agentsElsewhere === report.id ? null : agentsElsewhere}
+              demoAnchor={demoAnchor}
+              decidedNote={decidedNote(report.status, report.incident_id, incidents, opened?.recurrence_of ?? null)}
               stale={changes.length > 0}
               verify={verifiable ? { analysisId: analysis!.id, running: verifying, again: runs.length > 0 } : null}
               verifyLimit={verifyLimit}
-              brief={briefable ? { analysisId: analysis!.id, again: briefs.length > 0 } : null}
+              brief={briefable && !repeatBrief ? { analysisId: analysis!.id, again: briefs.length > 0 } : null}
               briefLimit={briefLimit}
             >
               {final && (
                 <>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <OpsLabel label={final.label} />
-                    <p className="text-lg font-semibold tracking-tight text-white">{headline(final.label, final.incident_id)}</p>
+                    <p className="text-lg font-semibold tracking-tight text-white">{headline(final.label, suggestedIncident?.title ? `the ${suggestedIncident.title}` : final.incident_id)}</p>
                   </div>
-                  {lastReason && <p className="mt-1 text-sm text-ops-text">{readable(lastReason)}</p>}
+                  {/* The headline names the suggested incident; the sentence under it calls it "the incident". */}
+                  {lastReason && (
+                    <p className="mt-1 text-sm text-ops-text">{final.incident_id ? readable(lastReason).replaceAll(final.incident_id, "the incident") : readable(lastReason)}</p>
+                  )}
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
                     {final.incident_id && (
                       <Link
                         href={`/admin/incidents/${final.incident_id}`}
                         className="text-xs text-ops-dim underline decoration-ops-line underline-offset-2 hover:text-white hover:decoration-white"
                       >
-                        <span className="font-mono text-ops-text">{final.incident_id}</span>
-                        {suggestedIncident?.title ? `, ${suggestedIncident.title}` : ""} →
+                        <span className="text-ops-text" title={final.incident_id}>
+                          {suggestedIncident?.title ? `The ${suggestedIncident.title}` : final.incident_id}
+                        </span>{" "}
+                        →
                       </Link>
                     )}
-                    {/* The confidence is the fast path's; once verification changed the answer it is not this answer's. */}
-                    {decision && !answerChanged && decision.confidence > 0 && <Confidence value={decision.confidence} />}
+                    {/* The confidence is the fast path's; once verification changed the answer it is not this answer's. A rule
+                        that decided without any comparison (no photo, an emergency) has no model confidence to show. */}
+                    {decision && !answerChanged && decision.confidence > 0 && comparisons.some((c) => c.result) && <Confidence value={decision.confidence} />}
                   </div>
                   {decision && answerChanged && (
                     <p className="mt-1 text-xs text-ops-dim">
@@ -295,8 +356,8 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 </>
               )}
             </Actions>
-            <VerifyProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} runningSince={verifying ? String(report.verify_claimed_at) : null} />
-            <BriefProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} />
+            <VerifyProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} runningSince={verifying ? String(report.verify_claimed_at) : null} live={report.live ? "always" : !verifyReplays ? "maybe" : null} names={incidentLabels} />
+            <BriefProgress maxSteps={AGENT_LIMITS.max_steps} maxMs={AGENT_LIMITS.max_ms} live={report.live ? "always" : !briefReplays ? "maybe" : null} names={incidentLabels} />
           </div>
           {changes.length > 0 && <OutOfDate changes={changes} reportId={report.id} analysisId={analysis.id} />}
 
@@ -330,6 +391,8 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                           box={seg(photos[0]!.id)?.box as Box | null}
                           synthetic={photos[0]!.is_synthetic}
                         />
+                        {/* The cut-outs SAM made of this report, as the side-by-side comparison shows them. */}
+                        {seg(photos[0]!.id)?.object_crop_id && <Crops seg={seg(photos[0]!.id)!} synthetic={photos[0]!.is_synthetic} />}
                         {photos.length > 1 && (
                           <div className="grid grid-cols-3 gap-2">
                             {photos.slice(1).map((p) => (
@@ -352,7 +415,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   </Panel>
                   {ruledOut && focus && shownMatch?.result ? (
                     <Panel
-                      title={`Ruled out: incident ${focus.id}`}
+                      title={`Ruled out: the ${focus.title ?? focus.id}`}
                       aside={<MatchChip verdict="different" confidence={shownMatch.result.asset_match.confidence} crops={shownMatch.stage === 2} />}
                     >
                       <p className="text-sm text-ops-text">
@@ -369,7 +432,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                         ))}
                       </ul>
                       {candidatePhoto && (
-                        <details className="group mt-4">
+                        <details className="group mt-4" open>
                           <summary className="cursor-pointer select-none text-[13px] font-medium text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white">
                             <span className="group-open:hidden">Show its photo</span>
                             <span className="hidden group-open:inline">Hide its photo</span>
@@ -383,7 +446,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                               maskPath={seg(candidatePhoto)?.mask_svg_path}
                               box={seg(candidatePhoto)?.box as Box | null}
                               synthetic={candidateFacts?.is_synthetic ?? false}
-                              caption={`${focus.id}, not this report`}
+                              caption={`The ${focus.title ?? focus.id}, not this report`}
                             />
                           </div>
                         </details>
@@ -394,11 +457,13 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                       title={
                         focus
                           ? linked
-                            ? `Linked incident ${focus.id}`
+                            ? `Linked: the ${focus.title ?? "incident"}`
                             : compared
-                              ? `Compared with incident ${focus.id}`
-                              : `Nearest incident ${focus.id}`
-                          : "No incident nearby"
+                              ? `Compared with the ${focus.title ?? "incident"}`
+                              : `Nearest incident: the ${focus.title ?? "incident"}`
+                          : decision?.reasons.at(-1)?.rule_id === "R0"
+                            ? "Not searched yet"
+                            : "No incident nearby"
                       }
                       aside={
                         focus ? (
@@ -428,7 +493,11 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                         />
                       ) : (
                         <div className="flex min-h-32 items-center justify-center rounded-md border border-dashed border-ops-line p-6 text-center text-sm text-ops-dim">
-                          {focus ? "No photo of this incident to show." : "Nothing of this kind within the search radius."}
+                          {focus
+                            ? "No photo of this incident to show."
+                            : decision?.reasons.at(-1)?.rule_id === "R0"
+                              ? "Not searched yet: a usable photo comes first."
+                              : "Nothing of this kind within the search radius."}
                         </div>
                       )}
                     </Panel>
@@ -499,7 +568,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                                 href={`/admin/incidents/${c.incident_id}`}
                                 className="text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white"
                               >
-                                {c.incident_id}
+                                {incidents.find((i) => i.id === c.incident_id)?.title ?? c.incident_id}
                               </Link>
                             </td>
                             <td className="text-ops-dim">{c.status}</td>
@@ -521,28 +590,38 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               <Panel title="Why">
                 {/* The rules read in order; the last one decided. Rule ids stay for whoever checks the decision table. */}
                 <ol className="space-y-2 text-[13px]">
-                  {decision?.reasons.map((r, i, all) => {
+                  {decision?.reasons.filter((r) => r.text.trim()).map((r, i, all) => {
                     const last = i === all.length - 1;
                     return (
-                      <li key={i} className={`flex gap-2.5 ${last ? "rounded-md bg-ops-raised px-2.5 py-2" : "px-2.5"}`}>
+                      <li key={i} title={`Rule ${r.rule_id}`} className={`flex gap-2.5 ${last ? "rounded-md bg-ops-raised px-2.5 py-2" : "px-2.5"}`}>
                         <span className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full ${last ? "bg-white" : "bg-ops-dim"}`} />
                         <span className="min-w-0 flex-1">
                           {last && <span className="mb-0.5 block text-xs text-ops-dim">Result</span>}
-                          <span className={last ? "font-medium text-white" : "text-ops-text"}>{readable(r.text)}</span>
-                        </span>
-                        <span className="shrink-0 pt-px font-mono text-[10px] text-ops-dim" title={`Rule ${r.rule_id}`}>
-                          {r.rule_id}
+                          <span className={last ? "font-medium text-white" : "text-ops-text"}>{byName(readable(r.text), incidentLabels)}</span>
                         </span>
                       </li>
                     );
                   })}
                 </ol>
+                {/* The zoomed after-fix check: what it found is the evidence a recurrence (R7z) rests on. */}
+                {zoomed.length > 0 && (
+                  <ul className="mt-3 space-y-1.5 text-[13px]">
+                    {zoomed.map(([imageId, z]) => (
+                      <li key={imageId} className="flex gap-2.5 px-2.5">
+                        <span className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full ${z.problem_found ? "bg-rose-300" : "bg-emerald-300"}`} />
+                        <span className="text-ops-text">
+                          Zoomed check of {names[imageId] ?? "a photo"}: {z.problem_found ? `a problem found${z.description ? `, ${z.description}` : ""}` : "no problem found"}.
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {best?.result && !sideBySide && !ruledOut && (
                   <>
                     <h3 className="mt-4 text-[13px] font-medium text-ops-text">What the photos show</h3>
                     <p className="mt-1 text-[11px] text-ops-dim">
                       From the {best.stage === 2 && !best.fallback ? "cut-out" : "whole photo"} comparison of {names[best.new_image_id] ?? "the report's photo"} with{" "}
-                      {names[best.candidate_image_id] ?? `${best.incident_id}'s photo`}, model confidence {pct(best.result.asset_match.confidence)}.
+                      {names[best.candidate_image_id] ?? "the incident's photo"}, model confidence {pct(best.result.asset_match.confidence)}.
                     </p>
                     <ul className="mt-2 space-y-1.5 text-[13px]">
                       {[...best.result.asset_match.evidence, ...best.result.damage.evidence].map((e, i) => (
@@ -605,7 +684,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 </Panel>
               )}
 
-              {runs.length > 0 && <Investigation runs={runs as Run[]} currentRunId={currentRunId} />}
+              {runs.length > 0 && <Investigation runs={runs as Run[]} currentRunId={currentRunId} names={incidentLabels} />}
             </aside>
           </div>
         </BriefProvider>
@@ -632,6 +711,29 @@ function MatchChip({ verdict, confidence, crops }: { verdict: string; confidence
       {crops ? "cut-out" : "whole photo"}: {VERDICT_TEXT[verdict] ?? verdict} · model {pct(confidence)}
     </span>
   );
+}
+
+// What a staff decision did, in the words the band shows after it.
+function decidedNote(status: string, incidentId: string | null, near: Array<{ id: string; title: string | null }>, recurrenceOf: string | null) {
+  if (status === "linked" && incidentId) {
+    const title = near.find((i) => i.id === incidentId)?.title;
+    return (
+      <>
+        Linked to{" "}
+        <Link href={`/admin/incidents/${incidentId}`} title={incidentId} className="text-white underline decoration-emerald-400/60 underline-offset-2 hover:decoration-white">
+          {title ? `the ${title}` : incidentId}
+        </Link>
+        .
+      </>
+    );
+  }
+  if (status === "new_incident" && recurrenceOf) {
+    const was = near.find((i) => i.id === recurrenceOf)?.title;
+    return `Opened as a recurrence of ${was ? `the ${was}` : recurrenceOf}, kept apart from the fixed incident.`;
+  }
+  if (status === "new_incident") return "Opened as a new incident.";
+  if (status === "dismissed") return "Dismissed.";
+  return null;
 }
 
 type PhotoRow = { id: string; width: number; height: number; is_synthetic: boolean };
@@ -665,7 +767,7 @@ function PhotoComparison({
   const words = (text: string) => photoWords(text, incident.id);
   return (
     <Panel
-      title={linked ? `Compared with ${incident.id}, the incident it suggests` : `Compared with ${incident.id}`}
+      title={`Compared with the ${incident.title ?? incident.id}${linked ? ", the incident it suggests" : ""}`}
       aside={<MatchChip verdict={result.asset_match.verdict} confidence={result.asset_match.confidence} crops={crops} />}
     >
       <div className="grid gap-4 md:grid-cols-2">
@@ -706,8 +808,12 @@ function PhotoComparison({
         </div>
         <div className="min-w-0 space-y-2">
           <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
-            <Link href={`/admin/incidents/${incident.id}`} className="font-mono font-medium text-white underline decoration-ops-line underline-offset-2 hover:decoration-white">
-              {incident.id}
+            <Link
+              href={`/admin/incidents/${incident.id}`}
+              title={incident.id}
+              className="font-medium text-white underline decoration-ops-line underline-offset-2 hover:decoration-white"
+            >
+              The incident on file
             </Link>
             <span className="text-xs text-ops-dim">{[incident.title, fixed ? `fixed ${when(incident.resolved)}` : incident.status].filter(Boolean).join(" · ")}</span>
           </p>
@@ -731,7 +837,7 @@ function PhotoComparison({
       </div>
       <p className="mt-3 text-xs text-ops-dim">
         Muse Spark compared {crops ? "the SAM 3.1 cut-outs" : "the whole photos"} of {names[comparison.new_image_id] ?? "the report's photo"} and{" "}
-        {names[comparison.candidate_image_id] ?? `${incident.id}'s photo`} without seeing any dates. {words(result.summary)}
+        {names[comparison.candidate_image_id] ?? "the incident's photo"} without seeing any dates. {words(result.summary)}
       </p>
     </Panel>
   );
@@ -861,7 +967,17 @@ function PipelineTrace(props: {
     },
     {
       name: "SAM 3.1",
-      value: props.photoFound === undefined ? "skipped" : props.photoFound ? "object found" : "not found",
+      // Road damage and dumped piles are boxed by Muse Spark before SAM cuts them out.
+      value:
+        props.photoFound === undefined
+          ? "skipped"
+          : triage && (triage.category === "road_damage" || triage.category === "trash")
+            ? props.photoFound
+              ? "boxed by Spark, cut out"
+              : "Spark did not see it"
+            : props.photoFound
+              ? "object found"
+              : "not found",
       tone: props.photoFound === undefined ? "skip" : props.photoFound ? "ok" : "warn",
     },
     {
@@ -898,8 +1014,7 @@ function PipelineTrace(props: {
           <path d="M4.5 2.5 8 6l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
         <span className="font-medium text-ops-text">How the pipeline got here</span>
-        <span className="text-xs text-ops-dim">message, photo check, search, SAM 3.1, comparison, rules, verification</span>
-        {decision && <span className="ml-auto hidden font-mono text-[11px] text-ops-dim sm:inline">{decision.reasons.map((r) => r.rule_id).join(" → ")}</span>}
+        <span className="text-xs text-ops-dim">message, photo check, search, cut-outs, comparison, rules, verification</span>
       </summary>
       <ol className="flex flex-wrap items-stretch border-t border-ops-line p-1">
         {steps.map((s, i) => (
@@ -926,11 +1041,17 @@ function PipelineTrace(props: {
 
 // Observation, arrival and repair on one axis: a late report and a recurrence differ only in where the dots fall.
 function TimeBar({ observed, submitted, created, resolved }: { observed: string; submitted: string; created: string | null; resolved: string | null }) {
+  // Seen and sent within the same minute: one mark, not two labels with the same time.
+  const together = Math.abs(Date.parse(observed) - Date.parse(submitted)) < 60_000;
   const marks = [
     { t: created, text: "Incident opened", color: "bg-zinc-400" },
     { t: resolved, text: "Repair recorded", color: "bg-emerald-400" },
-    { t: observed, text: "Resident saw it", color: "bg-white" },
-    { t: submitted, text: "Report arrived", color: "bg-white" },
+    ...(together
+      ? [{ t: submitted, text: "Seen and reported", color: "bg-white" }]
+      : [
+          { t: observed, text: "Resident saw it", color: "bg-white" },
+          { t: submitted, text: "Report arrived", color: "bg-white" },
+        ]),
   ].filter((m): m is { t: string; text: string; color: string } => Boolean(m.t));
   const times = marks.map((m) => new Date(m.t).getTime());
   const [min, max] = [Math.min(...times), Math.max(...times)];
@@ -977,6 +1098,13 @@ function TimeBar({ observed, submitted, created, resolved }: { observed: string;
   );
 }
 
+// The agent proposed what the rules' recheck also answered (the run's trigger label for the same incident).
+function sameAsGuardFallback(run: Run): boolean {
+  const p = run.proposal as { label?: string; incident_id?: string | null } | null | undefined;
+  const t = run.trigger as { label?: string } | null;
+  return Boolean(p?.label && t?.label && p.label === t.label);
+}
+
 function span(ms: number): string {
   const min = Math.round(ms / 60_000);
   if (min < 60) return `${min} min`;
@@ -984,7 +1112,14 @@ function span(ms: number): string {
   return h < 48 ? `${h}h` : `${Math.round(h / 24)} days`;
 }
 
-function Investigation({ runs, currentRunId }: { runs: Run[]; currentRunId: number | null }) {
+// The incident ids in a step's summary, by name where the page knows it.
+// An id the page has no name for (an incident opened after the analysis, say) still reads as words.
+const byName = (text: string, labels: Record<string, string>) =>
+  Object.entries(labels)
+    .reduce((t, [id, label]) => t.replaceAll(id, label), text)
+    .replace(/\binc_[a-z0-9]+\b/g, "another incident");
+
+function Investigation({ runs, currentRunId, names }: { runs: Run[]; currentRunId: number | null; names: Record<string, string> }) {
   return (
     <Panel title="Verification agent" aside="Muse Spark · tool calls">
       {runs.map((run) => {
@@ -994,7 +1129,7 @@ function Investigation({ runs, currentRunId }: { runs: Run[]; currentRunId: numb
           <div key={run.id} className="space-y-2">
             <p className="text-[11px] text-ops-dim">
               {run.requested_by === "staff" ? "Requested by staff" : "Ran automatically on the suggestion"}
-              {run.applied && run.id !== currentRunId && <span className="ml-2">· on an earlier analysis, replaced since</span>}
+              {run.applied && run.id !== currentRunId && <span className="ml-2">· ran on an earlier analysis of this report</span>}
               {!run.applied && <span className="ml-2 text-amber-300">Not applied: the report changed while it ran</span>}
               {run.applied && (run.status === "failed" || run.status === "budget_exceeded") && (
                 <span className="ml-2 text-amber-300">Stopped partway; the rules still read every tool result above</span>
@@ -1011,7 +1146,7 @@ function Investigation({ runs, currentRunId }: { runs: Run[]; currentRunId: numb
                       <span className="font-medium text-white">{TOOL_TEXT[s.tool] ?? s.tool}</span>
                       <span className="font-mono text-[10px] text-ops-dim">{s.tool}</span>
                     </span>
-                    <span className={`block break-words ${s.ok ? "text-ops-text" : "text-rose-300"}`}>{summarize(s)}</span>
+                    <span className={`block break-words ${s.ok ? "text-ops-text" : "text-rose-300"}`}>{byName(summarize(s), names)}</span>
                   </span>
                 </li>
               ))}
@@ -1021,15 +1156,21 @@ function Investigation({ runs, currentRunId }: { runs: Run[]; currentRunId: numb
                 guard.passed ? (
                   <span className="rounded bg-emerald-500/15 px-2 py-0.5 text-emerald-300">Guardrail passed</span>
                 ) : (
+                  // A blocked proposal is left out of the answer: the fast path's and the rules' recheck stand. When it
+                  // proposed that same answer, only its citations fell short.
                   <span className="rounded bg-rose-500/15 px-2 py-0.5 text-rose-300">
-                    Guardrail blocked ({guard.blocked_rules.join(", ")}) → {LABEL_TEXT[guard.final_label]}
+                    <span title={`Guardrail rules: ${guard.blocked_rules.join(", ")}`}>
+                      {sameAsGuardFallback(run)
+                        ? "The guardrail did not count the agent's proposal, which cited no confident comparison; the rules gave the same answer"
+                        : "The guardrail left out the agent's proposal, which cited no confident comparison; the rules' answer stands"}
+                    </span>
                   </span>
                 )
               ) : (
                 <span className="text-ops-dim">Run ended: {run.status.replace("_", " ")}</span>
               )}
               <span className="ml-auto font-mono text-ops-dim">
-                ${run.cost_usd.toFixed(3)} · {(run.latency_ms / 1000).toFixed(1)}s
+                {cost(run.cost_usd)} · {(run.latency_ms / 1000).toFixed(1)}s
               </span>
             </p>
           </div>
@@ -1041,7 +1182,7 @@ function Investigation({ runs, currentRunId }: { runs: Run[]; currentRunId: numb
 
 // Staff words for the image ids that stored texts carry: internal ids mean nothing to staff, and a dataset id
 // names the photo's state, which is the answer the comparison is there to find.
-function photoNames(reportPhotos: string[], comparisons: Comparison[]): Record<string, string> {
+function photoNames(reportPhotos: string[], comparisons: Comparison[], titles: Record<string, string>): Record<string, string> {
   const names: Record<string, string> = {};
   reportPhotos.forEach((id, i) => {
     names[id] = i === 0 ? "the report's photo" : reportPhotos.length > 2 ? `the resident's answer photo ${i}` : "the resident's answer photo";
@@ -1054,13 +1195,22 @@ function photoNames(reportPhotos: string[], comparisons: Comparison[]): Record<s
     byIncident.set(c.incident_id, ids);
   }
   for (const [incident, ids] of byIncident) {
-    ids.forEach((id, i) => (names[id] = ids.length > 1 ? `${incident}'s photo ${i + 1}` : `${incident}'s photo`));
+    const owner = titles[incident] ? `the ${titles[incident]}` : "the incident";
+    ids.forEach((id, i) => (names[id] = ids.length > 1 ? `photo ${i + 1} of ${owner}` : `the photo of ${owner}`));
   }
   return names;
 }
 
 // The comparison model calls the two photos NEW and CANDIDATE; staff know them as this report and the incident.
-const photoWords = (text: string, incidentId: string) => text.replace(/\bNEW\b/g, "this photo").replace(/\bCANDIDATE\b/g, incidentId);
+// The comparison model names the images it was shown (NEW and CANDIDATE, IMAGE N1/N2 and C1/C2); staff read photos.
+const photoWords = (text: string, incidentId: string) =>
+  text
+    .replace(/\b(?:IMAGE\s+)?N\d(?:\s*(?:\/|and|&)\s*N\d)*\b/g, "this photo")
+    .replace(/\b(?:IMAGE\s+)?C\d(?:\s*(?:\/|and|&)\s*C\d)*\b/g, "the incident's photo")
+    .replace(/\bNEW\b/g, "this photo")
+    .replace(/^new (?=shows|has|is)/i, "this photo ")
+    .replace(/\bcandidate\b/gi, "the incident's photo")
+    .replaceAll(incidentId, "the incident");
 
 const RUN_TEXT: Record<string, string> = {
   proposed: "finished",
@@ -1093,6 +1243,17 @@ function VerdictLine({ verdict }: { verdict: Verdict }) {
   );
 }
 
+// The incident photo a verification comparison looked at, so a ruled-out look-alike is seen, not only named.
+function ComparedPhoto({ id }: { id?: string }) {
+  if (!id) return null;
+  return (
+    <a href={`/api/images/${id}`} target="_blank" rel="noreferrer" className="shrink-0">
+      {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
+      <img src={`/api/images/${id}?w=160`} alt="The incident photo it was compared with" className="h-10 w-14 rounded border border-ops-line object-cover" />
+    </a>
+  );
+}
+
 // What the verification found: the answer first, then the comparisons behind it.
 function VerdictCard({ verdict }: { verdict: Verdict }) {
   const tone = VERDICT_TONE[verdict.kind];
@@ -1107,17 +1268,23 @@ function VerdictCard({ verdict }: { verdict: Verdict }) {
       {(verdict.against.length > 0 || verdict.agree.length > 0) && (
         <ul className="mt-2 space-y-1 text-[13px]">
           {verdict.against.map((line) => (
-            <li key={line} className="flex gap-2 text-orange-200">
+            <li key={line} className="flex items-center gap-2 text-orange-200">
               <span className="w-3 shrink-0 text-center">✕</span>
+              <ComparedPhoto id={verdict.photos[line]} />
               {line}
             </li>
           ))}
-          {verdict.agree.map((line) => (
-            <li key={line} className="flex gap-2 text-ops-text">
-              <span className="w-3 shrink-0 text-center text-emerald-300">✓</span>
-              {line}
-            </li>
-          ))}
+          {verdict.agree.map((line) => {
+            // A look-alike ruled out is a check that came out as expected, not a match: a neutral mark.
+            const ruledOutLine = line.endsWith("(ruled out)");
+            return (
+              <li key={line} className="flex items-center gap-2 text-ops-text">
+                <span className={`w-3 shrink-0 text-center ${ruledOutLine ? "text-ops-dim" : "text-emerald-300"}`}>{ruledOutLine ? "○" : "✓"}</span>
+                <ComparedPhoto id={verdict.photos[line]} />
+                {line}
+              </li>
+            );
+          })}
         </ul>
       )}
       <p className="mt-2 text-[11px] text-ops-dim">

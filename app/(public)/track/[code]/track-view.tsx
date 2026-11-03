@@ -44,7 +44,8 @@ export function TrackView({ code }: { code: string }) {
   const [view, setView] = useState<ResidentView | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
-  const [step, setStep] = useState(0);
+  const [photoRun, setPhotoRun] = useState(false); // an answer with a photo: show the photo steps the page does not know of yet
+  const [startedAt, setStartedAt] = useState(0);
   const started = useRef(false);
 
   // Showing what came back is a callback of the fetch, never a synchronous step of an effect.
@@ -59,11 +60,11 @@ export function TrackView({ code }: { code: string }) {
   const load = useCallback(() => fetchView(code).then(show), [code, show]);
 
   const run = useCallback(
-    async (request: () => Promise<Response>) => {
+    async (request: () => Promise<Response>, withPhoto = false) => {
       setWorking(true);
+      setPhotoRun(withPhoto);
+      setStartedAt(Date.now());
       setError(null);
-      setStep(0);
-      const timer = setInterval(() => setStep((s) => s + 1), 4000);
       try {
         const res = await request();
         const body = (await res.json()) as { error?: string };
@@ -71,9 +72,9 @@ export function TrackView({ code }: { code: string }) {
       } catch {
         setError(OFFLINE);
       } finally {
-        clearInterval(timer);
-        setWorking(false);
+        // The result first, then the steps go: otherwise the question just answered flashes back for a moment.
         await load();
+        setWorking(false);
       }
     },
     [load],
@@ -91,8 +92,7 @@ export function TrackView({ code }: { code: string }) {
 
   if (error && !view) return <p className="rounded-lg bg-rose-50 px-3 py-2 text-rose-800">{error}</p>;
   if (!view) return <p className="text-zinc-500">Loading…</p>;
-  const steps = stepsFor(view);
-  const current = Math.min(step, steps.length - 1);
+  const steps = photoRun ? stepsFor({ ...view, photos: [...view.photos, "answer"] }) : stepsFor(view);
 
   return (
     <div className="space-y-5">
@@ -110,23 +110,42 @@ export function TrackView({ code }: { code: string }) {
 
       <section className={`rounded-2xl border p-5 ${view.urgent && !working ? "border-rose-300 bg-rose-50" : "border-zinc-200 bg-zinc-50/60"}`}>
         {working ? (
-          <ol className="space-y-2.5 text-sm">
-            {steps.map((s, i) => (
-              <li key={s} className={`flex items-center gap-2.5 ${i < current ? "text-zinc-400" : i === current ? "font-medium text-zinc-900" : "text-zinc-400"}`}>
-                <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] ${i < current ? "bg-zinc-900 text-white" : i === current ? "animate-pulse bg-zinc-900 text-white" : "bg-zinc-200"}`}>
-                  {i < current ? "✓" : ""}
-                </span>
-                {s}
-              </li>
-            ))}
-          </ol>
+          // The server reports no progress until the check ends, so the steps are listed, not ticked off.
+          <>
+            <p className="flex items-center gap-2.5 text-sm font-medium text-zinc-900">
+              <span aria-hidden className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-zinc-900 border-r-transparent" />
+              Checking your report, in this order:
+            </p>
+            <ol className="mt-2 list-decimal space-y-1 pl-11 text-sm text-zinc-600">
+              {steps.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ol>
+          </>
         ) : (
           <p className={`text-[17px] leading-relaxed ${view.urgent ? "font-medium text-rose-900" : "text-zinc-900"}`}>{view.status_text}</p>
         )}
+        {working && <Elapsed since={startedAt} live={view.live} />}
         {error && <p className="mt-3 text-sm text-rose-700">{error}</p>}
       </section>
 
-      {view.question && !working && <Answer view={view} onAnswer={(form) => run(() => fetch(`/api/reports/${view.report_id}/answer`, { method: "POST", body: form }))} />}
+      {view.question && !working && (
+        <Answer view={view} onAnswer={(form) => run(() => fetch(`/api/reports/${view.report_id}/answer`, { method: "POST", body: form }), form.has("photo") || form.has("sample_id"))} />
+      )}
+
+      {view.status === "unavailable" && !working && (
+        <RunLive
+          onRun={(code) =>
+            run(() =>
+              fetch(`/api/reports/${view.report_id}/analyze`, {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ access_code: code }),
+              }),
+            )
+          }
+        />
+      )}
 
       {(view.description || view.has_audio) && (
         <section className="space-y-2 rounded-2xl border border-zinc-200 p-5 text-sm">
@@ -148,20 +167,68 @@ export function TrackView({ code }: { code: string }) {
             <div key={id} className="relative overflow-hidden rounded-xl border border-zinc-200">
               {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
               <img src={`/api/images/${id}?w=480`} alt="Your photo" className="aspect-[3/2] w-full object-cover" />
-              <span className="absolute left-1.5 top-1.5">
-                <SyntheticBadge />
-              </span>
+              {view.synthetic_photos.includes(id) && (
+                <span className="absolute left-1.5 top-1.5">
+                  <SyntheticBadge />
+                </span>
+              )}
             </div>
           ))}
         </section>
       )}
 
-      <p className="text-sm">
+      <p className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
         <Link href="/report" className="font-medium text-zinc-900 underline underline-offset-2">
           Report something else →
         </Link>
+        <Link href={`/admin/reports/${view.report_id}`} className="text-zinc-600 underline underline-offset-2 hover:text-zinc-900">
+          See it as staff →
+        </Link>
       </p>
     </div>
+  );
+}
+
+// How long the check has run. A live one (Muse Spark and SAM 3.1 called now) takes 20 seconds to a minute.
+function Elapsed({ since, live }: { since: number; live: boolean }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const seconds = Math.max(0, Math.floor((now - since) / 1000));
+  return (
+    <p className="mt-3 font-mono text-xs text-zinc-500">
+      {live ? "Live check with Muse Spark and SAM 3.1, usually 20 seconds to a minute" : "Checking"} · {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}
+    </p>
+  );
+}
+
+// A report the public demo could not check: the access code runs it live, or the guided demo shows recorded cases.
+function RunLive({ onRun }: { onRun: (code: string) => Promise<void> }) {
+  const [code, setCode] = useState("");
+  return (
+    <section className="rounded-2xl border border-zinc-200 p-5">
+      <h2 className="font-medium">Run the check live</h2>
+      <p className="mt-1 text-sm text-zinc-600">Hackathon judges find the access code in the submission notes. With it, Muse Spark and SAM 3.1 check this report now.</p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (code.trim()) void onRun(code.trim());
+        }}
+        className="mt-3 flex flex-wrap gap-2"
+      >
+        <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Access code" className="min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm" />
+        <button disabled={!code.trim()} className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-40">
+          Run it live
+        </button>
+      </form>
+      <p className="mt-3 text-sm">
+        <Link href="/demo" className="text-zinc-600 underline underline-offset-2 hover:text-zinc-900">
+          Or see the recorded cases in the demo →
+        </Link>
+      </p>
+    </section>
   );
 }
 
@@ -236,7 +303,12 @@ function Answer({ view, onAnswer }: { view: ResidentView; onAnswer: (form: FormD
     <form onSubmit={send} className="space-y-4 rounded-2xl border border-violet-300 bg-violet-50 p-5">
       <p className="font-medium">{q.question}</p>
       {wantsTime ? (
-        <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-[15px]" />
+        <>
+          <p className="text-sm text-violet-900">
+            Your photo shows a problem that was recorded as fixed. If it was taken before the repair, it is the same problem; if after, it is a new one.
+          </p>
+          <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-[15px]" />
+        </>
       ) : (
         <>
           {hint && <p className="text-sm text-violet-900">{hint}</p>}
@@ -261,6 +333,7 @@ function Answer({ view, onAnswer }: { view: ResidentView; onAnswer: (form: FormD
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
                   <img src={`/api/samples/${s.id}/image?w=240`} alt={s.title} className="aspect-[3/2] w-full object-cover" />
+                  <span className="block truncate px-1.5 py-1 text-left text-[11px] text-zinc-700">{s.title.split(", ").at(-1)}</span>
                 </button>
               ))}
             </div>

@@ -13,11 +13,25 @@ import { plural, summarize, TOOL_TEXT, type StepView } from "./steps";
 type Phase = "idle" | "running" | "finished";
 type State = { phase: Phase; steps: StepView[]; startedAt: number; note: { tone: "info" | "warn" | "error"; text: string } | null };
 
-const Ctx = createContext<{ state: State; start: (analysisId: number) => void; busy: boolean; refreshing: boolean } | null>(null);
+const Ctx = createContext<{ state: State; start: (analysisId: number) => void; busy: boolean; refreshing: boolean; paced: boolean } | null>(null);
 
 export const useVerify = () => useContext(Ctx);
 
-export function VerifyProvider({ reportId, children }: { reportId: string; children: ReactNode }) {
+/**
+ * Holds each streamed event until gapMs after the one before (the first, after the start). A replayed run streams
+ * every recorded step in well under a second; paced, staff can follow it check by check, as a live run reads.
+ */
+export function pacer(gapMs: number) {
+  let next = Date.now() + gapMs;
+  return async () => {
+    const wait = next - Date.now();
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    next = Date.now() + gapMs;
+  };
+}
+
+// paceMs: set when runs are replayed from recordings.
+export function VerifyProvider({ reportId, paceMs = 0, children }: { reportId: string; paceMs?: number; children: ReactNode }) {
   const router = useRouter();
   const [state, setState] = useState<State>({ phase: "idle", steps: [], startedAt: 0, note: null });
   const [refreshing, startRefresh] = useTransition();
@@ -28,6 +42,7 @@ export function VerifyProvider({ reportId, children }: { reportId: string; child
       setState((s) => ({ ...s, phase: "finished", note }));
       startRefresh(() => router.refresh());
     };
+    const pace = pacer(paceMs);
     try {
       const res = await fetch(`/api/admin/reports/${reportId}/verify`, {
         method: "POST",
@@ -48,6 +63,7 @@ export function VerifyProvider({ reportId, children }: { reportId: string; child
         buffer = lines.pop() ?? "";
         for (const line of lines.filter(Boolean)) {
           const event = JSON.parse(line) as VerifyEvent;
+          await pace();
           if (event.type === "step") setState((s) => ({ ...s, steps: [...s.steps, event.step] }));
           else if (event.type === "result") return finish(noteOf(event.result));
           else return finish({ tone: "error", text: event.error });
@@ -59,7 +75,7 @@ export function VerifyProvider({ reportId, children }: { reportId: string; child
     }
   }
 
-  return <Ctx.Provider value={{ state, start, busy: state.phase === "running" || refreshing, refreshing }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ state, start, busy: state.phase === "running" || refreshing, refreshing, paced: paceMs > 0 }}>{children}</Ctx.Provider>;
 }
 
 // Applied results are shown by the verdict card once the page refreshes; the rest are said here.
@@ -77,6 +93,19 @@ function noteOf(r: VerifyResult): State["note"] {
       return { tone: "error", text: "The agent could not start. The suggestion is unchanged." };
   }
 }
+
+// A run started from the sticky decision band while the page was scrolled down: bring its progress into view.
+// scroll-margin keeps it clear of the sticky band.
+export const intoView = (el: HTMLElement | null) => el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+
+/** A step's summary with incident ids by name. */
+export const withNames = (text: string, names: Record<string, string>) =>
+  Object.entries(names)
+    .reduce((t, [id, label]) => t.replaceAll(id, label), text)
+    .replace(/\binc_[a-z0-9]+\b/g, "another incident");
+
+export const liveText = (live: "always" | "maybe") =>
+  live === "always" ? "Running live on Muse Spark: usually under a minute, sometimes a little more. " : "No recorded run is known to match this report, so it may run live and take about a minute. ";
 
 export function useElapsed(since: number, on: boolean): number {
   const [now, setNow] = useState(() => Date.now());
@@ -98,7 +127,21 @@ export function Spinner({ className = "" }: { className?: string }) {
  * The run as it happens, under the decision band. runningSince: a verification another tab or person
  * started; the page refreshes until it is done.
  */
-export function VerifyProgress({ maxSteps, maxMs, runningSince }: { maxSteps: number; maxMs: number; runningSince: string | null }) {
+// live: "always" for a live report, whose agent calls Muse Spark every time; "maybe" when no recorded run is known to match.
+export type LiveRun = "always" | "maybe" | null;
+export function VerifyProgress({
+  maxSteps,
+  maxMs,
+  runningSince,
+  live = null,
+  names = {},
+}: {
+  maxSteps: number;
+  maxMs: number;
+  runningSince: string | null;
+  live?: LiveRun;
+  names?: Record<string, string>; // incident ids by name, for the steps as they arrive
+}) {
   const v = useVerify();
   const router = useRouter();
   const elsewhere = v?.state.phase === "idle" && runningSince !== null;
@@ -150,7 +193,7 @@ export function VerifyProgress({ maxSteps, maxMs, runningSince }: { maxSteps: nu
         : "Choosing the next check";
   const checks = state.steps.filter((s) => s.tool !== "propose_decision").length;
   return (
-    <section className="mt-2 rounded-lg border border-violet-500/40 bg-ops-panel px-4 py-3" role="status" aria-live="polite">
+    <section ref={intoView} className="mt-2 scroll-mt-60 rounded-lg border border-violet-500/40 bg-ops-panel px-4 py-3" role="status" aria-live="polite">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <Spinner className="text-violet-300" />
         <p className="font-semibold text-white">The verification agent is looking for evidence against this suggestion</p>
@@ -167,7 +210,7 @@ export function VerifyProgress({ maxSteps, maxMs, runningSince }: { maxSteps: nu
             <span className={`mt-px w-4 shrink-0 text-center ${s.ok ? "text-emerald-300" : "text-rose-300"}`}>{s.ok ? "✓" : "✕"}</span>
             <span className="min-w-0">
               <span className="font-medium text-white">{TOOL_TEXT[s.tool] ?? s.tool}</span>
-              <span className={`ml-2 break-words ${s.ok ? "text-ops-text" : "text-rose-300"}`}>{summarize(s)}</span>
+              <span className={`ml-2 break-words ${s.ok ? "text-ops-text" : "text-rose-300"}`}>{withNames(summarize(s), names)}</span>
             </span>
           </li>
         ))}
@@ -179,6 +222,8 @@ export function VerifyProgress({ maxSteps, maxMs, runningSince }: { maxSteps: nu
         </li>
       </ol>
       <p className="mt-3 border-t border-ops-line pt-2 text-[11px] text-ops-dim">
+        {v.state.phase === "running" && v.paced && "Replaying a recorded run, one check at a time. "}
+        {v.state.phase === "running" && live && liveText(live)}
         Nothing changes until it finishes. The agent can only make the suggestion more cautious; if it cannot start, the suggestion stays as it is.
       </p>
     </section>

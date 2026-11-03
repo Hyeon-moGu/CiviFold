@@ -10,6 +10,9 @@ const DAY = new Intl.DateTimeFormat("en-CA", { timeZone });
 
 export const when = (t: string | null | undefined) => (t ? FORMAT.format(new Date(t)) : "n/a");
 
+/** What model calls cost: nothing means every call was replayed from a recorded run, which "$0.000" would hide. */
+export const cost = (usd: number) => (usd > 0 ? `$${usd.toFixed(3)}` : "replayed");
+
 /** Today's reports to the second (reports minutes apart still read apart); older ones with their date. */
 export function clock(t: string, now = Date.now()): string {
   const d = new Date(t);

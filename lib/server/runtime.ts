@@ -10,7 +10,7 @@ import { db, type Db } from "../db/client";
 import { spend } from "../db/schema";
 import { dbCache, dbData, dbImages } from "../db/stores";
 import { setCacheStore } from "../meta/cache";
-import { setLiveGate, type LiveGate, type Mode } from "../meta/call";
+import { defaultMode, setLiveGate, type LiveGate, type Mode } from "../meta/call";
 import { memoizedImages } from "../tools/images";
 import type { ToolContext } from "../tools/types";
 
@@ -24,11 +24,32 @@ export async function runtime(): Promise<Runtime> {
   // Set on every call: Next may load lib/meta once per route bundle, each with its own settings.
   // Deployed, the evaluation's cached responses live in Postgres; locally the file cache under .cache/llm.
   if (process.env.DATABASE_URL) setCacheStore(dbCache(rt.database));
-  setLiveGate(spendGate(rt.database, Number(process.env.LIVE_DAILY_USD || 2)));
+  setLiveGate(spendGate(rt.database, liveDailyUsd()));
   return rt;
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
+/** The daily cap on live model spend; 0 keeps a deployment on replays alone. */
+export const liveDailyUsd = () => Number(process.env.LIVE_DAILY_USD || 2);
+
+/** What is left of today's live model budget. */
+export async function liveBudgetLeft(database: Db): Promise<number> {
+  const [row] = await database.select({ usd: spend.usd }).from(spend).where(eq(spend.day, today()));
+  return liveDailyUsd() - (row?.usd ?? 0);
+}
+
+/**
+ * How a report's model calls run. A live report (sent with the access code, or a demo case a visitor sent while
+ * today's budget held) calls the models every time, recordings or not, and keeps no recording of its own. In a replay-only deployment the others
+ * replay their recorded calls first, and fall back to live calls while today's budget still holds a whole run
+ * (needUsd).
+ */
+export async function runMode(database: Db, report: { live: boolean }, needUsd: number): Promise<Mode> {
+  if (report.live) return "fresh";
+  const mode = defaultMode();
+  if (mode !== "cached") return mode;
+  return (await liveBudgetLeft(database)) >= needUsd ? "cached_then_live" : "cached";
+}
 
 export function spendGate(database: Db, dailyUsd: number): LiveGate {
   return {

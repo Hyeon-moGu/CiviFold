@@ -3,27 +3,28 @@
 
 import Link from "next/link";
 import { defaultMode } from "@/lib/meta/call";
+import { liveDailyUsd } from "@/lib/server/runtime";
 
 // Recorded evaluation runs on synthetic data: the share of reports that needed attention (a new problem or a
 // recurrence) that got a one-click "duplicate / late / already fixed" suggestion. Location-only is the baseline.
 const RESULTS = [
-  { split: "Newest unseen places", n: 33, geo: 24, ours: 0, headline: true },
-  { split: "Second unseen set", n: 33, geo: 22, ours: 1 },
-  { split: "Test set, first run", n: 33, geo: 24, ours: 1 },
-  { split: "First unseen set", n: 16, geo: 11, ours: 3 },
+  { split: "holdout3, newest unseen places", n: 33, geo: 24, ours: 0, headline: true },
+  { split: "holdout2", n: 33, geo: 22, ours: 1 },
+  { split: "test, first run", n: 33, geo: 24, ours: 1 },
+  { split: "holdout, first unseen set", n: 16, geo: 11, ours: 3 },
 ];
 
 const FLOW = [
   { who: "Resident", what: "Sends a photo, a message, a voice note, or a mix.", model: "Muse Voice Transcribe" },
   { who: "Read", what: "Reads the message for danger, then names the fixture and the problem in the photo.", model: "Muse Spark" },
-  { who: "Isolate", what: "Cuts out the hydrant, light or pile, and a wider crop of what stands around it.", model: "SAM 3.1" },
+  { who: "Isolate", what: "Cuts out the hydrant or light, and a wider crop of what stands around it. Road damage and dumped piles are boxed first.", model: "Muse Spark + SAM 3.1" },
   { who: "Compare", what: "Compares the object and its surroundings with incidents nearby, then rules check dates and repairs.", model: "Muse Spark + rules" },
   { who: "Staff", what: "See the suggestion with its evidence and decide. Nothing is merged on its own.", model: "Human decision" },
 ];
 
 const SCOPE = [
-  { title: "Fixed assets", examples: "Fire hydrants, street lights, traffic signs, benches", handled: "Matched by the fixture and its surroundings" },
-  { title: "Problems at a place", examples: "Road damage, illegal dumping, graffiti", handled: "Matched by the spot's fixed surroundings" },
+  { title: "Fixed assets", examples: "Fire hydrants, street lights; also accepted, not evaluated: traffic signs, benches", handled: "Matched by the fixture and its surroundings" },
+  { title: "Problems at a place", examples: "Road damage, illegal dumping; also accepted, not evaluated: graffiti", handled: "Matched by the spot's fixed surroundings" },
   { title: "People or behavior", examples: "Noise, loitering, parking", handled: "Never matched by image; sent to staff" },
   { title: "Possible emergencies", examples: "Smoke, a gas smell, a fallen power line", handled: "No matching; top of the staff queue, resident told to call 911", urgent: true },
 ];
@@ -73,7 +74,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-14">
+      <section id="results" className="mx-auto max-w-6xl scroll-mt-16 px-4 py-14">
         <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">What gets buried</h2>
         <p className="mt-2 max-w-2xl text-sm text-zinc-600">
           Of the reports that needed attention (a new problem, or one that came back), the share that got a one-click &ldquo;duplicate, late or already
@@ -113,7 +114,8 @@ export default function Home() {
         </table>
         <p className="mt-3 max-w-2xl text-xs text-zinc-500">
           Synthetic photos generated with Muse Image. First run on each set; each set was unseen when it ran. Rules were changed after the test set and
-          the first unseen set, so those two rows used earlier rules. Every run is in the evaluation notes.
+          the first unseen set, so those two rows used earlier rules. Later, Muse Spark began boxing road damage and dumped piles for SAM; that was
+          checked on the development sets only (no wrong closing suggestion on their 222 cases, before or after). Every run is in the evaluation notes.
         </p>
       </section>
 
@@ -145,7 +147,14 @@ export default function Home() {
           ))}
         </div>
         <p className="mt-10 text-xs text-zinc-500">
-          Model calls: {mode === "cached" ? "recorded results only (no live calls)" : mode === "live" ? "live" : "recorded first, live on a miss"}
+          Model calls:{" "}
+          {mode === "cached"
+            ? liveDailyUsd() > 0
+              ? "recorded results first, live within a daily budget when there is none"
+              : "recorded results only (no live calls)"
+            : mode === "live"
+              ? "live"
+              : "recorded first, live on a miss"}
         </p>
       </section>
     </main>

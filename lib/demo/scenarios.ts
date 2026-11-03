@@ -11,14 +11,15 @@
 import { and, asc, desc, eq, inArray, like } from "drizzle-orm";
 import { messageSample } from "../dataset/messages";
 import { sample } from "../dataset/static";
-import { briefs, incidentEvents, incidents, reportAnalyses, reports, staffDecisions } from "../db/schema";
+import { agentRuns, briefs, images, incidentEvents, incidents, infoRequests, reportAnalyses, reports, segmentations, staffDecisions } from "../db/schema";
 import { locationOnly } from "../eval/ablations";
-import type { Candidate } from "../pipeline/decide";
+import { haversineM } from "../geo";
+import type { Candidate, Comparison } from "../pipeline/decide";
 import { seedIncidentId } from "./seed";
 import type { Label } from "../tools/types";
 import { briefReport } from "../server/briefs";
-import { analyzeReport, answerReport, createReport, recordRepair, staffDecide, UserError, verifyReport } from "../server/reports";
-import type { Runtime } from "../server/runtime";
+import { analyzeReport, ANALYSIS_USD, answerReport, createReport, recordRepair, staffDecide, UserError, verifyReport } from "../server/reports";
+import { liveBudgetLeft, type Runtime } from "../server/runtime";
 
 // `why` tells the visitor what is about to happen and why that answer is the right one.
 type Step =
@@ -85,6 +86,11 @@ export const SCENARIOS: Scenario[] = [
         why: "The open incident is a different hydrant 28 m away. The surroundings do not match, so expect a new incident.",
         expect: "NEW",
       },
+      {
+        kind: "brief",
+        text: "Staff ask for a case brief",
+        why: "The brief says why this is not the incident 28 m away, citing the comparison, and what staff could do next. It decides nothing.",
+      },
     ],
   },
   {
@@ -125,12 +131,23 @@ export const SCENARIOS: Scenario[] = [
         expect: "LATE_REPORT",
       },
       {
+        kind: "verify",
+        text: "Staff ask the verification agent to check it",
+        why: "A late report would be merged into a fixed incident, so the agent looks for evidence that the damage is new.",
+        expect: "LATE_REPORT",
+      },
+      {
         kind: "report",
         sample: "syn_H2_damaged_v2_front",
         observed_hours_ago: 0,
         text: "A resident reports the hydrant tagged and cracked today",
         why: "Same hydrant, new damage after the repair. Expect a possible recurrence, kept apart from the fixed incident.",
         expect: "POSSIBLE_RECURRENCE",
+      },
+      {
+        kind: "brief",
+        text: "Staff ask for a case brief",
+        why: "The brief lays out the repair, the new damage and what staff could check before sending a crew back.",
       },
     ],
   },
@@ -153,6 +170,14 @@ export const SCENARIOS: Scenario[] = [
         kind: "brief",
         text: "Staff ask for a case brief",
         why: "A report that was asked for another view is where a brief earns its keep: it says what the one distant photo settles, what it does not, and what to ask for. Every item cites a fact or a tool result; the rest is deleted.",
+      },
+      {
+        kind: "report",
+        sample: "syn_W1_damaged_v2_front",
+        observed_hours_ago: 0,
+        text: "A resident reports a new pile at the same wall today",
+        why: "Same wall, a different pile after the cleanup. Expect a possible recurrence, kept apart from the cleared incident.",
+        expect: "POSSIBLE_RECURRENCE",
       },
     ],
   },
@@ -223,19 +248,103 @@ async function checkWorld(rt: Runtime, scenario: Scenario, index: number) {
   }
 }
 
+/**
+ * A few lines of what the comparison model wrote about the report's photo against the incident it was compared
+ * with (the suggested one, else the nearest compared), from its most detailed comparison: the model's own words,
+ * with its NEW and CANDIDATE named for a visitor. A different fixture gets three lines on what tells it apart;
+ * different damage on the same one gets two on the damage and one on the place.
+ */
+function seenBy(comparisons: Comparison[], incidentId: string | null): string[] {
+  const judged = comparisons.filter((c) => c.result && !c.fallback);
+  const pick = judged.filter((c) => !incidentId || c.incident_id === incidentId).sort((a, b) => b.stage - a.stage || b.result!.asset_match.confidence - a.result!.asset_match.confidence)[0];
+  if (!pick?.result) return [];
+  const words = (t: string) =>
+    t
+      .replace(/\b(?:IMAGE\s+)?N\d(?:\s*(?:\/|and|&)\s*N\d)*\b/g, "this photo")
+      .replace(/\b(?:IMAGE\s+)?C\d(?:\s*(?:\/|and|&)\s*C\d)*\b/g, "the incident's photo")
+      .replace(/\bNEW\b/g, "this photo")
+      .replace(/^new (?=shows|has|is)/i, "this photo ")
+      .replace(/^new:?\s+/i, "this photo: ")
+      .replace(/^this photo: (?=.*\b(both|in both)\b)/i, "")
+      .replace(/\bcandidate\b/gi, "the incident's photo");
+  const { asset_match, damage } = pick.result;
+  // A different fixture is told apart by its surroundings alone; different damage on the same one by the damage.
+  if (asset_match.verdict === "different") return asset_match.evidence.slice(0, 3).map(words);
+  const place = damage.same_damage_signature === "different" ? 1 : 2;
+  // The damage lines about this report's photo first: for a recurrence they name the new damage.
+  const aboutNew = (t: string) => /^(new|NEW)\b|\bthis photo\b|\bNEW\b/.test(t);
+  const damageLines = [...damage.evidence.filter(aboutNew), ...damage.evidence.filter((t) => !aboutNew(t))];
+  return [...asset_match.evidence.slice(0, place), ...damageLines.slice(0, 3 - place)].map(words);
+}
+
 async function analyzed(rt: Runtime, created: { report_id: string; tracking_code: string }) {
   const result = await analyzeReport(rt, created.report_id);
   if (result.error) return { ...created, error: result.error };
   const [latest] = await rt.database
-    .select({ final: reportAnalyses.final })
+    .select({
+      id: reportAnalyses.id,
+      final: reportAnalyses.final,
+      candidates: reportAnalyses.candidates,
+      comparisons: reportAnalyses.comparisons,
+      usd: reportAnalyses.cost_usd,
+      ms: reportAnalyses.latency_ms,
+    })
     .from(reportAnalyses)
     .where(eq(reportAnalyses.report_id, created.report_id))
     .orderBy(desc(reportAnalyses.id))
     .limit(1);
-  return { ...created, label: (latest?.final as { label: Label } | undefined)?.label };
+  const final = latest?.final as { label: Label; incident_id: string | null } | undefined;
+  const [sent] = await rt.database.select({ transcript: reports.transcript, live: reports.live }).from(reports).where(eq(reports.id, created.report_id));
+  const [question] = latest ? await rt.database.select({ text: infoRequests.question }).from(infoRequests).where(eq(infoRequests.analysis_id, latest.id)).limit(1) : [];
+  const cutout = (await cutoutsOf(rt, [created.report_id])).get(created.report_id);
+  // The visitor who sent it sees the location-only answer beside CiviFold's, as the shared state shows it, for a
+  // voice report what was heard, and the question the resident was asked.
+  return {
+    ...created,
+    label: final?.label,
+    incident_id: final?.incident_id ?? null,
+    location_only: locationOnly((latest?.candidates as Candidate[] | null) ?? []),
+    seen: seenBy((latest?.comparisons as Comparison[] | null) ?? [], final?.incident_id ?? null),
+    ...(sent?.transcript ? { transcript: sent.transcript } : {}),
+    ...(question ? { asked: question.text } : {}),
+    // How this check ran: live (what the models cost and how long it took) or replayed from a recording.
+    run: { live: sent?.live ?? false, usd: latest?.usd ?? 0, ms: latest?.ms ?? 0 },
+    ...(cutout ? { cutout } : {}),
+  };
 }
 
-export async function runStep(rt: Runtime, scenarioId: string, index: number) {
+/** What SAM cut out of each report's first photo: the crop, and the mask over the photo (in its pixels). */
+export type Cutout = { crop: string; mask: string | null; width: number; height: number };
+
+async function cutoutsOf(rt: Runtime, reportIds: string[]): Promise<Map<string, Cutout>> {
+  if (reportIds.length === 0) return new Map();
+  const photos = await rt.database
+    .select({ id: images.id, report_id: images.report_id, width: images.width, height: images.height })
+    .from(images)
+    .where(and(inArray(images.report_id, reportIds), eq(images.kind, "original")))
+    .orderBy(asc(images.id));
+  if (photos.length === 0) return new Map();
+  const segments = await rt.database
+    .select({ image_id: segmentations.image_id, crop: segmentations.object_crop_id, mask: segmentations.mask_svg_path })
+    .from(segmentations)
+    .where(inArray(segmentations.image_id, photos.map((p) => p.id)));
+  const out = new Map<string, Cutout>();
+  for (const p of photos) {
+    if (out.has(p.report_id)) continue;
+    const s = segments.find((c) => c.image_id === p.id && c.crop);
+    if (s?.crop) out.set(p.report_id, { crop: s.crop, mask: s.mask, width: p.width, height: p.height });
+  }
+  return out;
+}
+
+/** A report the visitor asked to run live does so while today's budget holds a whole analysis; else it replays. */
+async function sendLive(rt: Runtime, reportId: string, live: boolean) {
+  if (live && (await liveBudgetLeft(rt.database)) >= ANALYSIS_USD) await rt.database.update(reports).set({ live: true }).where(eq(reports.id, reportId));
+}
+
+// live: the visitor asked to run it live, so its report calls the models (sendLive). Otherwise, and in the play
+// that seeds a reset, it replays.
+export async function runStep(rt: Runtime, scenarioId: string, index: number, { live = false }: { live?: boolean } = {}) {
   const scenario = SCENARIOS.find((s) => s.id === scenarioId);
   const step = scenario?.steps[index];
   if (!scenario || !step) throw new UserError("Unknown demo step.");
@@ -260,6 +369,7 @@ export async function runStep(rt: Runtime, scenarioId: string, index: number) {
       access_code: null,
     });
     await rt.database.update(reports).set({ dataset_case_id: demoTag(scenarioId, index) }).where(eq(reports.id, created.report_id));
+    await sendLive(rt, created.report_id, live);
     return analyzed(rt, created);
   }
   if (step.kind === "verify") {
@@ -318,32 +428,114 @@ export async function runStep(rt: Runtime, scenarioId: string, index: number) {
     access_code: null,
   });
   await rt.database.update(reports).set({ dataset_case_id: demoTag(scenarioId, index) }).where(eq(reports.id, created.report_id));
+  await sendLive(rt, created.report_id, live);
   return analyzed(rt, created);
 }
 
+const isAgent = (step: Step) => step.kind === "verify" || step.kind === "brief";
+
 /**
- * Runs every step of every scenario, in order, on a freshly seeded world, so a visitor finds the results
- * already there. Staff decisions are left out: approving a suggestion is the visitor's to do, in the staff
- * view. A step that fails is reported and the rest still run.
+ * Runs every step of every scenario on a freshly seeded world, so a visitor finds the results already there.
+ * The agent steps run last, on the world every other step has left: the world a visitor's own report meets,
+ * so the agents' recorded runs replay on it too (agentRecorded). Staff decisions are left out: approving a
+ * suggestion is the visitor's to do, in the staff view. A step that fails is reported and the rest still run.
  */
 export async function playAll(rt: Runtime): Promise<Array<{ step: string; error?: string }>> {
   const ran: Array<{ step: string; error?: string }> = [];
-  for (const scenario of SCENARIOS) {
-    for (let i = 0; i < scenario.steps.length; i++) {
-      if (scenario.steps[i]!.kind === "decide") continue;
-      const step = `${scenario.id}:${i}`;
-      try {
-        const error = ((await runStep(rt, scenario.id, i)) as { error?: string }).error;
-        ran.push(error ? { step, error } : { step });
-      } catch (err) {
-        ran.push({ step, error: err instanceof Error ? err.message : String(err) });
-      }
+  const steps = SCENARIOS.flatMap((s) => s.steps.map((step, i) => ({ scenario: s.id, i, step })).filter(({ step }) => step.kind !== "decide"));
+  for (const { scenario, i } of [...steps.filter((s) => !isAgent(s.step)), ...steps.filter((s) => isAgent(s.step))]) {
+    const step = `${scenario}:${i}`;
+    try {
+      const error = ((await runStep(rt, scenario, i)) as { error?: string }).error;
+      ran.push(error ? { step, error } : { step });
+    } catch (err) {
+      ran.push({ step, error: err instanceof Error ? err.message : String(err) });
     }
   }
   return ran;
 }
 
+// search_incidents clamps the radius here, so an agent never reads an incident farther away.
+const AGENT_REACH_M = 300;
+const SEEDED = /^inc_[a-z]+\d+$/;
+// The seeded incidents a play repairs.
+const PLAY_REPAIRS = new Set(SCENARIOS.flatMap((s) => s.steps.flatMap((step) => (step.kind === "repair" ? [seedIncidentId(step.asset)] : []))));
+
+/**
+ * Whether a replay-only deployment holds a recorded run of this agent for this report: the report was sent by a
+ * demo step that one of its scenario's own agent steps acts on, its scenario's incidents are as that step expects,
+ * and every other incident of the kind within the agent's reach is as a play leaves it (open, or repaired by its
+ * own scenario, with nothing linked), as it was when the run was recorded at the end of a play. Any other run
+ * misses the recording, at its first turn or partway through.
+ */
+export async function agentRecorded(
+  rt: Runtime,
+  report: { dataset_case_id: string | null; lat: number; lng: number },
+  kind: "verify" | "brief",
+): Promise<boolean> {
+  const match = report.dataset_case_id?.match(/^demo:([^:]+):(\d+)$/);
+  const scenario = match ? SCENARIOS.find((s) => s.id === match[1]) : undefined;
+  if (!match || !scenario) return false;
+  const sent = Number(match[2]);
+  const at = scenario.steps.findIndex((s, i) => s.kind === kind && i > sent && ownerIndex(scenario, i) === sent);
+  if (at < 0) return false;
+  const ready = await checkWorld(rt, scenario, at).then(
+    () => true,
+    () => false,
+  );
+  if (!ready) return false;
+  const own = new Set(scenario.world.map(seedIncidentId));
+  const all = await rt.database.select({ id: incidents.id, status: incidents.status, category: incidents.category, lat: incidents.lat, lng: incidents.lng }).from(incidents);
+  const kindOf = all.find((i) => own.has(i.id))?.category;
+  const near = all.filter((i) => !own.has(i.id) && i.category === kindOf && haversineM(report, i) <= AGENT_REACH_M);
+  if (near.some((i) => !SEEDED.test(i.id) || i.status !== (PLAY_REPAIRS.has(i.id) ? "resolved" : "open"))) return false;
+  if (near.length === 0) return true;
+  const events = await rt.database
+    .select({ incident_id: incidentEvents.incident_id, type: incidentEvents.type })
+    .from(incidentEvents)
+    .where(inArray(incidentEvents.incident_id, near.map((i) => i.id)));
+  return near.every((i) => {
+    const types = events.filter((e) => e.incident_id === i.id).map((e) => e.type).sort();
+    return types.join() === (PLAY_REPAIRS.has(i.id) ? ["created", "repair_recorded"] : ["created"]).join();
+  });
+}
+
+/** The first report of a demo case that holds a stored agent run or brief, for visitors whose own send has none. */
+export async function recordedAgentReport(rt: Runtime, tag: string | null): Promise<string | null> {
+  if (!tag?.startsWith("demo:")) return null;
+  const sent = await rt.database.select({ id: reports.id }).from(reports).where(eq(reports.dataset_case_id, tag)).orderBy(asc(reports.submitted_at));
+  if (sent.length === 0) return null;
+  const ids = sent.map((r) => r.id);
+  const [ran, wrote] = await Promise.all([
+    rt.database.select({ id: agentRuns.report_id }).from(agentRuns).where(and(inArray(agentRuns.report_id, ids), eq(agentRuns.applied, true))),
+    rt.database.select({ id: briefs.report_id }).from(briefs).where(inArray(briefs.report_id, ids)),
+  ]);
+  const has = new Set([...ran, ...wrote].map((r) => r.id));
+  return ids.find((id) => has.has(id)) ?? null;
+}
+
 export type BriefOutcome = { status: string; kept: number; dropped: number };
+// What the verification agent checked on a report, counted as the staff view's verdict counts it.
+export type AgentCheck = { checks: number; matching: number; ruledOut: number; against: number };
+
+type CheckStep = { ok: boolean; tool: string; data?: unknown };
+/** The latest staff-requested check, in counts a visitor reads on the demo card. */
+export function agentCheckOf(steps: CheckStep[], suggested: string | null): AgentCheck {
+  const out = { checks: steps.filter((s) => s.ok && s.tool !== "propose_decision").length, matching: 0, ruledOut: 0, against: 0 };
+  for (const s of steps) {
+    if (!s.ok || s.tool !== "compare_images") continue;
+    const d = s.data as { asset_match: { verdict: string }; damage?: { same_damage_signature: string }; candidate_incident_id: string };
+    const same = d.asset_match.verdict === "same";
+    if (d.candidate_incident_id === suggested) {
+      if (same) out.matching++;
+      else out.against++;
+    }
+    // Another fixture, or the same fixture with a different problem, is not this report's incident.
+    else if (!same || d.damage?.same_damage_signature === "different") out.ruledOut++;
+    else out.against++;
+  }
+  return out;
+}
 // location_only: what the evaluation's location-only rule says for the same report (no model call), so each
 // case shows the answer CiviFold replaces next to its own.
 export type StepOutcome =
@@ -353,6 +545,12 @@ export type StepOutcome =
       label?: Label;
       incident_id?: string | null;
       location_only?: ReturnType<typeof locationOnly>;
+      seen?: string[];
+      asked?: string;
+      agent?: AgentCheck;
+      briefed?: number;
+      cutout?: Cutout;
+      run?: { live: boolean; usd: number; ms: number };
       brief?: BriefOutcome;
       decided?: { action: string; incident_id: string | null };
     }
@@ -400,15 +598,37 @@ export async function demoState(rt: Runtime): Promise<Record<string, StepOutcome
   const ids = tagged.map((r) => r.id);
   const analyses = ids.length
     ? await database
-        .select({ report_id: reportAnalyses.report_id, pipeline_config: reportAnalyses.pipeline_config, final: reportAnalyses.final, candidates: reportAnalyses.candidates })
+        .select({
+          id: reportAnalyses.id,
+          report_id: reportAnalyses.report_id,
+          pipeline_config: reportAnalyses.pipeline_config,
+          final: reportAnalyses.final,
+          candidates: reportAnalyses.candidates,
+          comparisons: reportAnalyses.comparisons,
+        })
         .from(reportAnalyses)
         .where(inArray(reportAnalyses.report_id, ids))
         .orderBy(asc(reportAnalyses.id))
     : [];
   const resolved = new Set((await database.select({ id: incidents.id }).from(incidents).where(eq(incidents.status, "resolved"))).map((i) => i.id));
+  const asked = new Map(
+    (analyses.length
+      ? await database.select({ analysis_id: infoRequests.analysis_id, question: infoRequests.question }).from(infoRequests).where(inArray(infoRequests.analysis_id, analyses.map((a) => a.id)))
+      : []
+    ).map((q) => [q.analysis_id, q.question]),
+  );
   const written = ids.length
     ? await database.select({ report_id: briefs.report_id, status: briefs.status, brief: briefs.brief }).from(briefs).where(inArray(briefs.report_id, ids)).orderBy(asc(briefs.id))
     : [];
+  // The latest check and brief staff asked for on each report, so a visitor back from the staff view sees them.
+  const checked = ids.length
+    ? await database
+        .select({ report_id: agentRuns.report_id, steps: agentRuns.steps, trigger: agentRuns.trigger, analysis_id: agentRuns.analysis_id })
+        .from(agentRuns)
+        .where(and(inArray(agentRuns.report_id, ids), eq(agentRuns.requested_by, "staff"), eq(agentRuns.applied, true)))
+        .orderBy(asc(agentRuns.id))
+    : [];
+  const cutouts = await cutoutsOf(rt, ids);
   const decisions = ids.length
     ? await database
         .select({ report_id: staffDecisions.report_id, final_action: staffDecisions.final_action, incident_id: staffDecisions.incident_id })
@@ -438,19 +658,39 @@ export async function demoState(rt: Runtime): Promise<Record<string, StepOutcome
       }
       // An answer and a verification act on the previous step's report, each adding an analysis of its own.
       const own = step.kind === "report" || step.kind === "message";
-      const report = tagged.find((r) => r.tag === demoTag(scenario.id, own ? i : i - 1));
+      // A verification is read from the latest report of the case that has one (the play's, until a visitor
+      // verifies theirs), so the card can show what the recorded check did.
+      const report =
+        step.kind === "verify"
+          ? tagged.find((r) => r.tag === demoTag(scenario.id, i - 1) && analyses.some((a) => a.report_id === r.id && a.pipeline_config === "C_rules+verify"))
+          : tagged.find((r) => r.tag === demoTag(scenario.id, own ? i : i - 1));
       if (!report) return;
       const mine = analyses.filter((a) => a.report_id === report.id);
       const fast = mine.filter((a) => a.pipeline_config !== "C_rules+verify");
       const found = own ? fast[0] : step.kind === "answer" ? fast[1] : mine.find((a) => a.pipeline_config === "C_rules+verify");
       if (!found) return;
       const final = found.final as { label: Label; incident_id: string | null };
+      // Whatever staff decided on the report, so every case card can say so, not only the one with a decide step.
+      const decided = own ? decisions.filter((d) => d.report_id === report.id).at(-1) : undefined;
+      const check = own || step.kind === "verify" ? checked.filter((c) => c.report_id === report.id).at(-1) : undefined;
+      const brief = own ? written.filter((b) => b.report_id === report.id).at(-1) : undefined;
+      const suggestedBefore = check ? (analyses.find((a) => a.id === check.analysis_id)?.final as { incident_id: string | null } | undefined)?.incident_id ?? null : null;
       out[key] = {
         report_id: report.id,
         tracking_code: report.tracking_code,
         label: final.label,
         incident_id: final.incident_id,
-        ...(step.kind === "verify" ? {} : { location_only: locationOnly((found.candidates as Candidate[] | null) ?? []) }),
+        ...(decided ? { decided: { action: decided.final_action, incident_id: decided.incident_id } } : {}),
+        ...(check ? { agent: agentCheckOf(check.steps as CheckStep[], suggestedBefore) } : {}),
+        ...(brief ? { briefed: (brief.brief as { kept?: number } | null)?.kept ?? 0 } : {}),
+        ...(step.kind === "verify"
+          ? {}
+          : {
+              location_only: locationOnly((found.candidates as Candidate[] | null) ?? []),
+              seen: seenBy((found.comparisons as Comparison[] | null) ?? [], final.incident_id),
+              ...(asked.has(found.id) ? { asked: asked.get(found.id) } : {}),
+              ...(own && cutouts.has(report.id) ? { cutout: cutouts.get(report.id) } : {}),
+            }),
       };
     });
   }

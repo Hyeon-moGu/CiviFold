@@ -6,22 +6,23 @@
 // A staff-requested case brief as it is written: the agent's reads arrive one by one from the brief route,
 // then the page refreshes to show the stored brief. The brief never changes the suggestion; it is read beside it.
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useState, useTransition, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import type { BriefEvent, BriefResult } from "@/lib/server/briefs";
 import type { BriefFact } from "@/lib/agent/brief";
 import type { Brief } from "@/lib/tools/write-brief";
-import { when } from "@/app/_ui/format";
+import { cost, when } from "@/app/_ui/format";
 import { plural, summarize, TOOL_TEXT, type StepView } from "./steps";
-import { clockOf, Spinner, useElapsed } from "./verify";
+import { clockOf, intoView, liveText, pacer, Spinner, useElapsed, withNames, type LiveRun } from "./verify";
 
 type Phase = "idle" | "running" | "finished";
 type State = { phase: Phase; steps: StepView[]; startedAt: number; note: { tone: "info" | "warn" | "error"; text: string } | null };
 
-const Ctx = createContext<{ state: State; start: (analysisId: number) => void; busy: boolean } | null>(null);
+const Ctx = createContext<{ state: State; start: (analysisId: number) => void; busy: boolean; paced: boolean } | null>(null);
 
 export const useBrief = () => useContext(Ctx);
 
-export function BriefProvider({ reportId, children }: { reportId: string; children: ReactNode }) {
+// paceMs: set when runs are replayed from recordings (pacer).
+export function BriefProvider({ reportId, paceMs = 0, children }: { reportId: string; paceMs?: number; children: ReactNode }) {
   const router = useRouter();
   const [state, setState] = useState<State>({ phase: "idle", steps: [], startedAt: 0, note: null });
   const [refreshing, startRefresh] = useTransition();
@@ -32,6 +33,7 @@ export function BriefProvider({ reportId, children }: { reportId: string; childr
       setState((s) => ({ ...s, phase: "finished", note }));
       startRefresh(() => router.refresh());
     };
+    const pace = pacer(paceMs);
     try {
       const res = await fetch(`/api/admin/reports/${reportId}/brief`, {
         method: "POST",
@@ -52,6 +54,7 @@ export function BriefProvider({ reportId, children }: { reportId: string; childr
         buffer = lines.pop() ?? "";
         for (const line of lines.filter(Boolean)) {
           const event = JSON.parse(line) as BriefEvent;
+          await pace();
           if (event.type === "step") setState((s) => ({ ...s, steps: [...s.steps, event.step] }));
           else if (event.type === "result") return finish(noteOf(event.result));
           else return finish({ tone: "error", text: event.error });
@@ -63,7 +66,7 @@ export function BriefProvider({ reportId, children }: { reportId: string; childr
     }
   }
 
-  return <Ctx.Provider value={{ state, start, busy: state.phase === "running" || refreshing }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ state, start, busy: state.phase === "running" || refreshing, paced: paceMs > 0 }}>{children}</Ctx.Provider>;
 }
 
 // A finished run is shown by the brief card once the page refreshes; a run that did not start is said here.
@@ -75,7 +78,7 @@ function noteOf(r: BriefResult): State["note"] {
 }
 
 /** The run as it happens, under the decision band. */
-export function BriefProgress({ maxSteps, maxMs }: { maxSteps: number; maxMs: number }) {
+export function BriefProgress({ maxSteps, maxMs, live = null, names = {} }: { maxSteps: number; maxMs: number; live?: LiveRun; names?: Record<string, string> }) {
   const b = useBrief();
   const running = b?.state.phase === "running";
   const elapsed = useElapsed(running ? b!.state.startedAt : 0, running);
@@ -104,7 +107,7 @@ export function BriefProgress({ maxSteps, maxMs }: { maxSteps: number; maxMs: nu
   const now = last?.tool === "write_brief" ? "Checking every item's evidence, then saving" : state.steps.length === 0 ? "Reading the report, the pipeline's facts and the history" : "Deciding what else to read";
   const reads = state.steps.filter((s) => s.tool !== "write_brief").length;
   return (
-    <section className="mt-2 rounded-lg border border-violet-500/40 bg-ops-panel px-4 py-3" role="status" aria-live="polite">
+    <section ref={intoView} className="mt-2 scroll-mt-60 rounded-lg border border-violet-500/40 bg-ops-panel px-4 py-3" role="status" aria-live="polite">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <Spinner className="text-violet-300" />
         <p className="font-semibold text-white">The brief agent is reading the evidence for this report</p>
@@ -121,7 +124,7 @@ export function BriefProgress({ maxSteps, maxMs }: { maxSteps: number; maxMs: nu
             <span className={`mt-px w-4 shrink-0 text-center ${s.ok ? "text-emerald-300" : "text-rose-300"}`}>{s.ok ? "✓" : "✕"}</span>
             <span className="min-w-0">
               <span className="font-medium text-white">{TOOL_TEXT[s.tool] ?? s.tool}</span>
-              <span className={`ml-2 break-words ${s.ok ? "text-ops-text" : "text-rose-300"}`}>{summarize(s)}</span>
+              <span className={`ml-2 break-words ${s.ok ? "text-ops-text" : "text-rose-300"}`}>{withNames(summarize(s), names)}</span>
             </span>
           </li>
         ))}
@@ -132,7 +135,11 @@ export function BriefProgress({ maxSteps, maxMs }: { maxSteps: number; maxMs: nu
           {now}
         </li>
       </ol>
-      <p className="mt-3 border-t border-ops-line pt-2 text-[11px] text-ops-dim">The brief does not change the suggestion. Items without a cited tool result or fact are deleted before it is shown.</p>
+      <p className="mt-3 border-t border-ops-line pt-2 text-[11px] text-ops-dim">
+        {b.paced && "Replaying a recorded run, one read at a time. "}
+        {live && liveText(live)}
+        The brief does not change the suggestion. Items without a cited tool result or fact are deleted before it is shown.
+      </p>
     </section>
   );
 }
@@ -178,6 +185,14 @@ type OpenChip = { open: string | null; toggle: (key: string) => void };
 
 // The refs behind an item, as small numbers. Each opens a popover with the fact or tool result it names;
 // one is open at a time. Numbers follow first appearance in the brief, so the same evidence keeps its number.
+// The note opens to the left of its number; near the left edge of a narrow screen it is moved back into view.
+const keepOnScreen = (el: HTMLElement | null) => {
+  if (!el) return;
+  const { left, right } = el.getBoundingClientRect();
+  const shift = left < 8 ? 8 - left : right > window.innerWidth - 8 ? window.innerWidth - 8 - right : 0;
+  if (shift) el.style.transform = `translateX(${shift}px)`;
+};
+
 function Refs({ id, refs, number, explain, chip }: { id: string; refs: string[]; number: (ref: string) => number; explain: (ref: string) => string; chip: OpenChip }) {
   return (
     <sup className="ml-0.5 inline-flex gap-0.5 align-super">
@@ -185,7 +200,7 @@ function Refs({ id, refs, number, explain, chip }: { id: string; refs: string[];
         const key = `${id}-${ref}`;
         const open = chip.open === key;
         return (
-          <span key={ref} className="relative inline-block">
+          <span key={ref} data-brief-ref className="relative inline-block">
             <button
               type="button"
               onClick={() => chip.toggle(key)}
@@ -198,12 +213,13 @@ function Refs({ id, refs, number, explain, chip }: { id: string; refs: string[];
             </button>
             {open && (
               <span
+                ref={keepOnScreen}
                 id={`brief-ref-${key}`}
                 role="note"
                 className="absolute right-0 top-full z-20 mt-1 block w-72 max-w-[80vw] rounded-md border border-ops-line bg-ops-raised px-3 py-2 text-left text-[12px] font-normal leading-relaxed text-ops-text shadow-lg shadow-black/40"
               >
                 <span className="mb-0.5 block font-mono text-[10px] text-violet-300">
-                  {number(ref)} · {ref.replace("_", " ")}
+                  Evidence {number(ref)}
                 </span>
                 {explain(ref)}
               </span>
@@ -220,25 +236,67 @@ function Refs({ id, refs, number, explain, chip }: { id: string; refs: string[];
 const UP_FRONT = new Set(["missing", "next"]);
 
 /** The latest stored brief beside the evidence: the summary and what is still open, the rest one click away. */
+// Facts are written for the model (and replayed word for word), so they keep its terse form; staff read them with
+// the categories and yes-or-no fields in words.
+function readableFact(text: string): string {
+  return text
+    .replace(/\b(?:fire_hydrant|traffic_sign|road_damage)\b/g, (c) => c.replace("_", " "))
+    .replace(/;\s*out of scope: false/g, "")
+    .replace(/\((full|crops)\):/g, (_, m: string) => (m === "crops" ? "(cut-outs):" : "(whole photos):"))
+    .replace(/asset (same|different|uncertain) \((\d(?:\.\d+)?)\)/g, (_, v: string, x: string) =>
+      `${v === "same" ? "same fixture" : v === "different" ? "a different fixture" : "unsure if the same fixture"} (model confidence ${Math.round(Number(x) * 100)}%)`,
+    )
+    .replace(/problem visible true/g, "problem visible")
+    .replace(/problem visible false/g, "no problem visible")
+    .replace(/signature same/g, "same problem")
+    .replace(/signature different/g, "a different problem")
+    .replace(/signature uncertain/g, "unsure if the same problem")
+    .replace(/, missing none/g, "")
+    .replace(/missing ([a-z_,]+)/g, (_, m: string) => `asks for ${m.replace(/_/g, " ").replace(/,/g, ", ")}`)
+    .replace(/ by rule R\w+/g, "")
+    .replace(/\bcandidate\b/gi, "the incident's photo")
+    .replace(/\bNEW\b/g, "this photo")
+    .replace(/(^|; )new (?=shows|has|is)/g, "$1this photo ")
+    .replace(/repair signs: false/g, "no repair signs")
+    .replace(/repair signs: true/g, "repair signs seen")
+    .replace(/resident already asked: no/g, "the resident has not been asked yet")
+    .replace(/resident already asked: yes/g, "the resident was already asked");
+}
+
 export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale: boolean; names: Record<string, string> }) {
   const brief = stored.brief as Brief | null;
   const steps = stored.steps as StepView[];
   const facts = stored.facts as BriefFact[];
   const [open, setOpen] = useState<string | null>(null);
   const [all, setAll] = useState(false);
+  // A brief just written lands in the side column, often below the fold: bring it into view.
+  const card = useRef<HTMLElement>(null);
+  const b = useBrief();
+  const fresh = b?.state.phase === "finished" && !b.state.note && !b.busy;
+  useEffect(() => {
+    if (fresh) card.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [fresh]);
   useEffect(() => {
     if (open === null) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(null);
     };
+    // A click anywhere but on a number or its note closes the note.
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target instanceof Element && e.target.closest("[data-brief-ref]"))) setOpen(null);
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onDown);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onDown);
+    };
   }, [open]);
   const chip: OpenChip = { open, toggle: (key) => setOpen((o) => (o === key ? null : key)) };
   const clean = (text: string) => nameIds(text, names);
   const explain = (ref: string): string => {
     const fact = facts.find((f) => f.ref === ref);
-    if (fact) return clean(fact.text);
+    if (fact) return readableFact(clean(fact.text));
     const step = steps.find((s) => s.ref === ref);
     return step ? `${TOOL_TEXT[step.tool] ?? step.tool}: ${clean(summarize(step))}` : ref;
   };
@@ -251,7 +309,7 @@ export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale
   const reads = steps.filter((s) => s.ok && s.tool !== "write_brief").length;
   const called = steps.some((s) => s.tool !== "write_brief");
   return (
-    <section id="brief" className="scroll-mt-72 rounded-lg border border-violet-500/40 bg-ops-panel">
+    <section ref={card} id="brief" className={`scroll-mt-72 rounded-lg border border-violet-500/40 bg-ops-panel ${fresh ? "ring-2 ring-violet-400/50" : ""}`}>
       <header className="flex items-center gap-3 border-b border-ops-line px-4 py-2.5">
         <h2 className="text-[13px] font-medium text-ops-text">Case brief</h2>
         <span className="ml-auto text-xs text-ops-dim">Muse Spark · {called ? plural(reads, "read") : "from the stored facts"}</span>
@@ -296,7 +354,7 @@ export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale
         {steps.length > 0 && (
           <details className="group text-[12px]">
             <summary className="cursor-pointer select-none text-ops-dim hover:text-white">
-              What the agent read ({plural(steps.length, "step")}, ${stored.cost_usd.toFixed(3)}, {(stored.latency_ms / 1000).toFixed(1)}s)
+              What the agent read ({plural(steps.length, "step")}, {cost(stored.cost_usd)}, {(stored.latency_ms / 1000).toFixed(1)}s)
             </summary>
             <ol className="mt-2 space-y-1">
               {steps.map((st) => (

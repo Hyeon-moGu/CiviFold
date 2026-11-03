@@ -29,7 +29,8 @@ Then call write_brief once. Sections and what belongs in each:
 - nearby: open or fixed incidents of this kind around the spot, with distances.
 - history: earlier reports and repairs of the incidents involved, and how long before this report each
   happened.
-- missing: what the evidence does not settle, and which photo or record would settle it.
+- missing: what the evidence does not settle, and which photo or record would settle it. When the
+  evidence settles the place, the problem and the timing, write no item here.
 - next: one or two concrete steps for staff (ask the resident for a specific photo, check a repair record,
   visit the site), citing the items that call for them.
 

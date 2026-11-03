@@ -2,6 +2,7 @@
 // Created: 2026-10-27
 
 import Link from "next/link";
+import { LinkPending } from "@/app/_ui/link-pending";
 import { mapIncidents, queue, staleAnalysis } from "@/lib/server/reports";
 import { runtime } from "@/lib/server/runtime";
 import type { Channel, Label } from "@/lib/tools/types";
@@ -48,7 +49,16 @@ const rank = (r: Row) => (r.report.urgent ? 0 : (r.analysis?.final as Final | un
 
 export default async function AdminQueue({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const rt = await runtime();
-  const [rows, incidents, { tab: tabId }] = await Promise.all([queue(rt), mapIncidents(rt), searchParams]);
+  const [received, incidents, { tab: tabId }] = await Promise.all([queue(rt), mapIncidents(rt), searchParams]);
+  // Visitors send the same demo cases again and again: the queue lists the latest send of each.
+  const listed = new Set<string>();
+  const rows = received.filter((r) => {
+    const tag = r.report.dataset_case_id;
+    if (!tag?.startsWith("demo:")) return true;
+    if (listed.has(tag)) return false;
+    listed.add(tag);
+    return true;
+  });
   const finalOf = (r: Row) => (r.analysis?.final as Final | undefined) ?? null;
   const counts = Object.fromEntries(
     TABS.map((t) => [t.id, rows.filter((r) => t.match(finalOf(r), r.report.status, r.report.urgent, staleAnalysis(r.report))).length]),
@@ -61,8 +71,6 @@ export default async function AdminQueue({ searchParams }: { searchParams: Promi
   const urgentOpen = rows.filter((r) => r.report.urgent && !DECIDED.has(r.report.status)).length;
 
   const today = new Date().toISOString().slice(0, 10);
-  const analyzed = rows.filter((r) => r.analysis);
-  const oneClick = analyzed.filter((r) => ["DUPLICATE", "LATE_REPORT", "ALREADY_RESOLVED"].includes(finalOf(r)?.label ?? "")).length;
   const reportsToday = rows.filter((r) => new Date(r.report.submitted_at).toISOString().startsWith(today)).length;
   // Rows are numbered as listed; the map pin carries the same number.
   const numberOf = new Map(shown.map((r, i) => [r.report.id, i + 1]));
@@ -111,6 +119,7 @@ export default async function AdminQueue({ searchParams }: { searchParams: Promi
                     )}
                     {t.text}
                     <span className={`rounded px-1.5 text-xs tabular-nums ${active ? "bg-white/15 text-white" : "bg-ops-raised text-ops-dim"}`}>{counts[t.id]}</span>
+                    <LinkPending />
                     {active && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-white" />}
                   </Link>
                 );
@@ -153,11 +162,11 @@ export default async function AdminQueue({ searchParams }: { searchParams: Promi
                             <span className="font-mono">{r.report.tracking_code}</span>
                             {" · "}
                             <span title={ago(at)}>{clock(at)}</span>
-                            {f?.incident_id ? ` · ${f.incident_id}` : ""}
                             {` · ${ATTACHED[r.report.channel as Channel].join(" + ")}`}
                           </span>
                         </span>
-                        <span className="shrink-0 text-sm text-ops-dim transition group-hover:text-white">
+                        <span className="flex shrink-0 items-center gap-1.5 text-sm text-ops-dim transition group-hover:text-white">
+                          <LinkPending />
                           <span className="hidden sm:inline">{ACTION_TEXT[tab.id]} </span>›
                         </span>
                       </Link>
@@ -176,10 +185,7 @@ export default async function AdminQueue({ searchParams }: { searchParams: Promi
       </SelectionProvider>
       <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ops-dim">
         <LiveRefresh />
-        <span>
-          {reportsToday} reports today
-          {analyzed.length > 0 && ` · ${Math.round((oneClick / analyzed.length) * 100)}% of checked reports got a one-click suggestion`}
-        </span>
+        <span>{reportsToday} reports today</span>
         <span>A row&apos;s number is its pin on the map. Click the number to find it.</span>
       </p>
     </main>

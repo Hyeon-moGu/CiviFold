@@ -10,7 +10,7 @@ import { VIEW_SIZE } from "../dataset/assets";
 import { sample } from "../dataset/static";
 import { agentRuns, briefs, images, incidentEvents, incidents, infoRequests, reportAnalyses, reports, segmentations, staffDecisions } from "../db/schema";
 import { blobKey } from "../db/stores";
-import { CacheMissError, defaultMode, LiveBudgetError, metered } from "../meta/call";
+import { CacheMissError, LiveBudgetError, metered } from "../meta/call";
 import { transcribe } from "../meta/voice";
 import { channelOf, messageText, type IntakeResult } from "../pipeline/intake";
 import type { AgentStep } from "../agent/run";
@@ -22,7 +22,7 @@ import { processReport, type IncomingReport, type ProcessResult } from "../pipel
 import type { Category, Label, RequestItem } from "../tools/types";
 import type { PhotoMeta } from "./photo-meta";
 import { templateQuestion } from "./questions";
-import { accessCodeValid, toolContext, type Runtime } from "./runtime";
+import { accessCodeValid, runMode, toolContext, type Runtime } from "./runtime";
 
 const id = (prefix: string) => `${prefix}_${randomBytes(5).toString("hex")}`;
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -160,6 +160,9 @@ const staleClaim = () =>
 
 class LeaseLost extends Error {}
 
+// About the costliest live analysis (triage, SAM and several comparisons), so a fallback to live calls can finish.
+export const ANALYSIS_USD = 0.1;
+
 /**
  * Transcribes a recording once, reads the resident's words, and runs the photo pipeline (the fast path)
  * unless the words or a missing photo route the report first. Every step is stored for the screens.
@@ -190,7 +193,7 @@ export async function analyzeReport(rt: Runtime, reportId: string): Promise<{ st
     if (err instanceof CacheMissError || err instanceof LiveBudgetError) {
       const kept = await database.update(reports).set({ status: "unavailable" }).where(ours).returning({ id: reports.id });
       if (kept.length === 0) return superseded;
-      return { status: "unavailable", error: err instanceof LiveBudgetError ? err.message : "This report has no prepared result in the public demo. Enter the access code to analyze it live." };
+      return { status: "unavailable", ...(err instanceof LiveBudgetError ? { error: err.message } : {}) };
     }
     console.error(`analysis of ${reportId} failed`, err);
     const message = (err instanceof Error ? err.message : String(err)).slice(0, 500);
@@ -198,6 +201,20 @@ export async function analyzeReport(rt: Runtime, reportId: string): Promise<{ st
     if (kept.length === 0) return superseded;
     return { status: "failed", error: "The automatic check failed. Staff will review your report." };
   }
+}
+
+/**
+ * The access code turns a report the public demo could not check (no recorded result) into a live one, so the
+ * next analysis may call the models. Only a report that is not running or decided can be switched.
+ */
+export async function goLive(rt: Runtime, reportId: string, code: string | null): Promise<void> {
+  if (!accessCodeValid(code)) throw new UserError("That access code is not right.");
+  const switched = await rt.database
+    .update(reports)
+    .set({ live: true })
+    .where(and(eq(reports.id, reportId), inArray(reports.status, ["unavailable", "failed"])))
+    .returning({ id: reports.id });
+  if (switched.length === 0) throw new UserError("This report is not waiting for a live check.");
 }
 
 export type ReanalyzeResult = { status: "analyzed"; label: Label } | { status: "not_started"; message: string } | { status: "superseded" };
@@ -283,7 +300,7 @@ async function runAnalysis(rt: Runtime, report: typeof reports.$inferSelect, cla
         .limit(1)
     : [];
 
-  const mode = report.live ? "cached_then_live" : defaultMode();
+  const mode = await runMode(database, report, ANALYSIS_USD);
   let transcript = report.transcript;
   let transcriptUsd = 0;
   if (report.audio_path && transcript === null) {
@@ -431,7 +448,7 @@ export async function verifyReport(rt: Runtime, reportId: string, analysisId: nu
     }
 
     const { input, analysis } = storedAnalysis(latest);
-    const mode = report.live ? "cached_then_live" : defaultMode();
+    const mode = await runMode(database, report, AGENT_LIMITS.max_usd);
     const checked = await verifySuggestion(input, analysis, toolContext(rt, reportId, mode), onStep);
     if (!checked.started) {
       await release();
@@ -607,13 +624,22 @@ export async function staffDecide(
     const openIncident = async (recurrenceOf: string | null) => {
       const newId = id("inc");
       const damage = (analysis?.triage as { damage_description?: string | null } | null | undefined)?.damage_description ?? intake?.problem;
+      // Titles are read as names ("Compared with the …"): a recurrence keeps the fixture's name, a new incident
+      // names its kind before the problem seen.
+      const [parent] = recurrenceOf ? await tx.select({ title: incidents.title }).from(incidents).where(eq(incidents.id, recurrenceOf)) : [];
+      const kind = category.replace("_", " ");
+      const title = parent
+        ? `${parent.title}, broken again`
+        : damage
+          ? `${kind} problem: ${damage.charAt(0).toLowerCase()}${damage.slice(1).replace(/\.$/, "")}`
+          : `reported ${kind}`;
       await tx.insert(incidents).values({
         id: newId,
         category,
         status: "open",
         lat: report.lat,
         lng: report.lng,
-        title: damage ?? `Reported ${category.replace("_", " ")}`,
+        title,
         created_at: now,
         recurrence_of: recurrenceOf,
         representative_report_id: reportId,
@@ -747,6 +773,13 @@ export async function mapIncidents(rt: Runtime) {
   return rt.database
     .select({ id: incidents.id, lat: incidents.lat, lng: incidents.lng, status: incidents.status, category: incidents.category, title: incidents.title, recurrence_of: incidents.recurrence_of })
     .from(incidents);
+}
+
+/** Incident titles by id, for screens that name incidents a run came across. */
+export async function incidentTitles(rt: Runtime, ids: string[]): Promise<Record<string, string>> {
+  if (ids.length === 0) return {};
+  const rows = await rt.database.select({ id: incidents.id, title: incidents.title }).from(incidents).where(inArray(incidents.id, ids));
+  return Object.fromEntries(rows.map((r) => [r.id, r.title]));
 }
 
 export async function incidentDetail(rt: Runtime, incidentId: string) {

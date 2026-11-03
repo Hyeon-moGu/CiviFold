@@ -2,12 +2,18 @@
 // Created: 2026-10-27
 
 import { handle } from "@/lib/server/http";
-import { analyzeReport } from "@/lib/server/reports";
+import { analyzeReport, goLive } from "@/lib/server/reports";
 import { runtime as app } from "@/lib/server/runtime";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // a live run (triage, SAM and several comparisons) can take a minute or two
 
-export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) {
-  return handle(async () => analyzeReport(await app(), (await params).id));
+// With an access code in the body, a report the public demo could not check runs live.
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  return handle(async () => {
+    const [rt, { id }] = await Promise.all([app(), params]);
+    const body = (await req.json().catch(() => null)) as { access_code?: unknown } | null;
+    if (typeof body?.access_code === "string") await goLive(rt, id, body.access_code);
+    return analyzeReport(rt, id);
+  });
 }

@@ -12,7 +12,7 @@ import { reports } from "../db/schema";
 import { ASSET_FILE } from "../dataset/static";
 import { analyze, type Analysis } from "../pipeline/analyze";
 import type { Runtime } from "../server/runtime";
-import { demoState, runStep, SCENARIOS } from "./scenarios";
+import { agentCheckOf, agentRecorded, demoState, runStep, SCENARIOS } from "./scenarios";
 import { seedDemo } from "./seed";
 
 vi.mock("../pipeline/analyze", async (original) => ({ ...(await original<typeof import("../pipeline/analyze")>()), analyze: vi.fn() }));
@@ -67,22 +67,31 @@ describe("demo scenarios", () => {
       label: "NEW",
       incident_id: null,
       location_only: { label: "NEW", incident_id: null },
+      seen: [],
     });
     expect(state["after-repair:0"]).toEqual({ done: "Staff record yesterday's repair" });
     expect(state["after-repair:1"]).toBeUndefined();
     expect(state["duplicate:0"]).toBeUndefined();
   });
 
-  it("keeps agent steps off an incident once a staff decision has linked a report to it", () => {
+  it("keeps agent steps before a staff decision in their scenario", () => {
     const agent = (kind: string) => kind === "verify" || kind === "brief";
     for (const s of SCENARIOS) {
       const at = s.steps.findIndex((st) => st.kind === "decide");
-      if (at < 0) continue;
-      expect(s.steps.slice(at).some((st) => agent(st.kind))).toBe(false);
-      for (const other of SCENARIOS.filter((o) => o !== s && o.world.some((a) => s.world.includes(a)))) {
-        expect(other.steps.some((st) => agent(st.kind)), other.id).toBe(false);
-      }
+      if (at >= 0) expect(s.steps.slice(at).some((st) => agent(st.kind))).toBe(false);
     }
+  });
+
+  it("turns off another scenario's replayed agent once staff link a report to the incident it reads", async () => {
+    fastSays("NEW", null);
+    const sent = (await runStep(rt, "lookalike", 0)) as Sent;
+    const [report] = await rt.database.select({ dataset_case_id: reports.dataset_case_id, lat: reports.lat, lng: reports.lng }).from(reports).where(eq(reports.id, sent.report_id));
+    await runStep(rt, "after-repair", 0);
+    expect(await agentRecorded(rt, report!, "brief")).toBe(true);
+    fastSays("DUPLICATE", "inc_h1");
+    await runStep(rt, "duplicate", 0);
+    await runStep(rt, "duplicate", 3);
+    expect(await agentRecorded(rt, report!, "brief")).toBe(false);
   });
 
   it("links the report when staff approve, and later report steps on that incident still run", async () => {
@@ -104,6 +113,59 @@ describe("demo scenarios", () => {
     expect(await runStep(rt, "lookalike", 0)).toMatchObject({ label: "NEW" });
     await expect(runStep(rt, "duplicate", 1)).rejects.toThrow(/Reset the demo/);
     await expect(runStep(rt, "duplicate", decide)).rejects.toThrow(/nothing to decide now/);
+  });
+
+  it("offers a replayed agent only where the world is still as its run was recorded", async () => {
+    fastSays("DUPLICATE", "inc_h1");
+    const sent = (await runStep(rt, "duplicate", 0)) as Sent;
+    const [report] = await rt.database.select({ dataset_case_id: reports.dataset_case_id, lat: reports.lat, lng: reports.lng }).from(reports).where(eq(reports.id, sent.report_id));
+    // The run was recorded at the end of a play, when the hydrant by the FLOWERS, 209 m away, was repaired; the
+    // agent searches up to 300 m.
+    expect(await agentRecorded(rt, report!, "verify")).toBe(false);
+    await runStep(rt, "after-repair", 0);
+    expect(await agentRecorded(rt, report!, "verify")).toBe(true);
+    expect(await agentRecorded(rt, report!, "brief")).toBe(true);
+    // No scenario records an agent on these reports, and a resident's own report is never a demo step.
+    expect(await agentRecorded(rt, { ...report!, dataset_case_id: "demo:lookalike:0" }, "verify")).toBe(false);
+    expect(await agentRecorded(rt, { ...report!, dataset_case_id: null }, "verify")).toBe(false);
+  });
+
+  it("offers no replayed agent once staff link a report to the incident it reads", async () => {
+    fastSays("DUPLICATE", "inc_h1");
+    const sent = (await runStep(rt, "duplicate", 0)) as Sent;
+    const [report] = await rt.database.select({ dataset_case_id: reports.dataset_case_id, lat: reports.lat, lng: reports.lng }).from(reports).where(eq(reports.id, sent.report_id));
+    await runStep(rt, "after-repair", 0);
+    expect(await agentRecorded(rt, report!, "verify")).toBe(true);
+    await runStep(rt, "duplicate", 3);
+    expect(await agentRecorded(rt, report!, "verify")).toBe(false);
+  });
+
+  it("runs a visitor's send live while today's budget holds a whole analysis, and the play's sends replay", async () => {
+    fastSays("NEW", null);
+    const liveOf = async (id: string) => (await rt.database.select({ live: reports.live }).from(reports).where(eq(reports.id, id)))[0]!.live;
+    vi.stubEnv("LIVE_DAILY_USD", "5");
+    expect(await liveOf(((await runStep(rt, "lookalike", 0, { live: true })) as Sent).report_id)).toBe(true);
+    expect(await liveOf(((await runStep(rt, "lookalike", 0)) as Sent).report_id)).toBe(false);
+    vi.stubEnv("LIVE_DAILY_USD", "0");
+    expect(await liveOf(((await runStep(rt, "lookalike", 0, { live: true })) as Sent).report_id)).toBe(false);
+    vi.unstubAllEnvs();
+  });
+
+  it("counts what the verification agent checked as the staff view does", () => {
+    const compare = (incident: string, verdict: string, problem = "same") => ({
+      ok: true,
+      tool: "compare_images",
+      data: { asset_match: { verdict }, damage: { same_damage_signature: problem }, candidate_incident_id: incident },
+    });
+    const steps = [
+      { ok: true, tool: "search_incidents" },
+      compare("inc_h1", "same"),
+      compare("inc_h5", "different"),
+      compare("inc_x", "same", "different"),
+      compare("inc_y", "same"),
+      { ok: true, tool: "propose_decision" },
+    ];
+    expect(agentCheckOf(steps, "inc_h1")).toEqual({ checks: 5, matching: 1, ruledOut: 2, against: 1 });
   });
 
   it("refuses to approve a suggestion that names no incident", async () => {

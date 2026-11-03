@@ -9,7 +9,7 @@ const SUBJECT: Record<Category, string> = {
   traffic_sign: "sign",
   bench: "bench",
   road_damage: "damaged spot",
-  trash: "pile",
+  trash: "dumping spot",
   graffiti: "graffiti",
   other: "problem",
 };

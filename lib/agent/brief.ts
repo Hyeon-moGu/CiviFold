@@ -221,9 +221,13 @@ function comparisonFact(c: Comparison): string {
   const r = c.result;
   const pair = `comparison for ${c.incident_id}: ${c.new_image_id} vs ${c.candidate_image_id}`;
   if (!r) return `${pair} (stage ${c.stage}) failed`;
+  // The model's own notes on the damage in each photo: without them "signature different" leaves the brief to
+  // guess what the earlier photo showed.
+  const notes = r.damage.evidence.slice(0, 2).map((e) => e.slice(0, 140));
   return (
     `${pair} (${c.stage === 2 ? "crops" : "full"}): asset ${r.asset_match.verdict} (${r.asset_match.confidence}), ` +
     `problem visible ${r.damage.new_damage_present}, signature ${r.damage.same_damage_signature}, ` +
-    `repair signs ${r.damage.repair_signs_in_new}, missing ${r.missing_info.join(",") || "none"}`
+    `repair signs ${r.damage.repair_signs_in_new}, missing ${r.missing_info.join(",") || "none"}` +
+    (notes.length ? `; problem notes: ${notes.join("; ")}` : "")
   );
 }

@@ -41,7 +41,7 @@ export function MaskedPhoto({
             {maskPath && (
               <>
                 <g fill="none" stroke="rgba(0,0,0,0.6)" strokeWidth={4} className="[&_path]:[vector-effect:non-scaling-stroke]" dangerouslySetInnerHTML={{ __html: maskPath }} />
-                <g fill="rgba(255,255,255,0.28)" stroke="#ffffff" strokeWidth={1.5} className="[&_path]:[vector-effect:non-scaling-stroke]" dangerouslySetInnerHTML={{ __html: maskPath }} />
+                <g fill="rgba(255,255,255,0.1)" stroke="#ffffff" strokeWidth={1.5} className="[&_path]:[vector-effect:non-scaling-stroke]" dangerouslySetInnerHTML={{ __html: maskPath }} />
               </>
             )}
             {box && <rect x={box.x1} y={box.y1} width={box.x2 - box.x1} height={box.y2 - box.y1} fill="none" stroke="#facc15" strokeWidth={2} vectorEffect="non-scaling-stroke" />}

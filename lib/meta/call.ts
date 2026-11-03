@@ -8,8 +8,9 @@ import type { Replay } from "./replay";
 import { withRetry, type RetryOptions } from "./retry";
 
 // live: always call and refresh the cache. cached: cache only, a miss is an error.
-// cached_then_live: cache first, call on a miss.
-export type Mode = "live" | "cached" | "cached_then_live";
+// cached_then_live: cache first, call on a miss. fresh: always call and keep nothing, so a visitor's live run
+// never overwrites the recordings a demo reset replays.
+export type Mode = "live" | "cached" | "cached_then_live" | "fresh";
 
 export type CallInfo = { model: string; key: string; cached: boolean; usd: number; ms: number };
 
@@ -78,7 +79,7 @@ export async function metaCall<T>(opts: {
   const key = cacheKey({ model: opts.model, request: opts.request });
   const info = (cached: boolean, usd: number): CallInfo => ({ model: opts.model, key, cached, usd, ms: Date.now() - start });
 
-  if (mode !== "live") {
+  if (mode !== "live" && mode !== "fresh") {
     const hit = await cacheStore().get(key);
     if (hit) return { response: hit.response as T, call: info(true, 0) };
     const replayed = opts.replay ? await cacheStore().get(opts.replay.key) : null;
@@ -93,7 +94,7 @@ export async function metaCall<T>(opts: {
   const live = (async () => {
     const hold = gate ? await gate.reserve(opts.reserve ?? reserveFor(opts.model)) : null;
     if (gate && !hold) throw new LiveBudgetError(`Live model calls are paused: today's budget is used up`);
-    return callLive(opts, key, info, hold);
+    return callLive(opts, key, info, hold, mode !== "fresh");
   })();
   inflight.set(key, live);
   try {
@@ -108,6 +109,7 @@ async function callLive<T>(
   key: string,
   info: (cached: boolean, usd: number) => CallInfo,
   hold: Hold | null,
+  keep: boolean,
 ): Promise<{ response: T; call: CallInfo }> {
   // Attempts rejected by validate were still billed, so cost is added per attempt.
   let usd = 0;
@@ -118,9 +120,11 @@ async function callLive<T>(
       opts.validate?.(res);
       return res;
     }, opts.retry);
-    const created_at = new Date().toISOString();
-    await cacheStore().set(key, { model: opts.model, response, created_at });
-    if (opts.replay) await cacheStore().set(opts.replay.key, { model: opts.model, response: opts.replay.store(response), created_at });
+    if (keep) {
+      const created_at = new Date().toISOString();
+      await cacheStore().set(key, { model: opts.model, response, created_at });
+      if (opts.replay) await cacheStore().set(opts.replay.key, { model: opts.model, response: opts.replay.store(response), created_at });
+    }
     return { response, call: info(false, usd) };
   } finally {
     spentUsd += usd;

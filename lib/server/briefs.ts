@@ -7,10 +7,10 @@ import { count, desc, eq } from "drizzle-orm";
 import { composeBrief, type BriefRun } from "../agent/brief";
 import type { AgentStep } from "../agent/run";
 import { briefs, reportAnalyses, reports } from "../db/schema";
-import { CacheMissError, defaultMode, LiveBudgetError } from "../meta/call";
+import { CacheMissError, LiveBudgetError } from "../meta/call";
 import { AGENT_LIMITS } from "../pipeline/config";
 import { storedAnalysis, UserError } from "./reports";
-import { toolContext, type Runtime } from "./runtime";
+import { runMode, toolContext, type Runtime } from "./runtime";
 
 export type BriefResult =
   | { status: "finished"; brief_id: number; run: BriefRun }
@@ -39,7 +39,7 @@ export async function briefReport(rt: Runtime, reportId: string, analysisId: num
   if (soFar >= AGENT_LIMITS.max_runs_per_report) throw new UserError(`This report has had ${soFar} briefs, the most allowed.`);
 
   const { input, analysis } = storedAnalysis(latest);
-  const mode = report.live ? "cached_then_live" : defaultMode();
+  const mode = await runMode(database, report, AGENT_LIMITS.max_usd);
   let run: BriefRun;
   try {
     run = await composeBrief(input, analysis, toolContext(rt, reportId, mode), AGENT_LIMITS, onStep);

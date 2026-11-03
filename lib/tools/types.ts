@@ -97,7 +97,7 @@ export type CompareResult = z.infer<typeof CompareResult>;
 export type ToolContext = {
   reportId: string;
   runId: string | null; // null when called from the fixed pipeline
-  mode: "live" | "cached" | "cached_then_live";
+  mode: "live" | "cached" | "cached_then_live" | "fresh";
   budget: { usdLeft: number; deadline: number };
   data: ToolData;
   images: ImageStore;

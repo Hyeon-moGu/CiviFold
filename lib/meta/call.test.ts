@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type OpenAI from "openai";
 import { z } from "zod";
 import { cacheKey, memoryStore, setCacheStore } from "./cache";
-import { CacheMissError, defaultMode, LiveBudgetError, metaCall, metered, setLiveGate, spent } from "./call";
+import { CacheMissError, defaultMode, LiveBudgetError, metaCall, metered, setLiveGate, spent, type Mode } from "./call";
 import { MetaHttpError } from "./client";
 import { sparkCost } from "./pricing";
 import { isRetryable, RetryableError } from "./retry";
@@ -13,7 +13,7 @@ import { parseCompletion } from "./spark";
 
 const retry = { baseMs: 1 };
 
-function call(send: () => Promise<string>, mode: "live" | "cached" | "cached_then_live" = "cached_then_live", validate?: (r: string) => void) {
+function call(send: () => Promise<string>, mode: Mode = "cached_then_live", validate?: (r: string) => void) {
   return metaCall({ model: "m", request: { q: 1 }, send, cost: () => 0.01, validate, mode, retry });
 }
 
@@ -36,6 +36,14 @@ describe("metaCall", () => {
     await call(send, "live");
     expect(send).toHaveBeenCalledTimes(2);
     await expect(call(send, "cached")).resolves.toMatchObject({ call: { cached: true } });
+  });
+
+  it("fresh mode always calls and keeps nothing, so live runs leave the recordings as they were", async () => {
+    const send = vi.fn(async () => "answer");
+    await call(send, "fresh");
+    await call(send, "fresh");
+    expect(send).toHaveBeenCalledTimes(2);
+    await expect(call(send, "cached")).rejects.toBeInstanceOf(CacheMissError);
   });
 
   it("retries 503 and rejected responses, billing every attempt", async () => {

@@ -3,14 +3,16 @@
 
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import type { Label, RequestItem } from "@/lib/tools/types";
 import { useBrief } from "./brief";
 import { Spinner, useVerify } from "./verify";
 
 type Action = "link" | "new_incident" | "recurrence" | "request_info" | "dismiss";
-type Choice = { action: Action; text: string; needs?: boolean };
+// approve: the button text when this is the suggested decision, in the words the public demo uses.
+type Choice = { action: Action; text: string; approve: string; needs?: boolean };
 
 const SUGGESTED: Partial<Record<Label, Action>> = {
   DUPLICATE: "link",
@@ -40,6 +42,11 @@ export function Actions({
   verifyLimit,
   brief,
   briefLimit,
+  agentsOff = false,
+  agentsElsewhere = null,
+  decidedNote = null,
+  demoAnchor = null,
+  caution = false,
 }: {
   children: ReactNode;
   status?: ReactNode; // one line on what an agent found, under the decision
@@ -55,19 +62,31 @@ export function Actions({
   verifyLimit: number | null; // the suggestion could be checked, but this many runs is the most allowed
   brief: { analysisId: number; again: boolean } | null; // staff can ask for a case brief of this analysis
   briefLimit: number | null; // this many briefs is the most allowed
+  agentsOff?: boolean; // a replay-only deployment holds no recorded agent run for this report
+  agentsElsewhere?: string | null; // the report of the same demo case whose recorded agent runs can be read
+  decidedNote?: ReactNode; // what the decision did
+  demoAnchor?: string | null; // the demo page card this report was sent from
+  caution?: boolean; // a verification found evidence against the suggestion that still stands
 }) {
   const router = useRouter();
   const checking = useVerify();
   const briefing = useBrief();
-  const [saving, setBusy] = useState<Action | null>(null);
+  const [pending, setBusy] = useState<Action | null>(null);
+  // The decision stays "Saving…" until the refreshed page that shows it has loaded.
+  const [lastAction, setLastAction] = useState<Action | null>(null);
+  const [refreshing, startRefresh] = useTransition();
+  const saving = pending ?? (refreshing ? lastAction : null);
   const [error, setError] = useState<string | null>(null);
   const suggested = final && !stale ? SUGGESTED[final.label] : undefined;
   const verifying = checking?.state.phase === "running";
   const writing = briefing?.state.phase === "running";
   const busy = saving ?? (checking?.busy ? "verify" : briefing?.busy ? "brief" : null);
+  // A brief only informs, so staff may decide while one is written; a check can change the suggestion, so they wait.
+  const deciding = saving ?? (checking?.busy ? "verify" : null);
 
   async function act(action: Action) {
     setBusy(action);
+    setLastAction(action);
     setError(null);
     try {
       const res = await fetch(`/api/admin/reports/${reportId}/decide`, {
@@ -88,7 +107,7 @@ export function Actions({
         if (body.code === "stale") router.refresh();
         return;
       }
-      router.refresh();
+      startRefresh(() => router.refresh());
     } catch {
       // The request may or may not have reached the server: show what is stored now.
       setError("Could not confirm that it was saved (connection problem). The page was reloaded to show what is stored.");
@@ -99,21 +118,19 @@ export function Actions({
   }
 
   const choices: Choice[] = [
-    { action: "link", text: focusId ? `Link to ${focusId}` : "Link", needs: true },
-    { action: "new_incident", text: "Open a new incident" },
-    { action: "recurrence", text: focusId ? `Recurrence of ${focusId}` : "Recurrence", needs: true },
-    { action: "request_info", text: askFor === "photo" ? "Ask for a photo" : "Ask the resident" },
-    { action: "dismiss", text: "Dismiss" },
+    { action: "link", text: focusId ? "Merge into the incident on file" : "Merge", approve: "Approve: merge it", needs: true },
+    { action: "new_incident", text: "Open a new incident", approve: "Approve: open a new incident" },
+    { action: "recurrence", text: focusId ? "Recurrence of the incident on file" : "Recurrence", approve: "Approve: keep it apart as a recurrence", needs: true },
+    { action: "request_info", text: askFor === "photo" ? "Ask for a photo" : "Ask the resident", approve: askFor === "photo" ? "Approve: ask for a photo" : "Approve: ask the resident" },
+    { action: "dismiss", text: "Dismiss", approve: "Approve: dismiss" },
   ];
   const primary = choices.find((c) => c.action === suggested);
   const open = choices.filter((c) => !c.needs || focusId);
-  const blocked = (c: Choice) => busy !== null || Boolean(c.needs && !focusId);
+  const blocked = (c: Choice) => deciding !== null || Boolean(c.needs && !focusId);
   const agents = Boolean((verify && checking) || verifyLimit !== null || (brief && briefing) || briefLimit !== null);
   const note = verifying
     ? "Decisions wait until the check finishes."
-    : writing
-      ? "Decisions wait until the brief is written."
-      : stale
+    : stale
         ? "The suggestion is out of date."
         : !primary
           ? "No one-click suggestion: choose from the evidence."
@@ -124,9 +141,16 @@ export function Actions({
       <div className="flex flex-col gap-3 px-4 py-3 xl:flex-row xl:items-center xl:gap-6">
         <div className="min-w-0 flex-1">{children}</div>
         {decided ? (
-          <p className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">Decided by staff.</p>
+          <p className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
+            Decided by staff.{decidedNote && <> {decidedNote}</>}
+            {demoAnchor && (
+              <Link href={`/demo#${demoAnchor}`} className="ml-3 font-medium text-white underline decoration-emerald-400/60 underline-offset-2 hover:decoration-white">
+                Back to the demo →
+              </Link>
+            )}
+          </p>
         ) : (
-          <div className="flex shrink-0 flex-wrap items-center gap-2 xl:justify-end">
+          <div className="flex flex-wrap items-center gap-2 xl:max-w-[55%] xl:justify-end">
             {primary ? (
               <>
                 <button
@@ -134,7 +158,7 @@ export function Actions({
                   onClick={() => act(primary.action)}
                   className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-zinc-200 disabled:opacity-40"
                 >
-                  {saving === primary.action ? "Saving…" : primary.text}
+                  {saving === primary.action ? "Saving…" : caution ? primary.approve.replace(/^Approve:/, "Approve anyway:") : primary.approve}
                 </button>
                 <OtherDecisions choices={open.filter((c) => c !== primary)} blocked={blocked} saving={saving} onPick={act} />
               </>
@@ -158,6 +182,11 @@ export function Actions({
       {!decided && (
         <footer className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-ops-line px-4 py-2">
           {agents && <span className="text-xs text-ops-dim">Ask an agent</span>}
+          {agentsOff && agentsElsewhere && (
+            <Link href={`/admin/reports/${agentsElsewhere}`} className="text-xs text-violet-200 underline decoration-violet-400/50 underline-offset-2 hover:text-white">
+              See what the verification agent and the case brief found on this case →
+            </Link>
+          )}
           {verify && checking && (
             <AgentButton
               disabled={busy !== null || verify.running}
