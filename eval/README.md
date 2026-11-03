@@ -45,8 +45,8 @@ The headline number counts critical outcomes among the reports that need attenti
 - **holdout2** was created and fingerprinted before the second round of rule changes, and pre-registered before its run. After it, the fast path (rules, triage, comparison and after-fix prompts, thresholds) was frozen.
 - **holdout3** was created and locked after the verification agent was tuned on dev, before its run. Only the agent changed in that round.
 - Holdout runs refuse to start without `HOLDOUT_FINAL_RUN=yes`, and holdout assets are excluded from the app.
-- Each configuration's first evaluation on each set is a single run. Three re-measurements were made afterwards, and all are reported below: the 23 affected holdout2 cases after a harness fix, the agent configuration on holdout3 after removing meaningful identifiers, and the fast path on holdout3 a second time, live, to see model variance.
-- After holdout3 the fast path changed in one place: for road damage and dumped trash, Muse Spark boxes the reported thing and SAM segments inside the box. It was checked on dev, val and test only, and the holdouts were not run again ([below](#after-holdout3-road-damage-and-dumped-piles)).
+- Each configuration's first evaluation on each set is a single run. Four re-measurements were made afterwards, and all are reported below: the 23 affected holdout2 cases after a harness fix, the agent configuration on holdout3 after removing meaningful identifiers, the fast path on holdout3 a second time, live, to see model variance, and the current fast path on holdout3 after the later change below.
+- After holdout3 the fast path changed in one place: for road damage and dumped trash, Muse Spark boxes the reported thing and SAM segments inside the box. It was checked on dev, val and test, then holdout3 was run once more as a re-measurement on photos already seen ([below](#after-holdout3-road-damage-and-dumped-piles)).
 - Live runs used the Meta Model API. Replays of recorded calls cost nothing and give the same results.
 
 ## Configurations
@@ -113,7 +113,7 @@ In C_rules' original holdout2 run, the correct incident was in front of staff fo
 | Missed: a large GPS error put the incident outside the search radius, so it was suggested as new | 2 |
 | Critical (W12-t6, above) | 1 |
 
-**holdout3**: 16 assets, 80 reports, 33 need attention. First run, a second live run of the fast path, and the agent configuration's re-run.
+**holdout3**: 16 assets, 80 reports, 33 need attention. First run, a second live run of the fast path, the agent configuration's re-run, and the current app's re-run after the later change.
 
 | Config | Critical | Correct | Deferred | Correctly linked | Left to staff, no answers |
 |---|---|---|---|---|---|
@@ -124,6 +124,7 @@ In C_rules' original holdout2 run, the correct incident was in front of staff fo
 | C_rules, run 2 (same code, live again) | 0 / 33 | 67 | 7 | 38.8% | 27.5% |
 | D_hybrid, run 1 | 0 / 33 | 66 | 8 | 37.5% | 33.8% |
 | D_hybrid, run 2 | 0 / 33 | 63 | 12 | 32.5% | 37.5% |
+| C_rules, run 3 (current app, after the later change) | 0 / 33 | 73 | 3 | 43.8% | 21.3% |
 
 On holdout3, C asked the resident one question in 28.8% of reports, and its live run spent $0.053 per report (24 s). The agent added $0.025 per report in run 2; its fast-path calls were replayed from C's run.
 
@@ -138,7 +139,7 @@ Critical outcomes over all stress reports, first runs:
 | test | 32 | 16 | 2 | 2 | 2 | 2 |
 | holdout | 16 | 8 | 3 | 1 | 3 | 2 |
 | holdout2 | 32 | 16 | 1 | 0 | 1 | 1 |
-| holdout3 | 32 | 16 | not run | not run | 0 (both runs) | 0 (both runs) |
+| holdout3 | 32 | 16 | not run | not run | 0 (all three runs) | 0 (both runs) |
 
 ## After holdout3: road damage and dumped piles
 
@@ -168,7 +169,17 @@ The version kept boxes road damage and trash only (run 321; run 310 is the versi
 
 By kind, road damage went from 26 to 41 of 55 correct at once and from 47 to 52 after answers, and dumped trash from 34 to 48 of 56 at once and from 47 to 50 after answers. Hydrant and street-light results are the same as before, call for call. Spark's box costs one more call per photo of these two kinds, about $0.01.
 
-The holdout results above were measured before these changes. The holdouts were not run again, because their photos have now been seen, so these changes have no unseen-data measurement, and the choice of which kinds to box was made on these same sets.
+The first holdout results above were measured before these changes, and the choice of which kinds to box was made on dev, val and test, so these changes have no unseen-data measurement. holdout3 was then run once more with the current app (run 3, November 3). Its photos had been seen, so this is a re-measurement, not new evidence; hydrant and street-light cases replayed run 1's calls, which are unchanged, and only road damage and trash called the models again ($1.86):
+
+| holdout3, 80 base reports | Run 1 (before) | Run 3 (current app) |
+|---|---|---|
+| Wrong closing suggestions on reports needing attention | 0 / 33 | 0 / 33 |
+| Correct before any resident answer | 51 | 60 |
+| Correct after simulated answers | 72 | 73 |
+| Asked the resident one question | 23 | 14 |
+| Left to staff without a suggestion | 3 | 3 |
+
+Road damage went from 15 to 21 of 27 correct at once but from 26 to 24 after answers: three reports were held for staff (R5, R6b) where a cut-out came back uncertain or only 80% the same. Dumped trash went from 16 to 21 at once and from 25 to 27 after answers. The stress reports again had no wrong closing suggestion.
 
 ## The verification agent
 
