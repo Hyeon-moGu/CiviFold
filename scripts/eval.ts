@@ -85,7 +85,7 @@ async function main() {
         split: values.split,
         run: Number(values.run),
         mode,
-        prompt_hash: { triage: (await loadPrompt("triage")).hash, compare: (await loadPrompt("compare")).hash, agent: (await loadPrompt("agent")).hash },
+        prompt_hash: { triage: (await loadPrompt("triage")).hash, compare: (await loadPrompt("compare")).hash, locate: (await loadPrompt("locate")).hash, agent: (await loadPrompt("agent")).hash },
         code_hash: await codeHash(),
         created_at: new Date().toISOString(),
         failed_cases: only ? undefined : cases.length - results.length,

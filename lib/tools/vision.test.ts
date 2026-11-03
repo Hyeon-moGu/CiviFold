@@ -4,16 +4,17 @@
 import type { SegmentationBoxRecord } from "@meta-sam/parser";
 import sharp from "sharp";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { segment } from "../meta/sam";
+import { segment, segmentBox } from "../meta/sam";
 import { sparkJson } from "../meta/spark";
 import { normalizeTriage, triage, type TriageResult } from "../pipeline/triage";
 import { compareImages, requireDistinctiveEvidence } from "./compare-images";
 import { memoryData } from "./data";
 import { memoryImages, type ImageRow } from "./images";
+import { toPixels } from "./locate";
 import { chooseInstance, contextCropRect, segmentObject } from "./segment-object";
 import type { CompareResult, ToolContext } from "./types";
 
-vi.mock("../meta/sam", () => ({ segment: vi.fn() }));
+vi.mock("../meta/sam", () => ({ segment: vi.fn(), segmentBox: vi.fn() }));
 vi.mock("../meta/spark", () => ({ sparkJson: vi.fn() }));
 
 const CALL = { model: "m", key: "k", cached: false, usd: 0, ms: 0 };
@@ -23,6 +24,7 @@ const H = 300;
 let png: Buffer;
 beforeEach(async () => {
   vi.mocked(segment).mockReset();
+  vi.mocked(segmentBox).mockReset();
   vi.mocked(sparkJson).mockReset();
   png ??= await sharp({ create: { width: W, height: H, channels: 3, background: "#888888" } }).png().toBuffer();
 });
@@ -33,6 +35,16 @@ function box(objectId: string, left: number, top: number, right: number, bottom:
 
 function samReturns(...boxes: SegmentationBoxRecord[]) {
   vi.mocked(segment).mockResolvedValue({ boxes, masks: [], diagnostics: [], call: CALL } as unknown as Awaited<ReturnType<typeof segment>>);
+}
+
+function samInBoxReturns(...boxes: SegmentationBoxRecord[]) {
+  vi.mocked(segmentBox).mockResolvedValue({ boxes, masks: [], diagnostics: [], call: CALL } as unknown as Awaited<ReturnType<typeof segmentBox>>);
+}
+
+// Where Spark sees the thing, 0-1000 (pixels 150-250 by 100-200 here); any other Spark call gets `compare`.
+const AT_CENTER = { visible: true, x1: 375, y1: 333, x2: 625, y2: 667 };
+function sparkLocates(located: typeof AT_CENTER, compare: CompareResult | null = null) {
+  vi.mocked(sparkJson).mockImplementation((async (opts: { name: string }) => ({ data: opts.name === "locate" ? located : compare, call: CALL })) as unknown as typeof sparkJson);
 }
 
 function original(id: string, report_id: string): { row: ImageRow; bytes: Buffer } {
@@ -119,6 +131,48 @@ describe("segment_object", () => {
     const first = await segmentObject.run({ image_id: "img_new", noun_phrase: "fire hydrant" }, ctx);
     const second = await segmentObject.run({ image_id: "img_new", noun_phrase: "fire hydrant" }, ctx);
     expect(second.chosen).toEqual(first.chosen);
+  });
+
+  it("turns Spark's 0-1000 box into pixels inside the image", () => {
+    expect(toPixels({ x1: 375, y1: 333, x2: 625, y2: 667 }, W, H)).toEqual({ left: 150, top: 100, right: 250, bottom: 200 });
+    expect(toPixels({ x1: 900, y1: 900, x2: 1200, y2: 1100 }, W, H)).toEqual({ left: 360, top: 270, right: 400, bottom: 300 });
+    expect(toPixels({ x1: 500, y1: 500, x2: 500, y2: 600 }, W, H)).toBeNull();
+  });
+
+  it("has Spark box road damage and SAM segment inside the box, instead of the noun phrase", async () => {
+    const { ctx } = setup();
+    await ctx.images.saveTriage("r_new", { category: "road_damage", sam_prompt: "pothole" });
+    sparkLocates(AT_CENTER);
+    samInBoxReturns(box("1", 160, 110, 240, 190, 0.9));
+    const out = await segmentObject.run({ image_id: "img_new", noun_phrase: "pothole" }, ctx);
+
+    expect(segment).not.toHaveBeenCalled();
+    expect(segmentBox).toHaveBeenCalledWith(expect.stringMatching(/^data:image\/png;base64,/), { left: 150, top: 100, right: 250, bottom: 200 }, { width: W, height: H }, { mode: "cached", signal: undefined });
+    expect(JSON.stringify(vi.mocked(sparkJson).mock.calls[0]![0].messages)).toContain("Report kind: road damage. Thing to box: pothole.");
+    expect(out).toMatchObject({ found: true, instances: 1, chosen: { box: { x1: 160, y1: 110, x2: 240, y2: 190 }, score: 0.9 } });
+  });
+
+  it("keeps Spark's box when SAM returns nothing inside it, and all of it for a pile", async () => {
+    const { ctx } = setup();
+    await ctx.images.saveTriage("r_new", { category: "road_damage", sam_prompt: "pothole" });
+    sparkLocates(AT_CENTER);
+    samInBoxReturns();
+    const kept = await segmentObject.run({ image_id: "img_new", noun_phrase: "pothole" }, ctx);
+    expect(kept).toMatchObject({ found: true, instances: 0, chosen: { box: { x1: 150, y1: 100, x2: 250, y2: 200 }, score: null } });
+
+    await ctx.images.saveTriage("r_new", { category: "trash", sam_prompt: "trash" });
+    samInBoxReturns(box("1", 170, 90, 270, 180, 0.8));
+    const pile = await segmentObject.run({ image_id: "img_new", noun_phrase: "trash" }, ctx);
+    expect(pile.chosen?.box).toMatchObject({ x1: 150, y1: 90, x2: 270, y2: 200 });
+  });
+
+  it("records a miss when Spark does not see the reported thing, without calling SAM", async () => {
+    const { ctx, images } = setup();
+    await ctx.images.saveTriage("r_new", { category: "trash", sam_prompt: "trash" });
+    sparkLocates({ visible: false, x1: 0, y1: 0, x2: 0, y2: 0 });
+    expect(await segmentObject.run({ image_id: "img_new", noun_phrase: "trash" }, ctx)).toEqual({ found: false, instances: 0, chosen: null });
+    expect(images.segmentations[0]).toMatchObject({ found: false, object_crop_id: null });
+    expect(segmentBox).not.toHaveBeenCalled();
   });
 
   it("records a miss when SAM finds nothing", async () => {

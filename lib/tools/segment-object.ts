@@ -5,13 +5,22 @@ import { createHash } from "node:crypto";
 import { decodeMaskToSVGPath, type SegmentationBoxRecord, type SegmentationMaskRecord } from "@meta-sam/parser";
 import sharp from "sharp";
 import { z } from "zod";
-import { segment } from "../meta/sam";
+import { segment, segmentBox } from "../meta/sam";
+import { locate, type PixelBox } from "./locate";
 import { dataUrl, type ImageKind, type ImageRow } from "./images";
 import { Box, ImageId, type Category, type ToolContext, type Tool } from "./types";
 
 const OBJECT_MARGIN = 0.1; // each side, as a fraction of the box
 const CONTEXT_SCALE = 3; // context crop is this many box sizes around the box center
 const CONTEXT_MIN_FRACTION = 0.5; // ...but at least half the frame per axis, so a distant object keeps its landmarks
+
+// Road damage and dumped trash have no fixture shape for a noun phrase to find: SAM misses a patched or lifted
+// surface, picks a road marking instead of the pothole, and returns a pile bag by bag. For these Muse Spark boxes
+// the reported thing and SAM segments inside the box. Fixtures keep the noun phrase: in evaluation, a boxed street
+// light pole on its own matched a look-alike of the same model.
+const LOCATED: ReadonlySet<Category> = new Set(["road_damage", "trash"]);
+// SAM segments one object in a box, and a pile is many; its cut-out keeps all of Spark's box.
+const PILES: ReadonlySet<Category> = new Set(["trash"]);
 
 /** SAM phrase per category when a report has no usable phrase of its own. */
 export const DEFAULT_SAM_PROMPT: Record<Category, string> = {
@@ -59,8 +68,11 @@ export const segmentObject: Tool<typeof SegmentObjectIn, typeof SegmentObjectOut
     if (!image) throw new Error(`Unknown image ${image_id}`);
     const bytes = await ctx.images.bytes(image_id);
 
-    const sam = await segment(dataUrl(bytes, image.mime), phrase, { mode: ctx.mode, signal: ctx.signal });
-    const best = chooseInstance(sam.boxes, image.width, image.height);
+    // The report under analysis sets the kind, so both photos of a comparison are cut out the same way.
+    const category = (await ctx.images.triageOf(ctx.reportId))?.category ?? (await ctx.images.triageOf(image.report_id))?.category ?? null;
+    const url = dataUrl(bytes, image.mime);
+    const opts = { mode: ctx.mode, signal: ctx.signal };
+    const best = category && LOCATED.has(category) ? await located(url, image, category, phrase, opts) : await named(url, image, phrase, opts);
     if (!best) {
       await ctx.images.saveSegmentation({
         image_id,
@@ -81,19 +93,18 @@ export const segmentObject: Tool<typeof SegmentObjectIn, typeof SegmentObjectOut
       saveCrop(image, bytes, "object_crop", objectCropRect(box), ctx),
       saveCrop(image, bytes, "context_crop", contextCropRect(box), ctx),
     ]);
-    const score = best.confidence ?? null;
     await ctx.images.saveSegmentation({
       image_id,
       noun_phrase: phrase,
       found: true,
-      instances: sam.boxes.length,
+      instances: best.instances,
       box,
-      score,
-      mask_svg_path: maskPath(sam.masks, best.objectId),
+      score: best.score,
+      mask_svg_path: best.mask,
       object_crop_id: objectCrop,
       context_crop_id: contextCrop,
     });
-    return { found: true, instances: sam.boxes.length, chosen: { box, score, object_crop_id: objectCrop, context_crop_id: contextCrop } };
+    return { found: true, instances: best.instances, chosen: { box, score: best.score, object_crop_id: objectCrop, context_crop_id: contextCrop } };
   },
 };
 
@@ -103,6 +114,31 @@ export function checkNounPhrase(phrase: string): string | null {
   if (/,|\b(and|or)\b/i.test(phrase)) return `"${phrase}" names more than one concept; segment them one at a time`;
   return null;
 }
+
+/** What is cut out, in pixels, with SAM's score and mask when it has them. */
+type Found = PixelBox & { score: number | null; mask: string | null; instances: number };
+type Opts = { mode: ToolContext["mode"]; signal?: AbortSignal };
+
+/** Every instance SAM finds for the phrase; the centered one is kept. */
+async function named(url: string, image: ImageRow, phrase: string, opts: Opts): Promise<Found | null> {
+  const sam = await segment(url, phrase, opts);
+  const best = chooseInstance(sam.boxes, image.width, image.height);
+  return best && { ...best, score: best.confidence ?? null, mask: maskPath(sam.masks, best.objectId), instances: sam.boxes.length };
+}
+
+/** Spark's box for the reported thing, and SAM's segmentation inside it. */
+async function located(url: string, image: ImageRow, category: Category, phrase: string, opts: Opts): Promise<Found | null> {
+  const size = { width: image.width, height: image.height };
+  const spot = await locate({ url, ...size }, { category, phrase }, opts);
+  if (!spot.box) return null;
+  const sam = await segmentBox(url, spot.box, size, opts);
+  const own = sam.boxes[0];
+  // SAM can come back empty on a box Spark drew; the box still marks the thing.
+  const box = !own ? spot.box : PILES.has(category) ? union(spot.box, own) : own;
+  return { left: box.left, top: box.top, right: box.right, bottom: box.bottom, score: own?.confidence ?? null, mask: own ? maskPath(sam.masks, own.objectId) : null, instances: sam.boxes.length };
+}
+
+const union = (a: PixelBox, b: PixelBox): PixelBox => ({ left: Math.min(a.left, b.left), top: Math.min(a.top, b.top), right: Math.max(a.right, b.right), bottom: Math.max(a.bottom, b.bottom) });
 
 // The reported object is usually what the resident centered: weigh SAM's score by closeness to the frame center.
 export function chooseInstance(boxes: readonly SegmentationBoxRecord[], width: number, height: number): SegmentationBoxRecord | null {

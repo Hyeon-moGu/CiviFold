@@ -16,7 +16,7 @@ import { composeBrief } from "./brief";
 
 vi.mock("../meta/responses", async (original) => ({ ...(await original<typeof import("../meta/responses")>()), sparkRespond: vi.fn() }));
 vi.mock("../meta/spark", () => ({ sparkJson: vi.fn() }));
-vi.mock("../meta/sam", () => ({ segment: vi.fn() }));
+vi.mock("../meta/sam", () => ({ segment: vi.fn(), segmentBox: vi.fn() }));
 
 const CALL = { model: "m", key: "k", cached: false, usd: 0, ms: 0 };
 const HERE = { lat: 37.5665, lng: 126.978 };

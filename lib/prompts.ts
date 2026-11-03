@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-export type PromptName = "triage" | "compare" | "agent" | "agent_closing" | "intake" | "after_fix" | "brief" | "brief_closing";
+export type PromptName = "triage" | "compare" | "locate" | "agent" | "agent_closing" | "intake" | "after_fix" | "brief" | "brief_closing";
 
 /** `hash` is the first 12 hex chars of the content's sha256, stored with each analysis. */
 export type Prompt = { name: PromptName; text: string; hash: string };

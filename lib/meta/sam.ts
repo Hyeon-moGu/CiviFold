@@ -1,7 +1,7 @@
 // Author: HyeonMo Gu
 // Created: 2026-10-27
 
-import { parseImageStream, recordsOfKind, type ResponsesEvent } from "@meta-sam/parser";
+import { buildObjectPrompt, parseImageStream, recordsOfKind, type ResponsesEvent } from "@meta-sam/parser";
 import { metaCall, type CallInfo, type Mode } from "./call";
 import { metaPost, MODELS } from "./client";
 import { SAM_PER_IMAGE } from "./pricing";
@@ -19,6 +19,24 @@ type SamResponse = {
 export async function segment(image: string, phrase: string, opts: { mode?: Mode; signal?: AbortSignal } = {}) {
   // SAM takes one noun phrase; a list ("hydrant and pole") is not split into two prompts.
   if (/,|\b(and|or)\b/i.test(phrase)) throw new Error(`SAM phrase must be a single noun phrase, got "${phrase}"`);
+  return request(image, phrase, opts);
+}
+
+/**
+ * Segments the one object inside `box` (pixels, half-open right and bottom) in an image of `size`. An object
+ * prompt replaces the noun phrase: the API must not get both.
+ */
+export async function segmentBox(
+  image: string,
+  box: { left: number; top: number; right: number; bottom: number },
+  size: { width: number; height: number },
+  opts: { mode?: Mode; signal?: AbortSignal } = {},
+) {
+  return request(image, buildObjectPrompt({ size, objects: [{ id: 1, prompts: [{ box }] }] }), opts);
+}
+
+// The request body is unchanged from the phrase-only version, so recorded calls still replay.
+async function request(image: string, text: string, opts: { mode?: Mode; signal?: AbortSignal }) {
   // Image requests must be unary: a streaming image request fails upstream.
   const request = {
     model: MODELS.sam,
@@ -28,7 +46,7 @@ export async function segment(image: string, phrase: string, opts: { mode?: Mode
         type: "message",
         role: "user",
         content: [
-          { type: "input_text", text: phrase },
+          { type: "input_text", text },
           { type: "input_image", image_url: image },
         ],
       },

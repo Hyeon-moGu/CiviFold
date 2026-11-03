@@ -14,7 +14,7 @@ import { analyze, decideInputOf, photoRoles, staffAsk, withAnswerPhoto, type Ana
 import type { Decision } from "./decide";
 import type { TriageResult } from "./triage";
 
-vi.mock("../meta/sam", () => ({ segment: vi.fn() }));
+vi.mock("../meta/sam", () => ({ segment: vi.fn(), segmentBox: vi.fn() }));
 vi.mock("../meta/spark", () => ({ sparkJson: vi.fn() }));
 
 const CALL = { model: "m", key: "k", cached: false, usd: 0, ms: 0 };
