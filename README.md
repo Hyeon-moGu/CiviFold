@@ -2,28 +2,23 @@
 
 ### Still broken, or broken again? Location can't tell. Photos can.
 
-**[Live demo](https://civi-fold.vercel.app)** · guided scenarios replay recorded model calls, so trying it costs nothing
+**[Live demo](https://civi-fold.vercel.app/demo)** · each case replays its recorded run in seconds, and "Run it live" calls Muse Spark and SAM 3.1 now
+
+![Synthetic examples: the open incident by the BAKERY, the same hydrant from across the street, a look-alike by the LAUNDRY, and new damage after repair.](media/scenes.webp)
 
 CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Every link and closure is a suggestion until a staff member approves it.
 
-On a pre-registered holdout of 80 synthetic reports, the fast path made **0 wrong closing suggestions on the 33 reports that needed attention**, in each of two live runs. A location-only baseline made 24 ([results](#results)).
+On a pre-registered holdout of 80 synthetic reports, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) suggested closing **none of the 33 reports that needed a person**, in each of two live runs. Grouping by location alone would have closed 24 ([results](#results); one later change was checked on the development sets only).
+
+**Try it in three minutes:** open the [demo](https://civi-fold.vercel.app/demo) and send the cases (or press "Run it live" on one) · open case 3 in the staff view and press "Verify with the agent" · approve, and the demo card and the resident's page show the decision.
 
 - **Nothing closes by itself.** The system never links or closes a report. It suggests, shows the evidence and waits for staff.
 - **Models judge the photo, rules judge the time.** Muse Spark and SAM 3.1 decide whether two photos show the same fixture and the same damage. Rules then apply the observation time and the repair history. The comparison never sees a timestamp.
-- **Closing takes two observations.** A duplicate, late report or already fixed suggestion needs a confident cut-out match or two distinct report photos. Staff can ask an agent to look for evidence against it, and the agent can only make the suggestion more cautious.
+- **Closing takes two observations.** A duplicate, late report or already fixed suggestion needs a confident cut-out match or two distinct report photos.
 
-| Meta model | What it does here |
-|---|---|
-| **Muse Spark** | Reads the words, compares photos whole and as cut-outs, runs the staff-requested verification and case brief agents with function tools |
-| **SAM 3.1** | Cuts out the fixture and its surroundings for the comparison |
-| **Muse Voice Transcribe** | Turns a spoken report into text |
-| **Muse Image** | Generated the 504-image synthetic evaluation set |
+## Why it matters
 
-**The workload is real.** In September 2026, New York City's 311 recorded 3,662 street pothole requests. The Department of Transportation closed 454 of them (12%) as duplicates of a previously filed complaint, and 63 after an inspection found the problem already fixed ([source](#sources)). A location rule sorts them badly: the broken fixture next door and the problem that returned after repair both sit where the earlier report was filed.
-
-## Three reports, three different decisions
-
-![Synthetic examples: the open incident by the BAKERY, the same hydrant from across the street, a look-alike by the LAUNDRY, and new damage after repair.](media/scenes.webp)
+In September 2026, New York City's 311 recorded 3,662 street pothole requests. The Department of Transportation closed 454 of them (12%) as duplicates of an earlier complaint, and 63 after an inspection found the problem already fixed ([sources](#sources)). A location rule sorts them badly: the broken fixture next door and the problem that returned after repair both sit where the earlier report was filed.
 
 | Incoming report | Suggested action | Evidence |
 |---|---|---|
@@ -31,132 +26,69 @@ On a pre-registered holdout of 80 synthetic reports, the fast path made **0 wron
 | Similar hydrant, 28 m away | **New problem** | Different shop sign, bollard and doorway |
 | Same hydrant, damaged after repair | **Possible recurrence** | Matching location, new damage and a later observation |
 
+CiviFold is for the staff who review incoming reports at a 311 center or public works office. It puts the candidates' photos beside the new one, says what matched and what differed, and puts the suggested action first. To run for a city it needs the open and recently repaired incidents with photos and repair dates, read from the existing 311 or work-order system (an Open311-style API or an export, not built yet). Without repair dates, a late report and a recurrence cannot be told apart.
+
 ## What staff see
 
 ![Staff console: a possible recurrence with its suggested decision, two hydrant photos with SAM outlines and cut-outs, what the comparison found about the fixture and the problem, and the rule behind the suggestion.](media/staff-review.webp)
 
-Both photos and their SAM cut-outs side by side, what the comparison found about the fixture and about the problem, and the rule behind the suggestion. The queue shows every report on a map. Staff can accept the suggestion in one click or choose another action. **Nothing is linked or closed automatically.**
+Both photos with their SAM outlines and cut-outs, what the comparison found about the fixture and the problem, and the rule behind the suggestion. Staff accept it in one click or choose another action. *Synthetic sample photos.*
 
-*Synthetic sample photos. The white button is the suggested action.*
+## How it works
 
-## Who it is for
+![From report to decision: a photo, text or voice report (voice transcribed by Muse Voice Transcribe) is read by Muse Spark and routed by rules, with emergencies and reports about people going straight to staff; photos go through triage (Muse Spark), a 40 m search (rules), cut-outs (SAM 3.1, with Muse Spark boxing road damage and piles first) and comparison (Muse Spark, no timestamps); rules then suggest duplicate, late report, already fixed, possible recurrence, new problem, one question or staff review, and staff decide. Staff may ask the agent to look for evidence against a closing suggestion.](media/report-flow.svg)
 
-Designed for staff reviewing incoming reports at a 311 center or public works office. NYC's records show that requests are closed as duplicates; they do not establish who makes that decision or when. How such a reviewer works today is an assumption we have not checked with city staff.
+- **Route first.** Emergencies go to the top of the staff queue, reports about people skip image matching, and a report without a photo is never matched: the system asks for one when nearby incidents need telling apart. In San Francisco, 7 in 10 of the 311 cases opened in September 2026 came with an attachment, usually a photo; phone calls, 1 in 5, almost never did.
+- **Compare, then apply time.** Muse Spark compares the whole photos and the SAM 3.1 cut-outs without any timestamp. For road damage and dumped trash, which have no fixture shape to name, Spark first boxes the damage or the pile and SAM segments inside the box. Rules then use the observation time and the repair history to tell a duplicate, a late report and a possible recurrence apart, or ask the resident one question.
+- **Agents when staff ask (experimental).** A verification agent looks for evidence against a closing suggestion with the same tools, and can only make it more cautious. A brief agent writes the case summary staff read first; an item that cites no tool result or numbered fact is deleted. Neither decides anything ([how they work](eval/README.md#the-agents-in-the-app)).
 
-- **What changes:** CiviFold puts the candidates' photos beside the new one, says what matched and what differed, and puts the suggested action first. The reviewer still decides.
-- **What it needs:** the city's open and recently repaired incidents with photos and repair dates, read from the existing 311 or work-order system (an Open311-style API or an export; not built yet). Without repair dates, a late report and a recurrence cannot be told apart.
+| Meta model | What it does here |
+|---|---|
+| **Muse Spark** (`muse-spark-1.3`) | Reads the words, boxes road damage and dumped piles for SAM, compares photos whole and as cut-outs, runs the verification and brief agents with function tools |
+| **SAM 3.1** | Cuts out the fixture or the boxed damage, and its surroundings, for the comparison |
+| **Muse Voice Transcribe** | Turns a spoken report into text |
+| **Muse Image** | Generated the 504-image synthetic evaluation set, for about $5 |
 
-## From report to decision
-
-![From report to decision: a photo, text or voice report (voice transcribed by Muse Voice Transcribe) is read by Muse Spark and routed by rules, with emergencies and reports about people going straight to staff; photos go through triage (Muse Spark), a 40 m search (rules), cut-outs (SAM 3.1) and comparison (Muse Spark, no timestamps); rules then suggest duplicate, late report, already fixed, possible recurrence, new problem, one question or staff review, and staff decide. Staff may ask the agent to look for evidence against a closing suggestion.](media/report-flow.svg)
-
-- **Route first.** Emergencies (from the text, the voice note or the resident's danger flag) go to the top of the staff queue. Reports about people or behavior skip image matching. Without a photo, nothing is matched; the system asks for one when nearby incidents need telling apart. That matches how reports arrive: in San Francisco, 7 in 10 of the 311 cases opened in September 2026 came with a photo, and phone calls, 1 in 5, almost never do ([source](#sources)).
-- **Compare, then apply time.** Muse Spark compares the full photos and SAM crops without seeing any timestamp. Rules then use the observation time and repair history to tell a duplicate, a late report and a possible recurrence apart. Too little evidence leads to a question or staff review.
-- **Verify when staff ask (experimental).** On a duplicate, late or already-fixed suggestion, an agent looks for counter-evidence with the same tools. It can only make the suggestion more cautious.
-- **Brief when staff ask (experimental).** On any analyzed report, an agent reads the pipeline's facts, the incident's history and what is open nearby, and writes the case brief staff read before deciding. Every item cites a tool result or a numbered fact; items without a valid citation are deleted before the brief is shown. It decides nothing.
-
-<details>
-<summary><strong>Evidence requirements and verification behavior</strong></summary>
-
-Before suggesting duplicate, late or already fixed, the rules require either a confident SAM-crop match or matching evidence from two distinct report photos. An already-fixed suggestion also needs repair evidence in two photos or in a requested close-up.
-
-The verification agent starts with the incident's other photos and similar incidents within 60 m, and can search up to 300 m. Staff can follow its tool calls as they finish. The rules reconsider all returned evidence; the agent cannot make a suggestion less cautious.
-
-- If verification cannot start because no recording or live budget is available, the existing suggestion stays.
-- If it stops partway, the rules still use the evidence collected so far.
-- Verification uses the latest stored analysis and runs once at a time per report. Results superseded by a staff decision or a newer analysis are recorded without being applied.
-- If a candidate incident's repair state has changed since analysis, staff are prompted to analyze again before requesting verification.
-
-The case brief agent gets the same tools, limits and neutral names as the verifier, plus a numbered list of facts (the triage, the candidates, every comparison, the incident's events and photos, incidents of the same kind within 60 m) that it can cite without a call. Its only terminal tool writes the brief; the server keeps an item only if it cites a successful tool call of that run or a listed fact, and shows how many were deleted. The brief has no label field and changes nothing. In the first demo scenario it wrote 7 cited items from the facts alone, with no tool call, for $0.02 in 15 s; in the fifth, on a report that was asked for another view, it read the incident's history and the area with 2 tool calls and wrote 11 cited items for $0.03 in 20 s. It writes no calendar dates, only times relative to the report and the repair, because a replayed brief is shown on later days. Its wording was adjusted on three live runs, and it has no evaluation beyond the citation rule.
-
-</details>
-
-## Built with Meta AI
-
-**Why these models.** The hard part is identity: two residents photograph the same fixture from different angles, in different light, while a look-alike stands down the street. Muse Spark returns that judgment as structured fields the rules can check (same fixture or spot, problem visible, signs of repair, the features that matched), not as a similarity score. SAM 3.1 gives the comparison the object and its surroundings as separate crops, so a dent and a shop sign are both examined. Muse Voice brings spoken reports into the same flow, and Muse Image produced the repairs, recurrences and look-alikes that cannot be photographed on demand.
-
-The two views catch different mistakes. On holdout2, comparing cut-outs only made no critical error (0 / 33) but got 60 of 80 right; whole photos only got 70 right with one critical error. On that recurrence, the crop-only configuration deferred to staff, avoiding the wrong "already fixed" suggestion made by the whole-photo and combined configurations. The fast path uses both ([ablations](eval/README.md)).
-
-Spark uses `muse-spark-1.3`; Muse Image (`muse-image-1.0`) generated the 504 evaluation images for about $5.
+Muse Spark returns its judgment as structured fields the rules can check (same fixture, problem visible, signs of repair, the features that matched), not as a similarity score. The two views catch different mistakes: on holdout2, cut-outs alone made no critical error but got 60 of 80 right, and whole photos alone got 70 right with one critical error, so the fast path uses both ([ablations](eval/README.md#results-base-sets)).
 
 ## Results
 
 ![Bar chart: wrong closing suggestions on reports that needed attention, distance baseline against CiviFold's fast path, on four evaluation sets. test 24 against 1 of 33, holdout 11 against 3 of 16, holdout2 22 against 1 of 33, holdout3 24 against 0 of 33.](media/results.svg)
 
-*Wrong closing suggestions, first run of each set. Rules were improved after test and the first holdout, the fast path was frozen after holdout2, and each holdout was pre-registered before it ran. The automatic agent configuration matched the fast path's count on every set, and a second live run of the fast path on holdout3 also made 0.*
+*Wrong closing suggestions, first run of each set. Rules were improved after test and the first holdout, the fast path was frozen after holdout2 with one later change (finding road damage and dumped piles, below), and each holdout was pre-registered before it ran.*
 
-**Latest holdout: 80 reports from 16 assets, including 8 primary fixtures or places and their look-alikes.** Of those reports, 33 describe a new problem or recurrence that must not be dismissed as duplicate, late or already fixed.
+The latest holdout has 80 reports from 16 assets (8 fixtures or places and their look-alikes). 33 of them describe a new problem or a recurrence that must not be closed. All images and resident answers are **simulated**, and the numbers count suggestions, not staff decisions.
 
-All images and resident answers are **simulated**, and the numbers count suggestions, not staff decisions.
-
-| holdout3 · 80 base reports | Distance baseline | **Default: fast path³** | Automatic agent¹ |
+| holdout3 · 80 reports | Distance baseline | **Fast path (default)** | Automatic agent¹ |
 |---|---|---|---|
 | Wrong closing suggestions on reports needing attention | 24 / 33 | **0 / 33** | 0 / 33 |
-| Correct suggestions before any resident answer | 26 / 80 | **51 / 80 (63.8%)** | 46 / 80 (57.5%) |
-| Correct suggestions after simulated answers | 26 / 80 | **72 / 80 (90%)** | 63 / 80 (78.8%) |
-| Deferred to staff without a suggestion | 0 / 80 | **3 / 80** | 12 / 80 |
-| Correct duplicate / late links after simulated answers, share of all reports | 22.5% | **42.5%** | 32.5% |
-| Reports requiring a resident question | 0% | 28.8% | 28.8% |
-| Left to staff if nobody answers | 0% | 31.3% | 37.5% |
-| Recorded API spend per report | $0 | $0.053 | $0.053 + $0.025² |
-| Time per report, live run | 0 s | 24 s | not comparable² |
+| Correct before any resident answer | 26 / 80 | **51 / 80** | 46 / 80 |
+| Correct after simulated answers | 26 / 80 | **72 / 80** | 63 / 80 |
+| Left to staff without a suggestion | 0 / 80 | **3 / 80** | 12 / 80 |
+| API spend and time per report, live | $0 | $0.053, about 24 s | $0.053 + $0.025 |
 
-¹ `D_hybrid` ran verification automatically on every closing suggestion (its corrected second run). **It does not measure the app's staff-requested mode.** The baseline and fast path are first and only runs.
+¹ Verification run on every closing suggestion (`D_hybrid`). It does not measure the app's staff-requested mode.
 
-² The fast path ran live. D_hybrid replayed the fast-path calls from cache, so only the agent's $0.025 is new and its time is not comparable.
+- **0 / 33 is an observation, not a guarantee.** A second live run of the fast path repeated it (67 / 80 correct after answers); earlier sets had 1 to 3 misses. The baseline proposes the nearest incident of the same kind as a duplicate and stands for no city's actual system.
+- **It asks rather than guesses.** The fast path asked one question (a wider shot, another angle, a close-up or the time) on 23 reports, and 21 ended correct after the simulated answer. Simulated residents always answer; reports nobody answers stay with staff.
+- **Verification stays optional.** On holdout3 it left the critical count unchanged and raised deferrals from 3 to 12. Across all sets it stopped one wrong suggestion.
+- **One change since.** SAM's noun phrase often missed a patched or lifted road surface and cut a dumped pile down to one bag, so those reports got a question even when the whole photos matched. Muse Spark now boxes the damage or the pile, and SAM segments inside the box. On the 222 dev, val and test cases, wrong closing suggestions stayed at 0, correct suggestions before any answer rose from 137 to 166, and after answers from 194 to 202. The holdouts above were measured before this change and were not run again ([details](eval/README.md#after-holdout3-road-damage-and-dumped-piles)).
+- **Three real photos** of one dumped pile in Korea, run once with the expectations written first, gave no wrong link and no confirmed duplicate either: the views share no fixed feature, so the fast path asked for a wider shot ([details](eval/README.md#real-world-check)).
 
-³ First run. A second live run of the same rules and prompts again made 0 / 33 wrong closing suggestions, with 67 / 80 correct and 7 deferred after answers (52 / 80 before any answer). Five of 112 cases moved, all to a more cautious outcome; the stress set was identical. [Both runs are published](eval/README.md#results-base-sets).
-
-**Suggest what is clear, ask about the rest.** Before any resident answer, the fast path got 51 of 80 right and left 25 to staff without a suggestion. It asked one question (a wider shot, another angle, a close-up or the observation time) on 23 reports, and 21 of them ended correct after the simulated answer. Of the 34 correct duplicate and late links, 20 needed no answer. Reports awaiting additional information remain pending; if residents never answer, they are left for staff review.
-
-**Why verification is optional.** On this holdout, automatic verification left the critical count unchanged and increased deferrals from 3 to 12. Across the four evaluation sets, it stopped one wrong suggestion on a stress set. So the app runs the fast path by default and offers verification as an experimental staff tool.
-
-### How to read the results
-
-- **0 / 33 is an observation, not a guarantee.** A second live run repeated it, but earlier sets had 1–3 critical misses. The denominator is the subset needing attention, not all 80 reports.
-- **The baseline is deliberately simple:** it proposes the nearest incident of the same kind as a duplicate. It does not represent any city's actual system.
-- **Simulated residents always answer correctly**, with an unused matching photo or the observation time. The no-answer row shows the result without them.
-
-<details>
-<summary><strong>Earlier evaluation sets</strong> (wrong closing suggestions, first run of each)</summary>
-
-| Set | Assets | Reports | Baseline | Fast path | Automatic agent |
-|---|---|---|---|---|---|
-| test | 16 | 78 | 24 / 33 | 1 / 33 | 1 / 33 |
-| holdout | 8 | 39 | 11 / 16 | 3 / 16 | 3 / 16 |
-| holdout2 | 16 | 80 | 22 / 33 | 1 / 33 | 1 / 33 |
-| holdout3 | 16 | 80 | 24 / 33 | 0 / 33 | 0 / 33 |
-
-</details>
-
-### Real-world check
-
-Three photos of one pile of dumped bags at a street tree, taken by the author on a street in Korea within two minutes on the night of October 27, 2026: from across the street, from the sidewalk and close up. The phone's location tag was off, so all three share the resident's map pin. The frozen fast path ran once on them, with the expected outcomes written down first ([details](eval/README.md#real-world-check)).
-
-- With no incident nearby, each photo was read as dumped trash and suggested as a new problem.
-- With one of the photos already on file, each of the other two arrived as a new report and was compared full-frame and by SAM cut-out. All four pairings came back uncertain: the three views share no sign, wall or road marking, so the fast path asked the resident for a wider shot instead of linking. No wrong link, and no confirmed duplicate either.
-
-Three photos are a sanity check, not a measurement. They show that the cautious behavior holds on real night photos, and what it costs: when views do not overlap, the link waits for a resident answer or a staff decision.
-
-**[Evaluation methods, harness fixes, ablations and every recorded result →](eval/README.md)**
+**[Methods, ablations, every set and every recorded run →](eval/README.md)**
 
 ## Limitations
 
-- **Synthetic evaluation.** Three real photos of one site were run once as a sanity check, not as a measurement. No study with real residents, no interviews with city staff, and no measured time savings. The harness supplies correct incident history rather than carrying earlier mistakes into later cases.
-- **Four evaluated categories.** Hydrants, street lights, dumped trash and road damage. The app also accepts signs, benches and graffiti, which have not been evaluated.
-- **Hard identity cases.** Look-alikes have different surroundings. Identical fixtures sharing the same background have not been evaluated separately.
-- **Evidence and uncertainty.** The evidence check counts lines, not semantically independent features. Problem visibility is yes/no; “not observable” is not a separate state.
-- **Category disagreement.** Search uses the resident's chosen type, while visual analysis uses the type read from the photo. They can refer to different objects.
-- **Changes after analysis.** The out-of-date check compares the candidate incidents an analysis read with their current state. An incident opened nearby after the analysis is not detected.
-- **Agent evaluation.** Automatic verification increased deferrals on the latest holdout. Staff-requested verification and the case brief have no separate evaluation; the brief's only check is that every shown item cites evidence. Only the fast path on holdout3 was run twice; every other configuration and set is a single run.
-- **Demo deployment.** The staff console has no login, so anyone with the URL can act as staff, and anyone can reset the demo world (once a minute). A real deployment needs authentication, an audit trail of staff decisions and rate limits.
-- **No undo.** Staff decisions are final: a link cannot be undone and an incident cannot be reopened. The analysis starts from the resident's tracking page; a report whose page was never opened waits in the staff queue as not checked yet.
-
-Next: same-background look-alikes, an explicit “not observable” state, structured visual evidence and a pilot with real reports.
+- **Synthetic evaluation.** No study with real residents or city staff, and no measured time savings. The harness supplies the correct incident history rather than carrying earlier mistakes forward.
+- **Four evaluated categories:** hydrants, street lights, dumped trash and road damage. Signs, benches and graffiti are accepted but not evaluated. Look-alikes in identical surroundings are not tested separately.
+- **Fixtures far away.** SAM sometimes misses a thin street light pole from across the street, and the report then needs a second photo. Boxing fixtures with Muse Spark found them, but once matched a look-alike of the same model on the pole alone, so fixtures keep SAM's noun phrase.
+- **Coarse evidence.** The evidence check counts lines, not independent features, and a problem is visible or not, with no "not observable" state. Search uses the type the resident chose, the analysis the type read from the photo.
+- **Agents.** Staff-requested verification and the case brief have no separate evaluation. Only the fast path on holdout3 ran twice; every other run is single.
+- **Demo deployment.** No login, no undo and no audit trail: anyone with the URL can act as staff, and anyone can reset the demo world (once a minute).
 
 ## Run locally
 
-Requires **Node.js 22.9.0 or later** and a Meta Model API key for model calls from a fresh clone. The local model cache is not included in the repository.
+Requires **Node.js 22.9.0 or later** and a Meta Model API key; the local model cache is not in the repository.
 
 ```bash
 npm install
@@ -167,35 +99,22 @@ npm run dev                 # http://localhost:3000
 
 | Page | Purpose |
 |---|---|
-| `/demo` | Seven cases, already run, each beside what grouping by location alone would do; one button runs them all again |
+| `/demo` | Five photo reports and five without a usable photo, each beside what grouping by location alone would do |
 | `/report` | Resident reporting form |
 | `/admin` | Staff queue and evidence review |
 
-`npm run lint`, `npm run typecheck` and `npm test` need no API key; CI runs the three on every push. For evaluation commands, see [the evaluation guide](eval/README.md#running-the-evaluation). Use a new run number to preserve published results.
+`npm run lint`, `npm run typecheck` and `npm test` need no API key, and CI runs them on every push. Evaluation commands are in [the evaluation guide](eval/README.md#running-the-evaluation).
 
-<details>
-<summary><strong>Demo replay and live calls</strong></summary>
-
-The public deployment uses `cached` mode and shows **models: replay**. Guided scenarios replay recorded calls, including a staff-requested agent check, a case brief and a staff approval in the first scenario, and a case brief of a report that was asked for another view in the fifth. A cache miss never triggers a live call in this mode.
-
-- A report without a prepared result is marked unavailable. A typed message sent with a sample photo has no recorded reading: the photo is then analyzed alone, and the resident and staff are both told that the words were not read.
-- Verification without a recorded first call does not start; the suggestion stays unchanged.
-- If a later call has no recording, verification stops and the rules reconsider the evidence already collected.
-
-Visitors with the demo access code can upload their own photos for live calls, subject to `LIVE_DAILY_USD`.
-
-</details>
+The public deployment replays recorded model runs and allows live calls within a daily budget (`LIVE_DAILY_USD`). "Run it live" on a demo card, the agent checks staff ask for, and uploads with the demo access code call the models now. Live runs keep no recording, so a reset always replays the same world. Once the day's budget is spent, cases replay and say so, and a report with no recorded result is marked unavailable. The demo world sits on a map of Menlo Park, California.
 
 **Stack:** Next.js 16 · React 19 · Tailwind 4 · TypeScript · zod · Drizzle · Neon Postgres / local PGlite · Vercel Blob · Leaflet / OpenStreetMap · vitest. Meta calls share caching, retries and cost tracking through `lib/meta/`.
 
 ## Built during the hackathon
 
-An entry in the Meta Global AI Developer Hackathon, Indie track, theme "Build for Your World". The code, prompts, synthetic evaluation dataset, generation scripts and evaluation harness were created during **October 26–November 4, 2026**. The first commit is dated October 26 in US Eastern time. No earlier project code is reused; third-party code comes from the open-source dependencies in `package.json`.
-
-The evaluation images and bundled photo demos were generated with Muse Image and are marked **SYNTHETIC** in the app.
+An entry in the Meta Global AI Developer Hackathon, Indie track, theme "Build for Your World". The code, prompts, synthetic evaluation dataset, generation scripts and evaluation harness were created during **October 26–November 4, 2026**. The first commit is dated October 26 in US Eastern time. No earlier project code is reused; third-party code comes from the open-source dependencies in `package.json`. The evaluation images and bundled photo demos were generated with Muse Image and are marked **SYNTHETIC** in the app.
 
 ## Sources
 
-- **NYC 311 pothole figures.** [NYC Open Data, 311 Service Requests](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9): complaint type "Street Condition", descriptor "Pothole", created September 1–30, 2026, grouped by resolution description, queried October 29, 2026. Highway potholes (185 requests, a separate descriptor) and bridge potholes (11) are excluded. Open requests can still change the counts. The channel field reads UNKNOWN for all of these requests and the dataset has no photo field, so it does not show how many came with a photo, how duplicates were identified, or whether any recurrence was merged by mistake.
-- **San Francisco 311 channels.** [DataSF, 311 Cases](https://data.sfgov.org/City-Infrastructure/311-Cases/vw6y-z8j6): cases with `requested_datetime` in September 1–30, 2026, grouped by `source`, counting cases whose `media_url` is set, queried October 29, 2026. Of 76,457 cases, 69% carried an attachment (mobile 84%, web 89%, phone 0.2%); phone was 19% of cases. An attachment is usually a photo but the field does not say. NYC's dataset has no attachment field.
+- **NYC 311 potholes.** [NYC Open Data, 311 Service Requests](https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9): complaint type "Street Condition", descriptor "Pothole", created September 1–30, 2026, grouped by resolution description, queried October 29, 2026. Highway and bridge potholes are excluded, and open requests can still change the counts. The dataset has no photo field and its channel field reads UNKNOWN, so it does not show how duplicates were identified or whether a recurrence was merged by mistake.
+- **San Francisco 311 channels.** [DataSF, 311 Cases](https://data.sfgov.org/City-Infrastructure/311-Cases/vw6y-z8j6): cases with `requested_datetime` in September 1–30, 2026, grouped by `source`, counting cases whose `media_url` is set, queried October 29, 2026. Of 76,457 cases, 69% carried an attachment (mobile 84%, web 89%, phone 0.2%); phone was 19% of cases.
 - **Evaluation numbers.** [eval/README.md](eval/README.md) and the JSON files in [eval/results/](eval/results/), each with the code and prompt fingerprints it ran with.

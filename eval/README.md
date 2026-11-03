@@ -46,6 +46,7 @@ The headline number counts critical outcomes among the reports that need attenti
 - **holdout3** was created and locked after the verification agent was tuned on dev, before its run. Only the agent changed in that round.
 - Holdout runs refuse to start without `HOLDOUT_FINAL_RUN=yes`, and holdout assets are excluded from the app.
 - Each configuration's first evaluation on each set is a single run. Three re-measurements were made afterwards, and all are reported below: the 23 affected holdout2 cases after a harness fix, the agent configuration on holdout3 after removing meaningful identifiers, and the fast path on holdout3 a second time, live, to see model variance.
+- After holdout3 the fast path changed in one place: for road damage and dumped trash, Muse Spark boxes the reported thing and SAM segments inside the box. It was checked on dev, val and test only, and the holdouts were not run again ([below](#after-holdout3-road-damage-and-dumped-piles)).
 - Live runs used the Meta Model API. Replays of recorded calls cost nothing and give the same results.
 
 ## Configurations
@@ -55,7 +56,7 @@ The headline number counts critical outcomes among the reports that need attenti
 | `baseline_geo` | Distance and kind only: the nearest incident of the same kind within the search radius is suggested as a duplicate |
 | `A_full_image` | The decision rules on whole-photo comparisons only |
 | `B_sam_crops` | The decision rules on SAM cut-out comparisons only (the object and its surroundings) |
-| `C_rules` | The fast path: the decision rules on both whole-photo and cut-out comparisons, plus the after-fix zoomed check. This is what the app runs |
+| `C_rules` | The fast path: the decision rules on both whole-photo and cut-out comparisons, plus the after-fix zoomed check. This is what the app runs (since holdout3, with road damage and dumped piles boxed by Muse Spark before SAM; [below](#after-holdout3-road-damage-and-dumped-piles)) |
 | `D_hybrid` | C, plus the verification agent run automatically on every suggestion that would close a report; a run that does not finish sends the report to staff |
 
 The app ran D_hybrid until the holdout3 results below. It now runs C, and staff can request the agent on a closing suggestion. That staff-requested mode is not what D_hybrid measures: there the agent runs on every closing suggestion without anyone asking, and an unfinished run turns the suggestion into staff review. A staff-requested run that cannot start leaves the suggestion as it is, and one that stops partway applies only what it found so far, so the suggestion can stay as it was. The staff-requested mode has not been evaluated.
@@ -139,6 +140,36 @@ Critical outcomes over all stress reports, first runs:
 | holdout2 | 32 | 16 | 1 | 0 | 1 | 1 |
 | holdout3 | 32 | 16 | not run | not run | 0 (both runs) | 0 (both runs) |
 
+## After holdout3: road damage and dumped piles
+
+After holdout3 the fast path changed in one place: how the thing to compare is found in a photo of road damage or dumped trash. Two failures of SAM's noun phrase showed on dev and val alike:
+
+- **Road damage.** "pothole" found nothing in many photos of a patched, cracked or lifted surface, and in some it found a road marking instead. With no cut-out, a closing suggestion needs two report photos (R2w), so the fast path asked for another angle even when the whole photos matched at 95% or more. Of the road-damage cases not right at once, 16 of 29 were this question.
+- **Dumped trash.** SAM returns a pile piece by piece, up to 69 instances in one photo, and the fast path kept one: the cut-out was a single bag or scrap, often under 3% of the frame.
+
+For these two kinds, Muse Spark now boxes the reported thing first (`prompts/locate.md`: the damaged surface or its repair patch, or the whole pile), and SAM 3.1 segments inside that box. A pile's cut-out keeps all of Spark's box. Fixtures (hydrants, street lights, signs, benches) keep the noun phrase. The rules, the triage and comparison prompts and every threshold are unchanged.
+
+Three ways were tried, each on dev, val and test only:
+
+| Try | What happened |
+|---|---|
+| Other phrases ("hole in the road", "damaged pavement", "lamp post") where the first found nothing | Right about half the time; otherwise a drain grate, a road marking or most of the frame. Stopped before an evaluation run |
+| Join the touching pieces of a pile (trash only) | On the 56 trash cases: no wrong closing suggestion, correct at once 34 → 45, after answers 47 → 49 (runs 300 and 301) |
+| Spark box, then SAM, for every kind | On all 222 cases: correct at once 148 → 171, after answers 196 → 203, but **one wrong closing suggestion**: a street-light look-alike whose boxed pole alone matched the incident's light of the same model (`S6-lookalike-open`). Hydrants did not improve. Not used for fixtures (run 320) |
+
+The version kept boxes road damage and trash only (run 321; run 310 is the version before, replayed):
+
+| dev, val and test, 222 cases | Frozen fast path | Piles joined | **Kept: Spark box for road and trash** |
+|---|---|---|---|
+| Wrong closing suggestions | 0 | 0 | **0** |
+| Correct before any resident answer | 137 | 148 | **166** |
+| Correct after simulated answers | 194 | 196 | **202** |
+| Left to staff | 17 | 15 | **9** |
+
+By kind, road damage went from 26 to 41 of 55 correct at once and from 47 to 52 after answers, and dumped trash from 34 to 48 of 56 at once and from 47 to 50 after answers. Hydrant and street-light results are the same as before, call for call. Spark's box costs one more call per photo of these two kinds, about $0.01.
+
+The holdout results above were measured before these changes. The holdouts were not run again, because their photos have now been seen, so these changes have no unseen-data measurement, and the choice of which kinds to box was made on these same sets.
+
 ## The verification agent
 
 In D_hybrid the agent runs whenever the fast path suggests a closing label. It has at most 8 tool calls, $0.20 and 120 s per run, and at most 2 runs per report. It can stop a suggestion but never make one less cautious. A run that does not finish leaves the report to staff.
@@ -159,6 +190,18 @@ In D_hybrid the agent runs whenever the fast path suggests a closing label. It h
 
 In run 2, the two unfinished runs ended because the model answered without calling a tool twice in a row. The safety rule sent both reports to staff. On holdout3 the agent did not reduce critical errors, since the fast path already had none, and it increased deferrals.
 
+## The agents in the app
+
+The app runs the fast path and offers two agents only when staff ask. Neither has a separate evaluation.
+
+**Verification.** On a duplicate, late or already fixed suggestion, the agent starts with the incident's other photos and similar incidents within 60 m, and can search up to 300 m. Staff follow its tool calls as they finish. The rules then reconsider the stored fast-path facts with everything the agent's tools returned, and the most cautious of the fast path's answer, that recheck and the agent's guarded proposal stands.
+
+- If it cannot start (no recording or live budget), the suggestion stays as it was. If it stops partway, the rules use the evidence collected so far.
+- It reads the latest stored analysis and runs once at a time per report. A result superseded by a staff decision or a newer analysis is recorded without being applied.
+- If a candidate incident's repair state changed since the analysis, staff are asked to analyze again before verifying.
+
+**Case brief.** On any analyzed report, the agent gets the same tools, limits and neutral names as the verifier, plus a numbered list of facts it can cite without a call: the triage, the candidates, every comparison, the incident's events and photos, and incidents of the same kind within 60 m. Its only terminal tool writes the brief. The server keeps an item only if it cites a successful tool call of that run or a listed fact, and shows how many were deleted. The brief has no label field and changes nothing. It writes no calendar dates, only times relative to the report and the repair, because a replayed brief is shown on later days.
+
 ## Real-world check
 
 Three real photos of one pile of dumped bags at a street tree, taken by the author on a street in Korea within two minutes on 2026-10-27 at 23:07 KST: from across the street (`dump1_far`), from the sidewalk (`dump1_side`) and close up (`dump1_close`). They are in [dataset/real/](../dataset/real/), normalized the way the app normalizes an upload (turned upright, longest side 1920 px, JPEG). The phone's location tag was off, so the worlds place every photo at the resident's pin, 0 m apart. The photos are in no evaluation set and not in the demo.
@@ -173,7 +216,7 @@ The expectations were written before the run and nothing was changed after it. W
 | Close shot on file | far | Question: wider shot, another angle (R5) | uncertain |
 | Close shot on file | side | Question: wider shot (R5) | uncertain |
 
-Triage read all three as dumped trash with the problem visible. The comparison model's evidence lines name what one view shows and the other does not: a storefront sign and striped shutters across the street in the far shot, a lit pizza sign in the side shot, only the tree, pavers and a road marking in the close-up. Nothing fixed is visible in two of these views at once, so "uncertain" is the honest reading, and the rules asked the resident rather than link. The run uses the same code as the app's fast path:
+Triage read all three as dumped trash with the problem visible. The comparison model's evidence lines name what one view shows and the other does not: a storefront sign and striped shutters across the street in the far shot, a lit pizza sign in the side shot, only the tree, pavers and a road marking in the close-up. Nothing fixed is visible in two of these views at once, so "uncertain" is the honest reading, and the rules asked the resident rather than link. After the later change to how dumped piles are found ([above](#after-holdout3-road-damage-and-dumped-piles)), all seven runs were repeated on November 3 with the same suggestions. The run uses the same code as the app's fast path:
 
 ```bash
 npm run analyze -- dataset/real/dump1_side.jpg --world scripts/worlds/real-dump1-far-first.json --observed 2026-10-27T14:08:17.000Z

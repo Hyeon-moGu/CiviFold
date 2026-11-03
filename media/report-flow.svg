@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="620" viewBox="0 0 960 620" role="img" aria-labelledby="title desc">
   <title id="title">CiviFold: from report to decision</title>
-  <desc id="desc">A resident sends a photo, text or voice (voice is transcribed by Muse Voice Transcribe). Muse Spark reads the words; rules route emergencies and reports about people straight to staff and ask for a photo when there is none. Photos go through triage (Muse Spark), a search for incidents within 40 m (rules), cut-outs (SAM 3.1) and comparison (Muse Spark, no timestamps). Rules apply the repair record and require two observations, then suggest duplicate, late report, already fixed, possible recurrence, new problem, one question to the resident, or staff review. Every outcome is a suggestion that staff decide on; staff may ask the agent to look for evidence against a closing suggestion.</desc>
+  <desc id="desc">A resident sends a photo, text or voice (voice is transcribed by Muse Voice Transcribe). Muse Spark reads the words; rules route emergencies and reports about people straight to staff and ask for a photo when there is none. Photos go through triage (Muse Spark), a search for incidents within 40 m (rules), cut-outs (SAM 3.1; for road damage and dumped piles, Muse Spark boxes the thing first) and comparison (Muse Spark, no timestamps). Rules apply the repair record and require two observations, then suggest duplicate, late report, already fixed, possible recurrence, new problem, one question to the resident, or staff review. Every outcome is a suggestion that staff decide on; staff may ask the agent to look for evidence against a closing suggestion.</desc>
   <defs>
     <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M1 1 L6 4 L1 7" fill="none" stroke="#64748b" stroke-width="1.5"/></marker>
     <marker id="blue-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M1 1 L6 4 L1 7" fill="none" stroke="#2563eb" stroke-width="1.5"/></marker>
@@ -97,8 +97,8 @@
   <text x="506" y="260" class="heading" style="font-size:14px">3 · Cut-outs</text>
   <rect x="622" y="246" width="62" height="18" rx="9" fill="#ede9fe"/>
   <text x="653" y="259" class="pill" text-anchor="middle" fill="#5b21b6">SAM 3.1</text>
-  <text x="506" y="279" class="body">The object and its</text>
-  <text x="506" y="296" class="body">surroundings, separately</text>
+  <text x="506" y="279" class="body">The object and surroundings;</text>
+  <text x="506" y="296" class="body">Spark boxes damage, piles</text>
 
   <text x="506" y="324" class="heading" style="font-size:14px">4 · Compare</text>
   <rect x="603" y="310" width="81" height="18" rx="9" fill="#dbeafe"/>
