@@ -9,7 +9,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-white text-zinc-900">
       <div className="bg-zinc-900 px-4 py-1.5 text-center text-[11px] font-medium tracking-wide text-zinc-300">
-        DEMO · sample photos are synthetic · the system only suggests, city staff decide
+        DEMO · sample photos: real San Francisco 311 records and generated images · the system only suggests, city staff decide
       </div>
       <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/90 backdrop-blur">
         <nav className="mx-auto flex max-w-6xl items-center gap-5 px-4 py-3 text-sm">

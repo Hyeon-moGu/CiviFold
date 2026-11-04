@@ -274,7 +274,9 @@ function Answer({ view, onAnswer }: { view: ResidentView; onAnswer: (form: FormD
   const wantsTime = q.requested_items.includes("observed_time");
   const hint = q.requested_items.map((item) => PHOTO_HINT[item]).find((h) => h !== undefined);
   const [time, setTime] = useState("");
-  const [source, setSource] = useState<"sample" | "own">("sample");
+  // A real 311 request or an upload has no sample answer: only the resident's own photo can answer it.
+  const hasSamples = view.suggested_samples.length > 0;
+  const [source, setSource] = useState<"sample" | "own">(hasSamples ? "sample" : "own");
   const [picked, setPicked] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -332,16 +334,20 @@ function Answer({ view, onAnswer }: { view: ResidentView; onAnswer: (form: FormD
       ) : (
         <>
           {hint && <p className="text-sm text-violet-900">{hint}</p>}
-          <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => setSource("sample")} className={option(source === "sample")}>
-              <span className="block font-medium">Sample photo</span>
-              <span className="block text-[11px] text-zinc-500">Demo: the photo you would take now</span>
-            </button>
-            <button type="button" onClick={() => setSource("own")} className={option(source === "own")}>
-              <span className="block font-medium">My photo</span>
-              <span className="block text-[11px] text-zinc-500">{view.live ? "From your phone" : "Needs the access code"}</span>
-            </button>
-          </div>
+          {hasSamples ? (
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => setSource("sample")} className={option(source === "sample")}>
+                <span className="block font-medium">Sample photo</span>
+                <span className="block text-[11px] text-zinc-500">Demo: the photo you would take now</span>
+              </button>
+              <button type="button" onClick={() => setSource("own")} className={option(source === "own")}>
+                <span className="block font-medium">My photo</span>
+                <span className="block text-[11px] text-zinc-500">{view.live ? "From your phone" : "Needs the access code"}</span>
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-600">There is no sample answer for this report, so it can only be answered with your own photo.</p>
+          )}
           {source === "sample" ? (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
               {view.suggested_samples.map((s) => (

@@ -2,7 +2,7 @@
 // Created: 2026-10-27
 
 import Link from "next/link";
-import { HELD_OUT, Scoreboard } from "@/app/_ui/scoreboard";
+import { HELD_OUT, REAL_SF, RealScoreboard, Scoreboard } from "@/app/_ui/scoreboard";
 import { SEARCH_CONFIG } from "@/lib/pipeline/config";
 import { defaultMode } from "@/lib/meta/call";
 import { liveDailyUsd } from "@/lib/server/runtime";
@@ -33,6 +33,8 @@ const SCOPE = [
 
 // Street Condition / Pothole requests created in September 2026, grouped by resolution description (queried 2026-10-29).
 const NYC_311 = "https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9";
+const EVAL = "https://github.com/Hyeon-moGu/CiviFold/blob/main/eval/README.md";
+const EVAL_REAL = `${EVAL}#real-311-photos-san-francisco`;
 
 export const dynamic = "force-dynamic";
 
@@ -71,11 +73,31 @@ export default function Home() {
 
       <section id="results" className="mx-auto max-w-6xl scroll-mt-16 border-t border-zinc-200 px-4 py-12">
         <h2 className="text-xl font-semibold tracking-tight text-zinc-900">What a location rule buries</h2>
-        <div className="mt-5 grid gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+        <div className="mt-5 grid gap-x-10 gap-y-10 lg:grid-cols-2">
           <div>
-            <p className="text-sm leading-relaxed text-zinc-600">
-              The newest held-out set: 80 synthetic reports at 16 places CiviFold had never seen, scored on its first run. Location alone links a
-              report to the nearest incident of the same kind within {SEARCH_CONFIG.radius_m.fire_hydrant} m.
+            <h3 className="text-sm font-semibold text-zinc-900">Real San Francisco 311 photos</h3>
+            <p className="mt-1 text-sm leading-relaxed text-zinc-600">
+              Public requests with residents&apos; photos, picked by eye with the expected answers written before any run, each run once. Location alone
+              links a request to the earlier one at the same spot.
+            </p>
+            <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200">
+              <RealScoreboard compact />
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+              Of the {REAL_SF.afterCleanup} requests made after a cleanup, CiviFold flagged {REAL_SF.civifold.recurrence} as possible recurrences and kept the
+              other {REAL_SF.afterCleanup - REAL_SF.civifold.recurrence} open. When both photos showed the same pile or damage, it merged fewer than location
+              alone: without a sure match it asks for another photo or leaves the call to staff. Small checks, not a measurement:{" "}
+              <a href={EVAL_REAL} className="underline underline-offset-2 hover:text-zinc-900">
+                how they were picked and every result
+              </a>
+              .
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-900">Pre-registered synthetic test</h3>
+            <p className="mt-1 text-sm leading-relaxed text-zinc-600">
+              The newest held-out set: 80 reports at 16 places CiviFold had never seen, with look-alikes and repairs placed on purpose, scored on its first
+              run. Location alone links a report to the nearest incident of the same kind within {SEARCH_CONFIG.radius_m.fire_hydrant} m.
             </p>
             <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200">
               <Scoreboard compact />
@@ -86,53 +108,49 @@ export default function Home() {
               resident. The other 8 of the 80 were already fixed and sit in neither row.
             </p>
           </div>
-          <div>
-            <p className="text-sm leading-relaxed text-zinc-600">
-              Every unseen set, first run: of the reports that needed attention, the share that wrongly got a one-click &ldquo;duplicate, late or already
-              fixed&rdquo; suggestion.
-            </p>
-            <table className="mt-4 w-full text-left text-sm">
-              <thead className="text-xs text-zinc-500">
-                <tr className="border-b border-zinc-200">
-                  <th className="py-2 font-medium">Set</th>
-                  <th className="py-2 text-right font-medium">Location alone</th>
-                  <th className="py-2 text-right font-medium">CiviFold</th>
+        </div>
+        <div className="mt-10 max-w-3xl">
+          <p className="text-sm leading-relaxed text-zinc-600">
+            Every synthetic unseen set, first run: of the reports that needed attention, the share that wrongly got a one-click &ldquo;duplicate, late or
+            already fixed&rdquo; suggestion.
+          </p>
+          <table className="mt-4 w-full text-left text-sm">
+            <thead className="text-xs text-zinc-500">
+              <tr className="border-b border-zinc-200">
+                <th className="py-2 font-medium">Set</th>
+                <th className="py-2 text-right font-medium">Location alone</th>
+                <th className="py-2 text-right font-medium">CiviFold</th>
+              </tr>
+            </thead>
+            <tbody className="font-mono tabular-nums">
+              {RESULTS.map((r) => (
+                <tr key={r.split} className="border-b border-zinc-100">
+                  <td className="py-2 font-sans">{r.split}</td>
+                  <td className="py-2 text-right text-zinc-500">
+                    <span className="hidden text-zinc-400 sm:inline">
+                      {r.geo}/{r.n} ·{" "}
+                    </span>
+                    {pct(r.geo, r.n)}
+                  </td>
+                  <td className="py-2 text-right">
+                    <span className="hidden text-zinc-400 sm:inline">
+                      {r.ours}/{r.n} ·{" "}
+                    </span>
+                    {pct(r.ours, r.n)}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="font-mono tabular-nums">
-                {RESULTS.map((r) => (
-                  <tr key={r.split} className="border-b border-zinc-100">
-                    <td className="py-2 font-sans">{r.split}</td>
-                    <td className="py-2 text-right text-zinc-500">
-                      <span className="hidden text-zinc-400 sm:inline">
-                        {r.geo}/{r.n} ·{" "}
-                      </span>
-                      {pct(r.geo, r.n)}
-                    </td>
-                    <td className="py-2 text-right">
-                      <span className="hidden text-zinc-400 sm:inline">
-                        {r.ours}/{r.n} ·{" "}
-                      </span>
-                      {pct(r.ours, r.n)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <p className="mt-3 text-xs leading-relaxed text-zinc-500">
-              Synthetic photos generated with Muse Image. Each set was unseen when it ran. Rules were changed after the test set and the first unseen set,
-              so those two rows used earlier rules. Later, Muse Spark began boxing road damage and dumped piles for SAM; re-run on holdout3 after that
-              change (photos already seen), the current version again suggested closing none of the 33. Every run is in the{" "}
-              <a href="https://github.com/Hyeon-moGu/CiviFold/blob/main/eval/README.md" className="underline underline-offset-2 hover:text-zinc-900">
-                evaluation notes
-              </a>
-              .
-            </p>
-            <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-              On real San Francisco 311 photos, picked and with expectations written before the runs, it closed none of 13 requests made after a
-              cleanup at the same spot (location alone: all 13). The demo has four of those real cases.
-            </p>
-          </div>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+            Synthetic photos generated with Muse Image. Each set was unseen when it ran. Rules were changed after the test set and the first unseen set, so
+            those two rows used earlier rules. Later, Muse Spark began boxing road damage and dumped piles for SAM; re-run on holdout3 after that change
+            (photos already seen), the current version again suggested closing none of the 33. Every run is in the{" "}
+            <a href={EVAL} className="underline underline-offset-2 hover:text-zinc-900">
+              evaluation notes
+            </a>
+            .
+          </p>
         </div>
       </section>
 
@@ -164,7 +182,8 @@ export default function Home() {
           ))}
         </dl>
         <p className="mt-8 text-xs text-zinc-500">
-          Built during the Meta Global AI Developer Hackathon, October 26 to November 4, 2026. Sample photos are synthetic, made with Muse Image.
+          Built during the Meta Global AI Developer Hackathon, October 26 to November 4, 2026. Sample photos are real San Francisco 311 requests (DataSF,
+          PDDL 1.0) and synthetic ones made with Muse Image, each marked.
         </p>
         <p className="mt-1 text-xs text-zinc-500">
           Model calls:{" "}
@@ -181,56 +200,59 @@ export default function Home() {
   );
 }
 
-// The guided demo's first two scenarios: the same hydrant from another angle is suggested as a duplicate;
-// the same model 28 m away is suggested as a new problem. Staff decide whether to apply either suggestion.
+// Two real San Francisco 311 pairs from the demo, each two residents at one spot: the same panel a day later is
+// suggested as a duplicate; new trash after Public Works' cleanup as a possible recurrence. Staff decide either way.
 function SameBlock() {
   return (
     <figure className="rounded-xl border border-zinc-200 bg-white p-3">
-      <div className="relative overflow-hidden rounded-lg">
-        {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
-        <img src="/api/images/syn_H1_damaged_v1_front?w=960" alt="The open incident: a leaking hydrant by the BAKERY" className="aspect-[16/9] w-full object-cover" />
-        <span className="absolute left-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white">SYNTHETIC</span>
-        <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent px-3 pb-2.5 pt-8 text-white">
-          <span className="block text-xs text-white/75">Open incident</span>
-          <span className="text-sm font-medium">Leaking hydrant by the BAKERY</span>
-        </figcaption>
-      </div>
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <Candidate
-          src="/api/samples/syn_H1_damaged_v1_across/image?w=480"
-          alt="A new report of the same hydrant from across the street"
-          where="Same spot, from across the street"
+      <div className="grid grid-cols-2 gap-3">
+        <Pair
+          title="The same panel, a day later"
+          before={{ src: "/api/images/sf_t058_1?w=480", alt: "The open request: a wooden panel left at a street tree on 24th Street", when: "Open, Sep 14" }}
+          after={{ src: "/api/samples/sf_t058_2/image?w=480", alt: "A new request the next day: the same panel at the same tree", when: "New, Sep 15" }}
           verdict="Suggested: duplicate"
           tone="bg-sky-50 text-sky-800 ring-sky-300"
           dot="bg-sky-500"
-          why="Shop sign and bike rack match"
+          why="Same tree pit, curb and paint mark"
         />
-        <Candidate
-          src="/api/samples/syn_H5_damaged_v1_front/image?w=480"
-          alt="A new report of a look-alike hydrant 28 m away"
-          where="28 m away, by the LAUNDRY"
-          verdict="Suggested: new problem"
-          tone="bg-zinc-100 text-zinc-800 ring-zinc-300"
-          dot="bg-zinc-500"
-          why="Same model, different wall"
+        <Pair
+          title="New trash after the cleanup"
+          before={{ src: "/api/images/sf_a123_1?w=480", alt: "A request on Alemany Boulevard that Public Works cleared the same morning", when: "Cleared, Sep 9" }}
+          after={{ src: "/api/samples/sf_a123_2/image?w=480", alt: "A new request six days later: different trash at the same corner tree", when: "New, Sep 15" }}
+          verdict="Suggested: possible recurrence"
+          tone="bg-rose-50 text-rose-800 ring-rose-300"
+          dot="bg-rose-500"
+          why="Same corner, different trash"
         />
       </div>
-      <p className="mt-3 px-1 text-[11px] text-zinc-500">A distance-only rule would suggest both as duplicates. Results from the guided demo, which you can run yourself.</p>
+      <figcaption className="mt-3 px-1 text-[11px] leading-relaxed text-zinc-500">
+        Real San Francisco 311 requests (DataSF), people and plates blurred. Location alone would merge both and close the second as already fixed.
+        Results from the demo, which you can run yourself.
+      </figcaption>
     </figure>
   );
 }
 
-function Candidate({ src, alt, where, verdict, tone, dot, why }: { src: string; alt: string; where: string; verdict: string; tone: string; dot: string; why: string }) {
+type Shot = { src: string; alt: string; when: string };
+
+function Pair({ title, before, after, verdict, tone, dot, why }: { title: string; before: Shot; after: Shot; verdict: string; tone: string; dot: string; why: string }) {
   return (
     <div>
-      <div className="relative overflow-hidden rounded-lg">
-        {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
-        <img src={src} alt={alt} className="aspect-[3/2] w-full object-cover" />
-        <span className="absolute left-1.5 top-1.5 rounded bg-black/70 px-1 py-0.5 text-[9px] font-semibold tracking-wide text-white">SYNTHETIC</span>
+      <p className="mb-2 text-sm font-medium text-zinc-900">{title}</p>
+      <div className="grid grid-cols-2 gap-1.5">
+        {[before, after].map((s) => (
+          <div key={s.src}>
+            <div className="relative overflow-hidden rounded-md bg-zinc-100">
+              {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
+              <img src={s.src} alt={s.alt} className="aspect-[3/4] w-full object-cover" />
+              <span className="absolute left-1 top-1 rounded bg-sky-700/85 px-1 py-0.5 text-[8px] font-semibold tracking-wide text-white">SF 311</span>
+            </div>
+            <p className="mt-1 text-[11px] text-zinc-500">{s.when}</p>
+          </div>
+        ))}
       </div>
-      <p className="mt-2 text-xs text-zinc-500">{where}</p>
-      <p className={`mt-1 inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${tone}`}>
-        <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+      <p className={`mt-1.5 inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${tone}`}>
+        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
         {verdict}
       </p>
       <p className="mt-1 text-[11px] text-zinc-500">{why}</p>

@@ -2,11 +2,25 @@
 // Created: 2026-10-27
 
 import { messageSamples } from "@/lib/dataset/messages";
+import { DEMO_TIME_ZONE } from "@/lib/dataset/place";
+import { REAL_PAIRS } from "@/lib/dataset/real";
 import { ASSET_FILE, samples } from "@/lib/dataset/static";
 import { seedIncidentId } from "@/lib/demo/seed";
 import { mapIncidents } from "@/lib/server/reports";
 import { runtime } from "@/lib/server/runtime";
-import { ReportForm } from "./report-form";
+import { ReportForm, type RealSampleView } from "./report-form";
+
+const DAY = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: DEMO_TIME_ZONE });
+// The later request of each real San Francisco pair, offered first; the earlier one is the incident on file.
+const REAL_SAMPLES: RealSampleView[] = REAL_PAIRS.map((p) => ({
+  id: p.later.id,
+  title: p.title.charAt(0).toUpperCase() + p.title.slice(1),
+  detail: `311 request ${p.later.case}, ${DAY.format(new Date(p.later.observed_at))}`,
+  category: p.category,
+  lat: p.later.lat,
+  lng: p.later.lng,
+  observed_at: p.later.observed_at,
+}));
 
 export const metadata = { title: "Report a problem · CiviFold" };
 export const dynamic = "force-dynamic";
@@ -29,7 +43,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
         This is a hackathon demo. Reports are not sent to any city or 311 service, and anything you send, photos and recordings included, can be seen by
         anyone who opens the staff console. Leave out faces, license plates and personal details.
       </p>
-      <ReportForm samples={samples()} messages={messageSamples()} places={places} initialSource={source === "upload" ? "upload" : "sample"} />
+      <ReportForm samples={samples()} realSamples={REAL_SAMPLES} messages={messageSamples()} places={places} initialSource={source === "upload" ? "upload" : "sample"} />
     </main>
   );
 }

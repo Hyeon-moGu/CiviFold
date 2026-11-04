@@ -10,8 +10,12 @@ import type { MessageSample } from "@/lib/dataset/messages";
 import { haversineM } from "@/lib/geo";
 import { MAX_DESCRIPTION_CHARS } from "@/lib/limits";
 import type { Sample } from "@/lib/dataset/static";
+
+/** A real San Francisco 311 photo offered as a sample: sent at its own place and time (lib/dataset/real.ts). */
+export type RealSampleView = { id: string; title: string; detail: string; category: Category; lat: number; lng: number; observed_at: string };
+type Picked = { id: string; title: string; lat: number; lng: number; category: Category; observed_at?: string };
 import type { Category } from "@/lib/tools/types";
-import { SyntheticBadge } from "@/app/_ui/labels";
+import { RealPhotoBadge, SyntheticBadge } from "@/app/_ui/labels";
 import type { MapPlace } from "@/app/_ui/pin-map";
 import { pauseFrom, usePaused } from "@/app/_ui/pause";
 import { EXIF_SLICE, isHeic, shrinkForUpload } from "@/app/_ui/shrink";
@@ -47,11 +51,13 @@ function localInput(iso: string): string {
 
 export function ReportForm({
   samples,
+  realSamples = [],
   messages,
   places,
   initialSource = "sample",
 }: {
   samples: Sample[];
+  realSamples?: RealSampleView[];
   messages: MessageSample[];
   places: MapPlace[];
   initialSource?: "sample" | "upload";
@@ -61,7 +67,9 @@ export function ReportForm({
   const lastStepAt = useRef(0); // when the form moved to a new step
   const [source, setSource] = useState<"sample" | "upload" | "none">(initialSource);
   const [filter, setFilter] = useState<Category | "all">("all");
-  const [picked, setPicked] = useState<Sample | null>(null);
+  // Real 311 photos first; the generated ones cover the kinds the real set has none of.
+  const [sampleSet, setSampleSet] = useState<"real" | "generated">(realSamples.length > 0 ? "real" : "generated");
+  const [picked, setPicked] = useState<Picked | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   // What the chosen photo's EXIF supplied; edited fields stop counting as "from the photo".
@@ -82,11 +90,19 @@ export function ReportForm({
   const shown = useMemo(() => (filter === "all" ? samples : samples.filter((s) => s.category === filter)), [samples, filter]);
   const present = useMemo(() => new Set(samples.map((s) => s.category)), [samples]);
 
-  function pick(s: Sample) {
+  function pick(s: Picked) {
     setPicked(s);
     setLat(s.lat.toFixed(6));
     setLng(s.lng.toFixed(6));
     setCategory(s.category);
+    // A real request keeps the time it was made; a generated sample is seen now.
+    if (s.observed_at) {
+      setWhen("custom");
+      setCustom(localInput(s.observed_at));
+    } else if (picked?.observed_at) {
+      setWhen("now");
+      setCustom("");
+    }
   }
 
   // A sample message stands in for what a resident would type or say on the spot, without a photo.
@@ -236,7 +252,7 @@ export function ReportForm({
             <div className="grid grid-cols-3 gap-2">
               {(
                 [
-                  ["sample", "Sample photo", "Demo images"],
+                  ["sample", "Sample photo", "Real 311 or generated"],
                   ["upload", "My photo", "Needs an access code"],
                   ["none", "No photo", "Text or voice"],
                 ] as const
@@ -253,9 +269,61 @@ export function ReportForm({
               ))}
             </div>
 
-            {source === "sample" && (
+            {source === "sample" && realSamples.length > 0 && (
+              <div className="mt-5 inline-flex rounded-lg bg-zinc-100 p-1 text-sm" role="tablist">
+                {(
+                  [
+                    ["real", "Real 311 photos (San Francisco)"],
+                    ["generated", "Generated (Muse Image)"],
+                  ] as const
+                ).map(([id, text]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="tab"
+                    aria-selected={sampleSet === id}
+                    onClick={() => setSampleSet(id)}
+                    className={`rounded-md px-3 py-1.5 font-medium transition ${sampleSet === id ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-600 hover:text-zinc-900"}`}
+                  >
+                    {text}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {source === "sample" && sampleSet === "real" && realSamples.length > 0 && (
               <>
-                <div className="-mx-4 mt-5 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+                <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                  {realSamples.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => (pick(s), setError(null))}
+                      className={`group relative overflow-hidden rounded-xl border text-left transition ${picked?.id === s.id ? "border-zinc-900 ring-2 ring-zinc-900" : "border-zinc-200 hover:border-zinc-300"}`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
+                      <img src={`/api/samples/${s.id}/image?w=240`} alt={s.title} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                      <span className="absolute left-1.5 top-1.5">
+                        <RealPhotoBadge />
+                      </span>
+                      {picked?.id === s.id && <span className="absolute right-1.5 top-1.5 rounded-full bg-zinc-900 px-1.5 text-xs font-bold text-white">✓</span>}
+                      <span className="block px-2 py-1.5 text-xs leading-snug">
+                        <span className="block font-medium text-zinc-800">{s.title}</span>
+                        <span className="block text-zinc-500">{s.detail}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-zinc-500">
+                  Real requests residents sent to San Francisco 311 (DataSF public records), with people and license plates blurred. Each goes in at its own
+                  place and time, next to the earlier request on file there.
+                </p>
+              </>
+            )}
+
+            {source === "sample" && sampleSet === "generated" && (
+              <>
+                <div className="-mx-4 mt-3 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
                   <button type="button" className={chip(filter === "all")} onClick={() => setFilter("all")}>
                     All
                   </button>
@@ -411,7 +479,7 @@ export function ReportForm({
                     : `Only incidents within about ${COMPARE_RADIUS_M} m are compared, so this would be a new report.`}
               </p>
             )}
-            {source === "sample" && picked && <Note tone="ok">Set from the sample photo.</Note>}
+            {source === "sample" && picked && <Note tone="ok">{picked.observed_at ? "Set from the 311 request: where it was reported." : "Set from the sample photo."}</Note>}
             {source === "upload" && exif && (
               <Note tone={exif.lat && lat === exif.lat && lng === exif.lng ? "ok" : "plain"}>
                 {!exif.lat
@@ -432,6 +500,9 @@ export function ReportForm({
             </div>
             {when === "custom" && <input type="datetime-local" value={custom} onChange={(e) => setCustom(e.target.value)} className={`${input} mt-2`} />}
             {source === "upload" && exif?.time && when === "custom" && custom === exif.time && <Note tone="ok">Read from the photo: when it was taken.</Note>}
+            {source === "sample" && picked?.observed_at && when === "custom" && custom === localInput(picked.observed_at) && (
+              <Note tone="ok">From the 311 request: when it was reported.</Note>
+            )}
           </Step>
         )}
 
@@ -445,7 +516,7 @@ export function ReportForm({
                 <span className="flex h-12 w-16 items-center justify-center rounded-md bg-zinc-100 text-xs text-zinc-500">No photo</span>
               )}
               <div className="min-w-0 text-xs text-zinc-600">
-                <p className="truncate font-medium text-zinc-900">{picked ? `${tileTitle(picked.title).place} · ${tileTitle(picked.title).view}` : (file?.name ?? "Message only")}</p>
+                <p className="truncate font-medium text-zinc-900">{picked ? (picked.observed_at ? picked.title : `${tileTitle(picked.title).place} · ${tileTitle(picked.title).view}`) : (file?.name ?? "Message only")}</p>
                 <p className="font-mono">{latN !== null && lngN !== null ? `${latN.toFixed(5)}, ${lngN.toFixed(5)}` : "not set"}</p>
               </div>
               <button type="button" onClick={() => setStep(0)} className="ml-auto text-xs font-medium text-zinc-900 underline underline-offset-2">

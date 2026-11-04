@@ -4,13 +4,16 @@
 import Link from "next/link";
 import { imageId } from "@/lib/dataset/assets";
 import { messageSample } from "@/lib/dataset/messages";
+import { REAL_CREDIT } from "@/lib/dataset/real";
 import { ASSET_FILE } from "@/lib/dataset/static";
 import { SCENARIOS } from "@/lib/demo/scenarios";
 import { defaultMode } from "@/lib/meta/call";
 import { liveDailyUsd } from "@/lib/server/runtime";
-import { HELD_OUT, Scoreboard } from "@/app/_ui/scoreboard";
+import { HELD_OUT, REAL_SF, RealScoreboard, Scoreboard } from "@/app/_ui/scoreboard";
 import type { Label } from "@/lib/tools/types";
 import { DemoRunner, type CaseView, type OtherView } from "./demo-runner";
+
+const EVAL_REAL = "https://github.com/Hyeon-moGu/CiviFold/blob/main/eval/README.md#real-311-photos-san-francisco";
 
 export const metadata = { title: "Demo · CiviFold" };
 export const dynamic = "force-dynamic";
@@ -104,21 +107,10 @@ const CASES: CaseView[] = [
   },
 ];
 
-// Real San Francisco 311 requests (lib/dataset/real.ts): each earlier request is on file, the later one is sent.
+// Real San Francisco 311 requests (lib/dataset/real.ts): each earlier request is on file, the later one is sent. The
+// one location alone gets wrong comes first, so the first report a visitor sends shows the difference.
 const realPhoto = (id: string) => `/api/images/${id}?w=960`;
 const REAL: CaseView[] = [
-  {
-    key: "sf311:0",
-    title: "The same wooden panel, a day later",
-    context: "Two residents report a panel left at a street tree on 24th Street, a day apart.",
-    evidence: "The same tree pit, yellow curb and paint mark on the sidewalk. CiviFold suggests merging it; staff confirm.",
-    incident: { photo: realPhoto("sf_t058_1"), caption: "On file: request 202000065099, September 14" },
-    report: { photo: photoOf("sf311:0")!, caption: "New request 202000068943, September 15" },
-    expect: expectOf("sf311:0"),
-    noun: "panel",
-    boxed: true,
-    real: true,
-  },
   {
     key: "sf311:1",
     title: "New trash at the same corner after the cleanup",
@@ -128,6 +120,18 @@ const REAL: CaseView[] = [
     report: { photo: photoOf("sf311:1")!, caption: "New request 202000068065, September 15" },
     expect: expectOf("sf311:1"),
     noun: "trash",
+    boxed: true,
+    real: true,
+  },
+  {
+    key: "sf311:0",
+    title: "The same wooden panel, a day later",
+    context: "Two residents report a panel left at a street tree on 24th Street, a day apart.",
+    evidence: "The same tree pit, yellow curb and paint mark on the sidewalk. CiviFold suggests merging it; staff confirm.",
+    incident: { photo: realPhoto("sf_t058_1"), caption: "On file: request 202000065099, September 14" },
+    report: { photo: photoOf("sf311:0")!, caption: "New request 202000068943, September 15" },
+    expect: expectOf("sf311:0"),
+    noun: "panel",
     boxed: true,
     real: true,
   },
@@ -174,17 +178,31 @@ const OTHERS: OtherView[] = [
   { key: "messages:1", send: "Send the message", what: "A noise complaint", note: "About people, not a place, so photos are never matched. Staff handle it.", kind: "text", ...messageOf("messages:1"), expect: expectOf("messages:1") },
 ];
 
-export default function DemoPage() {
+export default async function DemoPage({ searchParams }: { searchParams: Promise<{ cases?: string }> }) {
+  const { cases } = await searchParams;
   // A replay-only deployment with no live budget offers no live run, rather than one that falls back to the replay.
   const live = defaultMode() !== "cached" || liveDailyUsd() > 0;
-  return (
-    <main className="mx-auto max-w-5xl px-4 pb-10 pt-8">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Same spot isn&apos;t always the same problem.</h1>
-      <p className="mt-2 max-w-3xl text-lg leading-relaxed text-zinc-700">
-        Grouping duplicate reports by location also folds in the look-alike next door and the hydrant that broke again after its repair, and either
-        can be closed without anyone going back out. CiviFold checks the photos first. Staff make the call.
+  const realIntro = (
+    <>
+      <div className="max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <RealScoreboard />
+        <p className="border-t border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500">
+          Two checks on public San Francisco 311 requests, picked by eye with the expected answers written before any run, each run once. Of the{" "}
+          {REAL_SF.afterCleanup} requests made after a cleanup, CiviFold flagged {REAL_SF.civifold.recurrence} as possible recurrences and kept the
+          other {REAL_SF.afterCleanup - REAL_SF.civifold.recurrence} open as new problems, with a question or for staff. Every merge is a suggestion until staff approve it.{" "}
+          <a href={EVAL_REAL} className="font-medium text-zinc-900 underline underline-offset-2">
+            How it was checked →
+          </a>
+        </p>
+      </div>
+      <p className="max-w-3xl text-sm text-zinc-500">
+        Four pairs from those checks, two residents at one spot each, sent at their own place and time. Photos: {REAL_CREDIT}.
       </p>
-      <div className="mt-4 max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-white">
+    </>
+  );
+  const syntheticIntro = (
+    <>
+      <div className="max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <Scoreboard />
         <p className="border-t border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500">
           Pre-registered held-out test of 80 synthetic reports; every merge is a suggestion until staff approve it. Location alone also merged{" "}
@@ -196,11 +214,27 @@ export default function DemoPage() {
           </Link>
         </p>
       </div>
-      <p className="mt-3 text-sm text-zinc-500">
-        Synthetic photos, made with Muse Image. Each case replays its recorded run in seconds
-        {live ? <>; &ldquo;Run it live&rdquo; calls the models now</> : null}.
+      <p className="max-w-3xl text-sm text-zinc-500">
+        Real records rarely hold the cases that trip a location rule on purpose: the same hydrant model a few doors down, or one broken again the day
+        after its repair. These use photos generated with Muse Image, like the held-out test.
       </p>
-      <DemoRunner cases={CASES} real={REAL} others={OTHERS} live={live} />
+    </>
+  );
+  return (
+    <main className="mx-auto max-w-5xl px-4 pb-10 pt-8">
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Same spot isn&apos;t always the same problem.</h1>
+      <p className="mt-2 max-w-3xl text-lg leading-relaxed text-zinc-700">
+        Grouping duplicate reports by location also folds in the look-alike next door and the trash dumped again after a cleanup, and either can be
+        closed without anyone going back out. CiviFold checks the photos first. Staff make the call.
+      </p>
+      <DemoRunner
+        cases={CASES}
+        real={REAL}
+        others={OTHERS}
+        live={live}
+        initialSet={cases === "synthetic" ? "synthetic" : "real"}
+        intro={{ real: realIntro, synthetic: syntheticIntro }}
+      />
     </main>
   );
 }

@@ -254,7 +254,7 @@ Most of those sets pair different items that Public Works merged by spot, so a s
 | Same road or sidewalk damage | 15 | duplicate 4, one question 9, staff review 1, new problem 1 | 4 merged, 1 miss |
 | After the cleanup | 4 | possible recurrence 2, one question 2 | **0 critical**; location alone would close all 4 |
 
-When both photos clearly show the same thing, the fast path merged 14 of 33 and gave a second incident to 2; the other 17 got a question or went to staff. Road damage asked most often: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Four of these pairs, run once before this check to choose photos, are the demo's real cases; their photos are published blurred in [dataset/real-sf/](../dataset/real-sf/), and the blurred versions gave the same suggestions.
+When both photos clearly show the same thing, the fast path merged 14 of 33 and gave a second incident to 2; the other 17 got a question or went to staff. Each world holds one earlier request within 6 m, so location alone would merge all 33, and close all 4 requests made after a cleanup. Road damage asked most often: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Four of these pairs, run once before this check to choose photos, are the demo's real cases; their photos are published blurred in [dataset/real-sf/](../dataset/real-sf/), and the blurred versions gave the same suggestions.
 
 ```bash
 npx tsx scripts/sf311-photos.ts   # downloads and normalizes the photos of both checks into .cache/sf311/ and .cache/sf311pairs/

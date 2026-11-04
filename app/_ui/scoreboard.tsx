@@ -14,16 +14,28 @@ export const HELD_OUT = {
   civifold: { right: 34, wrong: 0, afterQuestion: 14 }, // 12 answered with a photo, 2 with the time it was seen
 };
 
-// The same two measures side by side, so each row compares the two ways at a glance. Compact leaves out the column
-// notes, for a narrow column that says what each way is in its own text.
-export function Scoreboard({ compact = false }: { compact?: boolean }) {
-  const cell = (n: number, of: number, tone: string) => (
+// The SF 311 real-photo checks (eval/sf311/results.json and pairs-results.json), each run once with its picks and
+// expectations written first. 13 requests came 1 hour to 7 days after Public Works' cleanup at the same spot (9 sets
+// and 4 pairs); 33 pairs show the same pile or damage in both photos. Each world holds one earlier request at the
+// spot, so location alone merges every same-problem pair and closes every request made after a cleanup.
+export const REAL_SF = {
+  afterCleanup: 13,
+  samePairs: 33,
+  location: { closed: 13, merged: 33 },
+  civifold: { closed: 0, merged: 14, asked: 17, apart: 2, recurrence: 3 },
+};
+
+type Row = { measure: string; note: string; of: number; location: [number, string]; civifold: [number, string] };
+
+// Two measures side by side, so each row compares the two ways at a glance. Compact leaves out the column notes,
+// for a narrow column that says what each way is in its own text.
+function Board({ rows, compact }: { rows: Row[]; compact: boolean }) {
+  const cell = (n: number, total: number, tone: string) => (
     <td className="px-3 py-2.5 text-center">
       <span className={`text-2xl font-semibold tracking-tight sm:text-3xl ${tone}`}>{n}</span>
-      <span className="ml-1 text-sm text-zinc-400">/ {of}</span>
+      <span className="ml-1 text-sm text-zinc-400">/ {total}</span>
     </td>
   );
-  const { location: lo, civifold: cf } = HELD_OUT;
   return (
     <table className="w-full text-left">
       <colgroup>
@@ -47,23 +59,45 @@ export function Scoreboard({ compact = false }: { compact?: boolean }) {
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <th scope="row" className="px-4 py-2.5 text-sm font-medium text-zinc-800">
-            Repeat reports merged into the right incident
-            <span className="block text-xs font-normal text-zinc-500">duplicates, and late reports seen before a repair</span>
-          </th>
-          {cell(lo.right, HELD_OUT.duplicates, "text-zinc-900")}
-          {cell(cf.right, HELD_OUT.duplicates, "text-emerald-700")}
-        </tr>
-        <tr className="border-t border-zinc-100">
-          <th scope="row" className="px-4 py-2.5 text-sm font-medium text-zinc-800">
-            Problems wrongly merged
-            <span className="block text-xs font-normal text-zinc-500">new or returning, should stay open</span>
-          </th>
-          {cell(lo.wrong, HELD_OUT.problems, "text-rose-700")}
-          {cell(cf.wrong, HELD_OUT.problems, "text-emerald-700")}
-        </tr>
+        {rows.map((r, i) => (
+          <tr key={r.measure} className={i > 0 ? "border-t border-zinc-100" : undefined}>
+            <th scope="row" className="px-4 py-2.5 text-sm font-medium text-zinc-800">
+              {r.measure}
+              <span className="block text-xs font-normal text-zinc-500">{r.note}</span>
+            </th>
+            {cell(r.location[0], r.of, r.location[1])}
+            {cell(r.civifold[0], r.of, r.civifold[1])}
+          </tr>
+        ))}
       </tbody>
     </table>
+  );
+}
+
+/** The newest pre-registered held-out set of synthetic reports. */
+export function Scoreboard({ compact = false }: { compact?: boolean }) {
+  const { location: lo, civifold: cf } = HELD_OUT;
+  return (
+    <Board
+      compact={compact}
+      rows={[
+        { measure: "Repeat reports merged into the right incident", note: "duplicates, and late reports seen before a repair", of: HELD_OUT.duplicates, location: [lo.right, "text-zinc-900"], civifold: [cf.right, "text-emerald-700"] },
+        { measure: "Problems wrongly merged", note: "new or returning, should stay open", of: HELD_OUT.problems, location: [lo.wrong, "text-rose-700"], civifold: [cf.wrong, "text-emerald-700"] },
+      ]}
+    />
+  );
+}
+
+/** The real San Francisco 311 photo checks. */
+export function RealScoreboard({ compact = false }: { compact?: boolean }) {
+  const { location: lo, civifold: cf } = REAL_SF;
+  return (
+    <Board
+      compact={compact}
+      rows={[
+        { measure: "New trash after a cleanup, closed as fixed", note: "the same spot, should stay open", of: REAL_SF.afterCleanup, location: [lo.closed, "text-rose-700"], civifold: [cf.closed, "text-emerald-700"] },
+        { measure: "Same pile or damage, merged", note: `CiviFold asked or sent ${REAL_SF.civifold.asked} to staff, kept ${REAL_SF.civifold.apart} apart`, of: REAL_SF.samePairs, location: [lo.merged, "text-zinc-900"], civifold: [cf.merged, "text-zinc-900"] },
+      ]}
+    />
   );
 }

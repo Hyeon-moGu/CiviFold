@@ -9,7 +9,6 @@ import { pauseFrom, usePaused } from "@/app/_ui/pause";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { Label } from "@/lib/tools/types";
 import { RealPhotoBadge, SyntheticBadge, UrgentBadge } from "@/app/_ui/labels";
-import { REAL_CREDIT } from "@/lib/dataset/real";
 import { safeMask } from "@/app/_ui/photo";
 
 export type CaseView = {
@@ -266,7 +265,30 @@ function Spinner() {
   return <span aria-hidden className="inline-block h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-zinc-400 border-r-transparent" />;
 }
 
-export function DemoRunner({ cases, real = [], others, live: liveOn }: { cases: CaseView[]; real?: CaseView[]; others: OtherView[]; live: boolean }) {
+export type CaseSet = "real" | "synthetic";
+
+export function DemoRunner({
+  cases,
+  real = [],
+  others,
+  live: liveOn,
+  initialSet = "real",
+  intro,
+}: {
+  cases: CaseView[];
+  real?: CaseView[];
+  others: OtherView[];
+  live: boolean;
+  initialSet?: CaseSet;
+  intro: Record<CaseSet, ReactNode>;
+}) {
+  // Real 311 photos first; the generated hard cases are the ones real records rarely hold.
+  const [set, setSet] = useState<CaseSet>(real.length > 0 ? initialSet : "synthetic");
+  const list = set === "real" ? real : cases;
+  const chooseSet = (next: CaseSet) => {
+    setSet(next);
+    window.history.replaceState(null, "", next === "synthetic" ? "?cases=synthetic" : window.location.pathname);
+  };
   const [sent, setSent] = useState<Record<string, Sent>>({});
   const [ready, setReady] = useState(false); // what this tab sent is read after the first render
   const [world, setWorld] = useState<Record<string, Sent>>({});
@@ -354,8 +376,8 @@ export function DemoRunner({ cases, real = [], others, live: liveOn }: { cases: 
     }
   }
 
-  // Every case not yet sent, all at once. The first case keeps the recorded run it opens with.
-  const unsent = cases.filter((c, i) => !sent[c.key] && !(c.key in busy) && !(i === 0 && world[c.key]?.label));
+  // Every case in the open set not yet sent, all at once. The first case keeps the recorded run it opens with.
+  const unsent = list.filter((c, i) => !sent[c.key] && !(c.key in busy) && !(i === 0 && world[c.key]?.label));
   const [batch, setBatch] = useState<string[]>([]);
   const batchDone = batch.filter((k) => !(k in busy)).length;
   const batchRunning = batch.length > 0 && batchDone < batch.length;
@@ -364,10 +386,9 @@ export function DemoRunner({ cases, real = [], others, live: liveOn }: { cases: 
     unsent.forEach((c) => void send(c.key, stagesFor(c.noun, c.boxed).length));
   };
 
-  // One case's card. featured: one of the main cases, whose first shows the world's own run before the visitor's.
-  const caseCard = (c: CaseView, i: number, label: string, featured: boolean) => {
-        // The first case shows the demo world's own run until the visitor sends theirs.
-        const preview = featured && i === 0 && !sent[c.key] && !(c.key in busy) && world[c.key]?.label ? world[c.key] : undefined;
+  // One case's card. The first of a set shows the demo world's own run until the visitor sends theirs.
+  const caseCard = (c: CaseView, i: number, label: string) => {
+        const preview = i === 0 && !sent[c.key] && !(c.key in busy) && world[c.key]?.label ? world[c.key] : undefined;
         const r = sent[c.key] ?? preview;
         const running = c.key in busy;
         const done = Boolean(r?.label) && !running;
@@ -456,7 +477,7 @@ export function DemoRunner({ cases, real = [], others, live: liveOn }: { cases: 
                 />
                 {r?.seen && r.seen.length > 0 && (
                   // Open on the first two cards; the later ones keep it a click away so the page stays short.
-                  <details open={featured && i < 2} className="group mx-5 mt-3 rounded-lg bg-zinc-50 px-4 py-3">
+                  <details open={i < 2} className="group mx-5 mt-3 rounded-lg bg-zinc-50 px-4 py-3">
                     <summary className="cursor-pointer list-none text-xs font-medium text-zinc-500 [&::-webkit-details-marker]:hidden">
                       <span className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
                       What Muse Spark wrote, comparing the two photos
@@ -558,7 +579,35 @@ export function DemoRunner({ cases, real = [], others, live: liveOn }: { cases: 
   };
 
   return (
-    <div className="mt-8 space-y-8">
+    <div className="mt-6 space-y-8">
+      {real.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex w-full gap-1 rounded-xl bg-zinc-100 p-1 sm:inline-flex sm:w-auto" role="tablist" aria-label="Which cases">
+            {(
+              [
+                ["real", "Real 311 photos", `${real.length} San Francisco cases`],
+                ["synthetic", "Hard cases", `${cases.length} with generated photos`],
+              ] as const
+            ).map(([id, text, sub]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                id={`set-${id}`}
+                aria-selected={set === id}
+                aria-controls="case-set"
+                onClick={() => chooseSet(id)}
+                className={`flex-1 rounded-lg px-4 py-2 text-left transition sm:flex-none ${set === id ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-600 hover:text-zinc-900"}`}
+              >
+                <span className="block text-sm font-semibold">{text}</span>
+                <span className="block text-xs text-zinc-500">{sub}</span>
+              </button>
+            ))}
+          </div>
+          {intro[set]}
+        </div>
+      )}
+      {real.length === 0 && intro.synthetic}
       {ready && (batchRunning || unsent.length > 1) && (
         <div
           className={`flex flex-col items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/95 px-4 py-3 backdrop-blur sm:flex-row sm:items-center ${batchRunning ? "sticky top-16 z-10" : ""}`}
@@ -579,19 +628,9 @@ export function DemoRunner({ cases, real = [], others, live: liveOn }: { cases: 
           )}
         </div>
       )}
-      {cases.map((c, i) => caseCard(c, i, String(i + 1), true))}
-
-      {real.length > 0 && (
-        <section className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Real 311 photos from San Francisco</h2>
-            <p className="mt-1 text-[15px] leading-relaxed text-zinc-600">
-              Four pairs of real requests, two residents at one spot each, sent at their own place and time. Photos: {REAL_CREDIT}.
-            </p>
-          </div>
-          {real.map((c, i) => caseCard(c, i, String(i + 1), false))}
-        </section>
-      )}
+      <div id="case-set" role="tabpanel" aria-labelledby={real.length > 0 ? `set-${set}` : undefined} className="space-y-8">
+        {list.map((c, i) => caseCard(c, i, String(i + 1)))}
+      </div>
 
       {/* Closed until the visitor opens it or has sent one of its reports, so the page stays short. */}
       <details open={others.some((o) => sent[o.key] || o.key in busy)} className="group">
