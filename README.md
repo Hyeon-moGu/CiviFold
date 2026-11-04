@@ -1,20 +1,36 @@
-# CiviFold
+<h1 align="center">CiviFold</h1>
 
-### Still broken, or broken again? Location can't tell. Photos can.
+<p align="center">
+  <b>Fold the duplicates. Keep recurrences apart.</b><br>
+  Photo-based duplicate and recurrence checks for city 311 staff, built on Muse Spark and SAM 3.1. It only suggests; staff decide.
+</p>
 
-**[Live demo](https://civi-fold.vercel.app/demo)** · real San Francisco 311 photos, plus generated hard cases · each case replays its recorded run in seconds, and "Run it live" calls Muse Spark and SAM 3.1 now
+<p align="center">
+  <a href="https://civi-fold.vercel.app/demo"><b>Live demo</b></a> ·
+  <a href="#results">Results</a> ·
+  <a href="eval/README.md">Evaluation notes</a> ·
+  <a href="#run-locally">Run locally</a>
+</p>
 
-![Four real San Francisco 311 pairs from the demo, each two residents at one spot, with what CiviFold and location alone suggest: new trash at a corner tree after the cleanup, which CiviFold keeps apart as a possible recurrence and location alone closes as already fixed; the same wooden panel a day later, a duplicate for both; the same orange bags from a wider view, which CiviFold sends to staff; the same broken utility cover, where CiviFold asks for another angle. Photos: DataSF 311 public records, people and plates blurred.](media/real-sf.webp)
+![Still broken, or broken again? Two real San Francisco 311 photos of one corner tree: trash reported and cleared on September 9, and new trash at the same corner on September 15. Location alone closes the new request as already fixed; CiviFold keeps it apart as a possible recurrence for staff. Real requests made after a cleanup and closed as fixed: location alone 13 of 13, CiviFold 0 of 13. New or returning problems wrongly merged on a pre-registered synthetic holdout: location alone 24 of 33, CiviFold 0 of 33.](media/hero.webp)
 
-CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Every link and closure is a suggestion until a staff member approves it.
+CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Its default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) compares what the photos show, then applies the repair history. Every link and closure is a suggestion until a staff member approves it.
 
-On real San Francisco 311 photos, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) suggested closing **none of the 13 requests made after a cleanup at the same spot**, where grouping by location alone would have closed all 13. It suggested merging fewer true duplicates than location alone (14 of 33), asked or sent 17 to staff, and wrongly suggested 2 as new problems. On a pre-registered holdout of 80 synthetic reports, with look-alikes and repairs placed on purpose, it suggested closing **none of the 33 reports that needed attention**; location alone would have closed 24 ([results](#results)).
+| Suggestions, first run | Location alone | **CiviFold** |
+|---|---|---|
+| Real SF 311 requests made after a cleanup, closed as already fixed | 13 / 13 | **0 / 13** |
+| Real SF 311 pairs showing the same pile or damage, merged (the right call) | 33 / 33 | 14 / 33 |
+| Synthetic holdout (pre-registered): new or returning problems wrongly merged | 24 / 33 | **0 / 33** |
 
-**Try it in three minutes:**
+On real photos CiviFold suggests fewer merges than location alone: of those 33 pairs it asked or sent 17 to staff and wrongly suggested 2 as new problems. The real checks are small and picked by eye; the synthetic holdout places look-alikes and repairs on purpose ([results](#results)).
 
-1. Open the [demo](https://civi-fold.vercel.app/demo). The first real San Francisco case is already shown; send the other three, or press "Run it live" on one.
-2. Switch to Hard cases, send case 3, open it in the staff view and press "Verify with the agent".
-3. Approve it: the demo card and the resident's page show the decision.
+> [!TIP]
+> **Try it in three minutes**
+> 1. Open the [demo](https://civi-fold.vercel.app/demo). The first real San Francisco case is already shown; send the other three, or press "Run it live" on one.
+> 2. Switch to Hard cases, send case 3, open it in the staff view and press "Verify with the agent".
+> 3. Approve it: the demo card and the resident's page show the decision.
+
+### Three rules it keeps
 
 - **Nothing closes by itself.** The system never links or closes a report. It suggests, shows the evidence and waits for staff.
 - **Models judge the photo, rules judge the time.** Muse Spark and SAM 3.1 decide whether two photos show the same fixture and the same damage. Rules then apply the observation time and the repair history. The comparison never sees a timestamp.
@@ -69,6 +85,8 @@ Two checks on public San Francisco 311 requests. Requests were picked by eye fro
 |---|---|---|
 | New trash after a cleanup at the same spot, closed as already fixed | 13 / 13 | **0 / 13** |
 | Same pile or damage in both photos, merged (the right call) | 33 / 33 | 14 / 33 |
+
+![Four real San Francisco 311 pairs from the demo, each two residents at one spot, with what CiviFold and location alone suggest: new trash at a corner tree after the cleanup, which CiviFold keeps apart as a possible recurrence and location alone closes as already fixed; the same wooden panel a day later, a duplicate for both; the same orange bags from a wider view, which CiviFold sends to staff; the same broken utility cover, where CiviFold asks for another angle. Photos: DataSF 311 public records, people and plates blurred.](media/real-sf.webp)
 
 - **After a cleanup, no closing suggestion.** Of the 13 requests made within 7 days after Public Works' cleanup, it flagged 3 as possible recurrences and kept the other 10 open: 2 as new problems, 7 with a question to the resident and 1 for staff.
 - **It suggests fewer merges on real duplicates and asks more.** When both photos clearly show the same pile or damage, it suggested merging 14 of 33, asked or sent 17 to staff, and suggested 2 as new problems. Road damage asked most: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Of 9 further requests that Public Works closed as duplicates, mostly different items at one corner, it suggested merging 1 and opening 3 as new.
