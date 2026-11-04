@@ -217,7 +217,7 @@ The app runs the fast path and offers two agents only when staff ask. Neither ha
 
 ## Real-world check
 
-Three real photos of one pile of dumped bags at a street tree, taken by the author on a street in Korea within two minutes on 2026-10-27 at 23:07 KST: from across the street (`dump1_far`), from the sidewalk (`dump1_side`) and close up (`dump1_close`). They are in [dataset/real/](../dataset/real/), normalized the way the app normalizes an upload (turned upright, longest side 1920 px, JPEG). The phone's location tag was off, so the worlds place every photo at the resident's pin, 0 m apart. The photos are in no evaluation set and not in the demo.
+Three real photos of one pile of dumped bags at a street tree, taken by the author on a street in Korea within two minutes on 2026-10-27 at 23:07 KST: from across the street (`dump1_far`), from the sidewalk (`dump1_side`) and close up (`dump1_close`). They were normalized the way the app normalizes an upload (turned upright, longest side 1920 px, JPEG) and are not published in this repository. The phone's location tag was off, so the worlds place every photo at the resident's pin, 0 m apart. The photos are in no evaluation set and not in the demo.
 
 The expectations were written before the run and nothing was changed after it. With no incident nearby, each photo should be a new problem. With one of the photos already on file, each of the other two should be linked as a duplicate or get a question; a second incident for the same pile would be a miss. With one site and an open incident, no critical outcome is possible, so this checks behavior, not the headline number.
 
@@ -229,11 +229,7 @@ The expectations were written before the run and nothing was changed after it. W
 | Close shot on file | far | Question: wider shot, another angle (R5) | uncertain |
 | Close shot on file | side | Question: wider shot (R5) | uncertain |
 
-Triage read all three as dumped trash with the problem visible. The comparison model's evidence lines name what one view shows and the other does not: a storefront sign and striped shutters across the street in the far shot, a lit pizza sign in the side shot, only the tree, pavers and a road marking in the close-up. Nothing fixed is visible in two of these views at once, so "uncertain" is the honest reading, and the rules asked the resident rather than link. After the later change to how dumped piles are found ([above](#after-holdout3-road-damage-and-dumped-piles)), all seven runs were repeated on November 3 with the same suggestions. The run uses the same code as the app's fast path:
-
-```bash
-npm run analyze -- dataset/real/dump1_side.jpg --world scripts/worlds/real-dump1-far-first.json --observed 2026-10-27T14:08:17.000Z
-```
+Triage read all three as dumped trash with the problem visible. The comparison model's evidence lines name what one view shows and the other does not: a storefront sign and striped shutters across the street in the far shot, a lit pizza sign in the side shot, only the tree, pavers and a road marking in the close-up. Nothing fixed is visible in two of these views at once, so "uncertain" is the honest reading, and the rules asked the resident rather than link. After the later change to how dumped piles are found ([above](#after-holdout3-road-damage-and-dumped-piles)), all seven runs were repeated on November 3 with the same suggestions, using the same code as the app's fast path (`npm run analyze`).
 
 ## Real 311 photos: San Francisco
 
