@@ -23,13 +23,17 @@ const EVENT_DOT: Record<string, string> = {
   note: "bg-ops-dim",
 };
 
+const named = (title: string | undefined, fallback: string) => (title ? title.charAt(0).toUpperCase() + title.slice(1) : fallback);
+
 export default async function IncidentDetail({ params }: { params: Promise<{ id: string }> }) {
   const rt = await runtime();
   const detail = await incidentDetail(rt, (await params).id);
   if (!detail) notFound();
   const { incident, reports, photos, recurrences } = detail;
-  // Older event summaries name an incident by id ("Opened as a recurrence of inc_..."): staff read its name.
-  const ids = [...new Set(detail.events.flatMap((e) => e.summary?.match(/\binc_[a-z0-9_]+/g) ?? []))];
+  // Older event summaries name an incident by id ("Opened as a recurrence of inc_..."): staff read its name, here and
+  // in the recurrence links.
+  const linked = [incident.recurrence_of, ...recurrences.map((r) => r.id)].filter((id): id is string => Boolean(id));
+  const ids = [...new Set([...linked, ...detail.events.flatMap((e) => e.summary?.match(/\binc_[a-z0-9_]+/g) ?? [])])];
   const titles = await incidentTitles(rt, ids);
   const events = detail.events.map((e) => ({ ...e, summary: e.summary?.replace(/\binc_[a-z0-9_]+/g, (id) => (titles[id] ? `the ${titles[id]}` : "an earlier incident")) ?? e.summary }));
   const open = incident.status === "open" || incident.status === "in_progress";
@@ -113,8 +117,8 @@ export default async function IncidentDetail({ params }: { params: Promise<{ id:
               <Fact
                 k="Recurrence of"
                 v={
-                  <Link href={`/admin/incidents/${incident.recurrence_of}`} className="font-mono text-rose-300 hover:underline">
-                    {incident.recurrence_of}
+                  <Link href={`/admin/incidents/${incident.recurrence_of}`} title={incident.recurrence_of} className="text-rose-300 hover:underline">
+                    {named(titles[incident.recurrence_of], "The earlier incident")}
                   </Link>
                 }
               />
@@ -122,11 +126,15 @@ export default async function IncidentDetail({ params }: { params: Promise<{ id:
             {recurrences.length > 0 && (
               <Fact
                 k="Came back as"
-                v={recurrences.map((r) => (
-                  <Link key={r.id} href={`/admin/incidents/${r.id}`} className="ml-2 font-mono text-rose-300 hover:underline">
-                    {r.id}
-                  </Link>
-                ))}
+                v={
+                  <span className="flex flex-col items-end gap-0.5">
+                    {recurrences.map((r) => (
+                      <Link key={r.id} href={`/admin/incidents/${r.id}`} title={r.id} className="text-rose-300 hover:underline">
+                        {named(titles[r.id], "A later incident")}
+                      </Link>
+                    ))}
+                  </span>
+                }
               />
             )}
           </Panel>

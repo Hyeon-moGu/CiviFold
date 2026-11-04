@@ -1,7 +1,7 @@
 // Author: HyeonMo Gu
 // Created: 2026-10-27
 
-import { handle, text } from "@/lib/server/http";
+import { formOf, handle, text } from "@/lib/server/http";
 import { photoMeta } from "@/lib/server/photo-meta";
 import { UserError } from "@/lib/server/reports";
 
@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 // sends only the start of the file, where the EXIF is, to stay under a deployment's request size limit.
 export async function POST(req: Request) {
   return handle(async () => {
-    const form = await req.formData();
+    const form = await formOf(req);
     const file = form.get("photo");
     if (!(file instanceof File) || file.size === 0) throw new UserError("No photo.");
     if (file.size > 25 * 1024 * 1024) throw new UserError("That photo is too large.");

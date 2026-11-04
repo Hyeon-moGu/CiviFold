@@ -1,7 +1,7 @@
 // Author: HyeonMo Gu
 // Created: 2026-10-27
 
-import { category, handle, isoTime, location, message, photoFrom, text, voiceFrom } from "@/lib/server/http";
+import { category, formOf, handle, isoTime, location, message, photoFrom, text, voiceFrom } from "@/lib/server/http";
 import { limit } from "@/lib/server/rate-limit";
 import { createReport, UserError } from "@/lib/server/reports";
 import { runtime as app } from "@/lib/server/runtime";
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   return handle(async () => {
     const rt = await app();
     await limit(rt.database, req, "report");
-    const form = await req.formData();
+    const form = await formOf(req);
     // A report sent with the access code runs live.
     if (text(form, "access_code")) await limit(rt.database, req, "live");
     const [photo, voice] = await Promise.all([photoFrom(form), voiceFrom(form)]);

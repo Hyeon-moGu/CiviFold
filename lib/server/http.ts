@@ -23,6 +23,15 @@ export async function handle(fn: () => Promise<unknown>): Promise<Response> {
   }
 }
 
+/** The request's form; a request that carries none (no body, or JSON) is the sender's mistake, not ours. */
+export async function formOf(req: Request): Promise<FormData> {
+  try {
+    return await req.formData();
+  } catch {
+    throw new UserError("Send this as a form: a photo, a message or a recording.");
+  }
+}
+
 const MAX_UPLOAD = 25 * 1024 * 1024; // a 50 MP phone photo; the browser shrinks large ones before a deployment's 4.5 MB body limit
 const ACCEPTED = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_SIDE = 1920; // what the models are given anyway; also what the dataset photos are
