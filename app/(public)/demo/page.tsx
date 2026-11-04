@@ -137,7 +137,7 @@ export default function DemoPage() {
           Pre-registered held-out test of 80 synthetic reports; every merge is a suggestion until staff approve it. Location alone also merged{" "}
           {HELD_OUT.location.wrongIncident} duplicates into the wrong incident; CiviFold none.{" "}
           {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} correct merges came after one follow-up question, answered by a simulated resident;
-          on earlier test sets, CiviFold made 1 to 3 wrong merges each. The other 8 reports were already fixed and sit in neither row.{" "}
+          on earlier test sets, CiviFold made 1 to 3 wrong merges or closures each. The other 8 reports were already fixed and sit in neither row.{" "}
           <Link href="/#results" className="font-medium text-zinc-900 underline underline-offset-2">
             How it was measured →
           </Link>
