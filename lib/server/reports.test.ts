@@ -468,9 +468,10 @@ describe("reports", () => {
       const { report_id } = await newReport();
       fastSays({ label: "NEW", incident_id: null, rule_id: "R1", missing_info: [] });
       await analyzeReport(rt, report_id);
+      const seeded = (await rt.database.select().from(incidents)).length;
       const clicks = await Promise.allSettled([staffDecide(rt, report_id, "new_incident", null), staffDecide(rt, report_id, "new_incident", null)]);
       expect(clicks.filter((c) => c.status === "fulfilled")).toHaveLength(1);
-      expect((await rt.database.select().from(incidents)).length).toBe(17);
+      expect((await rt.database.select().from(incidents)).length).toBe(seeded + 1);
 
       const other = (await newReport()).report_id;
       fastSays({ label: "NEW", incident_id: null, rule_id: "R1", missing_info: [] });

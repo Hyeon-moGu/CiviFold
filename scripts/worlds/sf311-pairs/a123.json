@@ -1,0 +1,27 @@
+{
+  "asOf": "2026-09-15T13:42:12.000Z",
+  "report_at": {
+    "lat": 37.7157880680767,
+    "lng": -122.44456568139886
+  },
+  "incidents": [
+    {
+      "id": "inc_a123",
+      "category": "trash",
+      "status": "resolved",
+      "lat": 37.71579068930468,
+      "lng": -122.44453386519118,
+      "title": "Reported to SF 311",
+      "created_at": "2026-09-09T13:55:58.000Z",
+      "resolved_at": "2026-09-09T15:45:44.000Z",
+      "recurrence_of": null,
+      "photos": [
+        {
+          "path": ".cache/sf311pairs/a123_1.jpg",
+          "report_id": "r_a123_1",
+          "observed_at": "2026-09-09T13:55:58.000Z"
+        }
+      ]
+    }
+  ]
+}

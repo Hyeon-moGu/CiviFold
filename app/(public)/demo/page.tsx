@@ -104,6 +104,59 @@ const CASES: CaseView[] = [
   },
 ];
 
+// Real San Francisco 311 requests (lib/dataset/real.ts): each earlier request is on file, the later one is sent.
+const realPhoto = (id: string) => `/api/images/${id}?w=960`;
+const REAL: CaseView[] = [
+  {
+    key: "sf311:0",
+    title: "The same wooden panel, a day later",
+    context: "Two residents report a panel left at a street tree on 24th Street, a day apart.",
+    evidence: "The same tree pit, yellow curb and paint mark on the sidewalk. CiviFold suggests merging it; staff confirm.",
+    incident: { photo: realPhoto("sf_t058_1"), caption: "On file: request 202000065099, September 14" },
+    report: { photo: photoOf("sf311:0")!, caption: "New request 202000068943, September 15" },
+    expect: expectOf("sf311:0"),
+    noun: "panel",
+    boxed: true,
+    real: true,
+  },
+  {
+    key: "sf311:1",
+    title: "New trash at the same corner after the cleanup",
+    context: "Public Works cleared the corner tree on Alemany Boulevard. Six days later a resident reports new trash there.",
+    evidence: "The same tree, pole and crosswalk, with different material after the cleanup. Location alone would close it as fixed; CiviFold keeps it apart for staff.",
+    incident: { photo: realPhoto("sf_a123_1"), caption: "On file: request 202000046581, September 9, cleared the same morning" },
+    report: { photo: photoOf("sf311:1")!, caption: "New request 202000068065, September 15" },
+    expect: expectOf("sf311:1"),
+    noun: "trash",
+    boxed: true,
+    real: true,
+  },
+  {
+    key: "sf311:2",
+    title: "The same orange bags, from across the corner",
+    context: "Two residents report bags at the Highland Avenue balustrade, 17 hours apart.",
+    evidence: "The same balustrade and tree, so the same place. From this wider view Muse Spark reads the pile as changed, so a person decides rather than a merge.",
+    incident: { photo: realPhoto("sf_t052_1"), caption: "On file: request 202000063217, September 13" },
+    report: { photo: photoOf("sf311:2")!, caption: "New request 202000065126, September 14" },
+    expect: expectOf("sf311:2"),
+    noun: "bags",
+    boxed: true,
+    real: true,
+  },
+  {
+    key: "sf311:3",
+    title: "The same broken utility cover",
+    context: "Two residents report a broken cover in the sidewalk on Pacific Avenue, two days apart.",
+    evidence: "The same vault and curb paint, but the cut-outs are not a sure match, so CiviFold asks for another angle before merging.",
+    incident: { photo: realPhoto("sf_r085_1"), caption: "On file: request 202000212553, October 23" },
+    report: { photo: photoOf("sf311:3")!, caption: "New request 202000222488, October 25" },
+    expect: expectOf("sf311:3"),
+    noun: "damage",
+    boxed: true,
+    real: true,
+  },
+];
+
 // What a resident said or typed, and the recording, for the reports that come without a photo.
 function messageOf(key: string): { quote: string; audio: string | null } {
   const step = stepOf(key);
@@ -147,7 +200,7 @@ export default function DemoPage() {
         Synthetic photos, made with Muse Image. Each case replays its recorded run in seconds
         {live ? <>; &ldquo;Run it live&rdquo; calls the models now</> : null}.
       </p>
-      <DemoRunner cases={CASES} others={OTHERS} live={live} />
+      <DemoRunner cases={CASES} real={REAL} others={OTHERS} live={live} />
     </main>
   );
 }

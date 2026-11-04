@@ -7,6 +7,7 @@ import { randomBytes } from "node:crypto";
 import { and, asc, count, desc, eq, inArray, isNull, lt, or } from "drizzle-orm";
 import { messageSample, voiceBlobKey } from "../dataset/messages";
 import { VIEW_SIZE } from "../dataset/assets";
+import { realSample } from "../dataset/real";
 import { sample } from "../dataset/static";
 import { agentRuns, briefs, images, incidentEvents, incidents, infoRequests, reportAnalyses, reports, segmentations, staffDecisions } from "../db/schema";
 import { blobKey } from "../db/stores";
@@ -68,6 +69,20 @@ export class UserError extends Error {
 async function photoRow(rt: Runtime, reportId: string, photo: Photo): Promise<typeof images.$inferInsert> {
   const imageRowId = id("img");
   if ("sample_id" in photo) {
+    const real = realSample(photo.sample_id);
+    if (real) {
+      return {
+        id: imageRowId,
+        report_id: reportId,
+        kind: "original",
+        storage_path: blobKey(real.id, "image/jpeg"),
+        mime: "image/jpeg",
+        width: real.width,
+        height: real.height,
+        is_synthetic: false,
+        dataset_image_id: real.id,
+      };
+    }
     const s = sample(photo.sample_id);
     if (!s) throw new UserError(`Unknown sample photo ${photo.sample_id}`);
     // Sample photos are already in the blob store (the seed uploads the dataset); the row points at them.
@@ -124,7 +139,7 @@ export async function createReport(rt: Runtime, input: NewReport): Promise<{ rep
     urgent: input.danger ?? false, // in the urgent queue from the start, before any model runs
     status: "received",
     live,
-    is_synthetic: media.length > 0 && media.every((m) => "sample_id" in m),
+    is_synthetic: media.length > 0 && media.every((m) => "sample_id" in m && !realSample(m.sample_id)),
   });
   if (photo) await rt.database.insert(images).values(await photoRow(rt, reportId, photo));
   return { report_id: reportId, tracking_code: code };

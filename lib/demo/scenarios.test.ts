@@ -4,16 +4,17 @@
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { fileBlobs } from "../db/blobs";
 import { openPglite } from "../db/client";
-import { reports } from "../db/schema";
+import { images, incidents, reports } from "../db/schema";
+import { REAL_PAIRS } from "../dataset/real";
 import { ASSET_FILE } from "../dataset/static";
 import { analyze, type Analysis } from "../pipeline/analyze";
 import type { Runtime } from "../server/runtime";
 import { agentCheckOf, agentRecorded, demoState, runStep, SCENARIOS } from "./scenarios";
-import { seedDemo } from "./seed";
+import { seedDemo, seedIncidentId } from "./seed";
 
 vi.mock("../pipeline/analyze", async (original) => ({ ...(await original<typeof import("../pipeline/analyze")>()), analyze: vi.fn() }));
 
@@ -172,6 +173,25 @@ describe("demo scenarios", () => {
     fastSays("NEW", null);
     await runStep(rt, "duplicate", 0);
     await expect(runStep(rt, "duplicate", 3)).rejects.toThrow(/names no incident/);
+  });
+
+  it("seeds the real San Francisco pairs at their own place and time, and sends their later photos as real", async () => {
+    const real = await rt.database.select().from(incidents).where(inArray(incidents.id, REAL_PAIRS.map((p) => seedIncidentId(p.id))));
+    expect(real).toHaveLength(REAL_PAIRS.length);
+    const alemany = real.find((i) => i.id === "inc_sf123")!;
+    expect(alemany.status).toBe("resolved");
+    expect(Date.parse(alemany.resolved_at!)).toBe(Date.parse("2026-09-09T15:45:44.000Z"));
+    fastSays("DUPLICATE", "inc_sf058");
+    const sent = (await runStep(rt, "sf311", 0)) as Sent;
+    expect(sent.label).toBe("DUPLICATE");
+    const [report] = await rt.database.select().from(reports).where(eq(reports.id, sent.report_id));
+    expect(report).toMatchObject({ is_synthetic: false, lat: 37.751603, lng: -122.428049 });
+    expect(Date.parse(report!.observed_at)).toBe(Date.parse("2026-09-15T16:24:14.000Z"));
+    const [photo] = await rt.database.select().from(images).where(eq(images.report_id, sent.report_id));
+    expect(photo).toMatchObject({ mime: "image/jpeg", is_synthetic: false, dataset_image_id: "sf_t058_2", width: 864, height: 1152 });
+    // The cleanup is part of the seeded world, so the step after it is not asked to reset.
+    fastSays("NEW", null);
+    expect(((await runStep(rt, "sf311", 1)) as Sent).label).toBe("NEW");
   });
 
   it("asks for a reset when the world a step expects has moved on", async () => {

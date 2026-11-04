@@ -224,7 +224,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
             {/* After a staff-requested check the latest analysis is the check's, its cost the agent's run included. */}
             {analysis.pipeline_config === "C_rules+verify" ? "check" : "analysis"} {cost(analysis.cost_usd)} · {(analysis.latency_ms / 1000).toFixed(1)}s ·{" "}
             {/* A report with only typed words carries no media, so it is neither a sample photo nor an upload. */}
-            {report.is_synthetic ? "synthetic sample" : report.channel === "text" ? "typed message" : "resident upload"}
+            {report.is_synthetic ? "synthetic sample" : photos.some((p) => p.dataset_image_id?.startsWith("sf_")) ? "San Francisco 311 photo" : report.channel === "text" ? "typed message" : "resident upload"}
           </span>
         )}
       </div>

@@ -1,0 +1,27 @@
+{
+  "asOf": "2026-10-11T05:31:33.000Z",
+  "report_at": {
+    "lat": 37.77189640736219,
+    "lng": -122.44584513815785
+  },
+  "incidents": [
+    {
+      "id": "inc_t048",
+      "category": "trash",
+      "status": "open",
+      "lat": 37.77190059946214,
+      "lng": -122.44585728970125,
+      "title": "Reported to SF 311",
+      "created_at": "2026-10-10T14:25:47.000Z",
+      "resolved_at": null,
+      "recurrence_of": null,
+      "photos": [
+        {
+          "path": ".cache/sf311pairs/t048_1.jpg",
+          "report_id": "r_t048_1",
+          "observed_at": "2026-10-10T14:25:47.000Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1188 @@
+{
+ "run": 1,
+ "date": "2026-11-04",
+ "mode": "live (cached_then_live; the four demo pairs replayed their single earlier run)",
+ "config": "C_rules fast path, unchanged",
+ "total_usd": 2.2053,
+ "results": [
+  {
+   "pair": "a115",
+   "kind": "after cleanup",
+   "earlier_case": "101004697819",
+   "later_case": "202000004366",
+   "label": "POSSIBLE_RECURRENCE",
+   "rule_id": "R7d",
+   "confidence": 0.95,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.95
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0534,
+   "latency_ms": 62140
+  },
+  {
+   "pair": "a120",
+   "kind": "after cleanup",
+   "earlier_case": "202000246688",
+   "later_case": "202000249968",
+   "label": "NEEDS_INFO",
+   "rule_id": "R7e",
+   "confidence": 0.92,
+   "ask": [
+    "observed_time"
+   ],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.92
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0567,
+   "latency_ms": 80258
+  },
+  {
+   "pair": "a123",
+   "kind": "after cleanup",
+   "earlier_case": "202000046581",
+   "later_case": "202000068065",
+   "label": "POSSIBLE_RECURRENCE",
+   "rule_id": "R7d",
+   "confidence": 0.95,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.95
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0,
+   "latency_ms": 678
+  },
+  {
+   "pair": "a144",
+   "kind": "after cleanup",
+   "earlier_case": "101004594227",
+   "later_case": "101004633794",
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context"
+   ],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.9
+    },
+    {
+     "stage": 2,
+     "verdict": "different",
+     "confidence": 0.85
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0722,
+   "latency_ms": 102565
+  },
+  {
+   "pair": "r061",
+   "kind": "same road damage",
+   "earlier_case": "202000013972",
+   "later_case": "202000038928",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.75,
+   "ask": [],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.75
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0737,
+   "latency_ms": 128621
+  },
+  {
+   "pair": "r062",
+   "kind": "same road damage",
+   "earlier_case": "202000002990",
+   "later_case": "202000024350",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.75,
+   "ask": [],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.75
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.75
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0848,
+   "latency_ms": 121217
+  },
+  {
+   "pair": "r065",
+   "kind": "same road damage",
+   "earlier_case": "202000109240",
+   "later_case": "202000110484",
+   "label": "NEEDS_INFO",
+   "rule_id": "R2w",
+   "confidence": 0.92,
+   "ask": [
+    "different_angle"
+   ],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.92
+    },
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.92
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.038,
+   "latency_ms": 42272
+  },
+  {
+   "pair": "r070",
+   "kind": "same road damage",
+   "earlier_case": "101004364467",
+   "later_case": "101004374148",
+   "label": "NEEDS_INFO",
+   "rule_id": "R2w",
+   "confidence": 0.95,
+   "ask": [
+    "different_angle"
+   ],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0337,
+   "latency_ms": 42909
+  },
+  {
+   "pair": "r071",
+   "kind": "same road damage",
+   "earlier_case": "202000161153",
+   "later_case": "202000191075",
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context"
+   ],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0553,
+   "latency_ms": 66940
+  },
+  {
+   "pair": "r072",
+   "kind": "same road damage",
+   "earlier_case": "101004546631",
+   "later_case": "101004552393",
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context"
+   ],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0568,
+   "latency_ms": 104485
+  },
+  {
+   "pair": "r073",
+   "kind": "same road damage",
+   "earlier_case": "101004672401",
+   "later_case": "202000017484",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.75,
+   "ask": [],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.8
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.75
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0642,
+   "latency_ms": 86185
+  },
+  {
+   "pair": "r076",
+   "kind": "same road damage",
+   "earlier_case": "202000014321",
+   "later_case": "202000018971",
+   "label": "HUMAN_REVIEW",
+   "rule_id": "R6b",
+   "confidence": 0.75,
+   "ask": [],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.75
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.75
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0679,
+   "latency_ms": 86075
+  },
+  {
+   "pair": "r077",
+   "kind": "same road damage",
+   "earlier_case": "101004600506",
+   "later_case": "101004655670",
+   "label": "NEW",
+   "rule_id": "R3",
+   "confidence": 0.8,
+   "ask": [],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "different",
+     "confidence": 0.9
+    },
+    {
+     "stage": 2,
+     "verdict": "different",
+     "confidence": 0.8
+    }
+   ],
+   "outcome": "miss",
+   "cost_usd": 0.0792,
+   "latency_ms": 106337
+  },
+  {
+   "pair": "r081",
+   "kind": "same road damage",
+   "earlier_case": "101004395748",
+   "later_case": "101004460201",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.95,
+   "ask": [],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.95
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0818,
+   "latency_ms": 112745
+  },
+  {
+   "pair": "r082",
+   "kind": "same road damage",
+   "earlier_case": "101004233402",
+   "later_case": "101004234161",
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "close_up"
+   ],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0787,
+   "latency_ms": 114543
+  },
+  {
+   "pair": "r083",
+   "kind": "same road damage",
+   "earlier_case": "202000238274",
+   "later_case": "202000240710",
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context"
+   ],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0629,
+   "latency_ms": 108208
+  },
+  {
+   "pair": "r084",
+   "kind": "same road damage",
+   "earlier_case": "101004689965",
+   "later_case": "202000005908",
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context"
+   ],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.85
+    },
+    {
+     "stage": 2,
+     "verdict": "different",
+     "confidence": 0.9
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0717,
+   "latency_ms": 108238
+  },
+  {
+   "pair": "r085",
+   "kind": "same road damage",
+   "earlier_case": "202000212553",
+   "later_case": "202000222488",
+   "label": "NEEDS_INFO",
+   "rule_id": "R2w",
+   "confidence": 0.75,
+   "ask": [
+    "different_angle"
+   ],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.75
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0,
+   "latency_ms": 297
+  },
+  {
+   "pair": "r099",
+   "kind": "same road damage",
+   "earlier_case": "101004536536",
+   "later_case": "101004548657",
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "close_up"
+   ],
+   "triage": {
+    "category": "road_damage",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0807,
+   "latency_ms": 103739
+  },
+  {
+   "pair": "t000",
+   "kind": "same trash",
+   "earlier_case": "202000177755",
+   "later_case": "202000181746",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.9,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.92
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.9
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0731,
+   "latency_ms": 120199
+  },
+  {
+   "pair": "t010",
+   "kind": "same trash",
+   "earlier_case": "202000130107",
+   "later_case": "202000132401",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.9,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.92
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.9
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0608,
+   "latency_ms": 81880
+  },
+  {
+   "pair": "t012",
+   "kind": "same trash",
+   "earlier_case": "202000077353",
+   "later_case": "202000079141",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.92,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.92
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.076,
+   "latency_ms": 136674
+  },
+  {
+   "pair": "t014",
+   "kind": "same trash",
+   "earlier_case": "202000206327",
+   "later_case": "202000209970",
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "different_angle"
+   ],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0764,
+   "latency_ms": 100353
+  },
+  {
+   "pair": "t016",
+   "kind": "same trash",
+   "earlier_case": "202000146488",
+   "later_case": "202000147643",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.9,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.9
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.9
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0607,
+   "latency_ms": 89462
+  },
+  {
+   "pair": "t022",
+   "kind": "same trash",
+   "earlier_case": "202000030734",
+   "later_case": "202000033423",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.92,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.92
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0419,
+   "latency_ms": 58419
+  },
+  {
+   "pair": "t024",
+   "kind": "same trash",
+   "earlier_case": "202000143071",
+   "later_case": "202000143488",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.75,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.9
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.75
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0758,
+   "latency_ms": 135707
+  },
+  {
+   "pair": "t027",
+   "kind": "same trash",
+   "earlier_case": "202000043460",
+   "later_case": "202000043624",
+   "label": "NEW",
+   "rule_id": "R3",
+   "confidence": 0.92,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "different",
+     "confidence": 0.92
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "miss",
+   "cost_usd": 0.0809,
+   "latency_ms": 136549
+  },
+  {
+   "pair": "t033",
+   "kind": "same trash",
+   "earlier_case": "202000144162",
+   "later_case": "202000147617",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.8,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.8
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.8
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0638,
+   "latency_ms": 82064
+  },
+  {
+   "pair": "t034",
+   "kind": "same trash",
+   "earlier_case": "101004585772",
+   "later_case": "101004587988",
+   "label": "NEEDS_INFO",
+   "rule_id": "R2w",
+   "confidence": 0.6,
+   "ask": [
+    "different_angle"
+   ],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.75
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0732,
+   "latency_ms": 98446
+  },
+  {
+   "pair": "t035",
+   "kind": "same trash",
+   "earlier_case": "202000192511",
+   "later_case": "202000193429",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.78,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.9
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.78
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0623,
+   "latency_ms": 93525
+  },
+  {
+   "pair": "t041",
+   "kind": "same trash",
+   "earlier_case": "101004693767",
+   "later_case": "101004696471",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.9,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.9
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.9
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0672,
+   "latency_ms": 102910
+  },
+  {
+   "pair": "t048",
+   "kind": "same trash",
+   "earlier_case": "202000165132",
+   "later_case": "202000168092",
+   "label": "HUMAN_REVIEW",
+   "rule_id": "R6b",
+   "confidence": 0.75,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.75
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0644,
+   "latency_ms": 94870
+  },
+  {
+   "pair": "t049",
+   "kind": "same trash",
+   "earlier_case": "202000054233",
+   "later_case": "202000057810",
+   "label": "HUMAN_REVIEW",
+   "rule_id": "R6b",
+   "confidence": 0.95,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.95
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0574,
+   "latency_ms": 72577
+  },
+  {
+   "pair": "t052",
+   "kind": "same trash",
+   "earlier_case": "202000063217",
+   "later_case": "202000065126",
+   "label": "HUMAN_REVIEW",
+   "rule_id": "R6b",
+   "confidence": 0.95,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.95
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0,
+   "latency_ms": 578
+  },
+  {
+   "pair": "t055",
+   "kind": "same trash",
+   "earlier_case": "101004689647",
+   "later_case": "101004696489",
+   "label": "HUMAN_REVIEW",
+   "rule_id": "R6b",
+   "confidence": 0.9,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.9
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.06,
+   "latency_ms": 84648
+  },
+  {
+   "pair": "t056",
+   "kind": "same trash",
+   "earlier_case": "202000028051",
+   "later_case": "202000028986",
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "different_angle"
+   ],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0995,
+   "latency_ms": 154383
+  },
+  {
+   "pair": "t058",
+   "kind": "same trash",
+   "earlier_case": "202000065099",
+   "later_case": "202000068943",
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.85,
+   "ask": [],
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true,
+    "out_of_scope": false
+   },
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.8
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.85
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0,
+   "latency_ms": 759
+  }
+ ]
+}

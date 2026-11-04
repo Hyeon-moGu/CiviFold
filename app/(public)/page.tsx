@@ -128,6 +128,10 @@ export default function Home() {
               </a>
               .
             </p>
+            <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+              On real San Francisco 311 photos, picked and with expectations written before the runs, it closed none of 13 requests made after a
+              cleanup at the same spot (location alone: all 13). The demo has four of those real cases.
+            </p>
           </div>
         </div>
       </section>

@@ -1,0 +1,27 @@
+{
+  "asOf": "2026-06-12T02:18:45.000Z",
+  "report_at": {
+    "lat": 37.75539838123743,
+    "lng": -122.46372530001379
+  },
+  "incidents": [
+    {
+      "id": "inc_r082",
+      "category": "road_damage",
+      "status": "open",
+      "lat": 37.7554065314061,
+      "lng": -122.4636702314074,
+      "title": "Reported to SF 311",
+      "created_at": "2026-06-11T23:49:21.000Z",
+      "resolved_at": null,
+      "recurrence_of": null,
+      "photos": [
+        {
+          "path": ".cache/sf311pairs/r082_1.jpg",
+          "report_id": "r_r082_1",
+          "observed_at": "2026-06-11T23:49:21.000Z"
+        }
+      ]
+    }
+  ]
+}

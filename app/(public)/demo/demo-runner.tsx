@@ -8,7 +8,8 @@ import { LinkPending } from "@/app/_ui/link-pending";
 import { pauseFrom, usePaused } from "@/app/_ui/pause";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { Label } from "@/lib/tools/types";
-import { SyntheticBadge, UrgentBadge } from "@/app/_ui/labels";
+import { RealPhotoBadge, SyntheticBadge, UrgentBadge } from "@/app/_ui/labels";
+import { REAL_CREDIT } from "@/lib/dataset/real";
 import { safeMask } from "@/app/_ui/photo";
 
 export type CaseView = {
@@ -24,6 +25,7 @@ export type CaseView = {
   approve?: string; // the staff decision step left to the visitor
   agent?: string; // what a Muse Spark agent can do for this report in the staff view
   verifyKey?: string; // the scenario step whose recorded agent check this case can show
+  real?: boolean; // its photos are real San Francisco 311 records, not synthetic
 };
 type Cutout = { crop: string; mask: string | null; width: number; height: number };
 export type OtherView = {
@@ -91,7 +93,13 @@ function locationMark(expect: Label, got: Label | undefined): Mark {
   return null;
 }
 const civifoldMark = (expect: Label, got: Label | undefined): Mark =>
-  !got ? null : got === expect ? { text: "✓ right call", tone: "text-emerald-700" } : { text: "differs from the right call for this case", tone: "text-amber-700" };
+  !got
+    ? null
+    : got === expect
+      ? { text: "✓ right call", tone: "text-emerald-700" }
+      : MERGES.has(expect) && (got === "NEEDS_INFO" || got === "HUMAN_REVIEW")
+        ? { text: "○ asks before merging: cautious, not wrong", tone: "text-amber-700" }
+        : { text: "differs from the right call for this case", tone: "text-amber-700" };
 
 // What a sent report goes through. A replay steps through it at a reading pace. A live run reports no progress
 // from the server, so it lists the stages and the time taken, without pretending to know which one is running.
@@ -149,23 +157,22 @@ function Plain({ label, size = "lg", urgent = false }: { label: Label; size?: "l
   );
 }
 
-function Photo({ src, caption, cutout }: { src: string; caption: string; cutout?: Cutout }) {
+function Photo({ src, caption, cutout, real = false }: { src: string; caption: string; cutout?: Cutout; real?: boolean }) {
   const mask = safeMask(cutout?.mask);
   return (
     <figure>
       <div className="relative overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100">
+        {/* A real 311 photo is shown whole (portrait or landscape, as the resident took it); the synthetic ones are all 3:2. */}
         {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
-        <img src={src} alt={caption} loading="lazy" className="block aspect-[3/2] w-full object-cover" />
+        <img src={src} alt={caption} loading="lazy" className={`block w-full ${real ? "aspect-square object-contain" : "aspect-[3/2] object-cover"}`} />
         {cutout && mask && (
-          // In the photo's pixels; "slice" crops it as object-cover crops the photo.
-          <svg viewBox={`0 0 ${cutout.width} ${cutout.height}`} preserveAspectRatio="xMidYMid slice" className="pointer-events-none absolute inset-0 h-full w-full">
+          // In the photo's pixels; "slice" crops it as object-cover crops the photo, "meet" fits it as object-contain does.
+          <svg viewBox={`0 0 ${cutout.width} ${cutout.height}`} preserveAspectRatio={real ? "xMidYMid meet" : "xMidYMid slice"} className="pointer-events-none absolute inset-0 h-full w-full">
             <g fill="none" stroke="rgba(0,0,0,0.6)" strokeWidth={4} className="[&_path]:[vector-effect:non-scaling-stroke]" dangerouslySetInnerHTML={{ __html: mask }} />
             <g fill="rgba(255,255,255,0.12)" stroke="#ffffff" strokeWidth={1.5} className="[&_path]:[vector-effect:non-scaling-stroke]" dangerouslySetInnerHTML={{ __html: mask }} />
           </svg>
         )}
-        <span className="absolute left-2 top-2">
-          <SyntheticBadge />
-        </span>
+        <span className="absolute left-2 top-2">{real ? <RealPhotoBadge /> : <SyntheticBadge />}</span>
         {mask && <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 font-mono text-[10px] text-white">outlined by SAM 3.1</span>}
       </div>
       <figcaption className="mt-1.5 text-xs text-zinc-600 sm:text-sm">{caption}</figcaption>
@@ -259,7 +266,7 @@ function Spinner() {
   return <span aria-hidden className="inline-block h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-zinc-400 border-r-transparent" />;
 }
 
-export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[]; others: OtherView[]; live: boolean }) {
+export function DemoRunner({ cases, real = [], others, live: liveOn }: { cases: CaseView[]; real?: CaseView[]; others: OtherView[]; live: boolean }) {
   const [sent, setSent] = useState<Record<string, Sent>>({});
   const [ready, setReady] = useState(false); // what this tab sent is read after the first render
   const [world, setWorld] = useState<Record<string, Sent>>({});
@@ -357,31 +364,10 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
     unsent.forEach((c) => void send(c.key, stagesFor(c.noun, c.boxed).length));
   };
 
-  return (
-    <div className="mt-8 space-y-8">
-      {ready && (batchRunning || unsent.length > 1) && (
-        <div
-          className={`flex flex-col items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/95 px-4 py-3 backdrop-blur sm:flex-row sm:items-center ${batchRunning ? "sticky top-16 z-10" : ""}`}
-        >
-          {batchRunning ? (
-            <p className="flex items-center gap-2 text-sm font-medium text-zinc-800" role="status">
-              <Spinner /> Sending: {batchDone} of {batch.length} done
-            </p>
-          ) : (
-            <>
-              <button onClick={sendAll} disabled={pausedReplay} className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-40">
-                Send the other {unsent.length} reports at once
-              </button>
-              <p className="text-sm text-zinc-600">
-                Each replays its recorded run in seconds.{liveOn && <> &ldquo;Run it live&rdquo; on any card then calls Muse Spark and SAM 3.1 now.</>}
-              </p>
-            </>
-          )}
-        </div>
-      )}
-      {cases.map((c, i) => {
+  // One case's card. featured: one of the main cases, whose first shows the world's own run before the visitor's.
+  const caseCard = (c: CaseView, i: number, label: string, featured: boolean) => {
         // The first case shows the demo world's own run until the visitor sends theirs.
-        const preview = i === 0 && !sent[c.key] && !(c.key in busy) && world[c.key]?.label ? world[c.key] : undefined;
+        const preview = featured && i === 0 && !sent[c.key] && !(c.key in busy) && world[c.key]?.label ? world[c.key] : undefined;
         const r = sent[c.key] ?? preview;
         const running = c.key in busy;
         const done = Boolean(r?.label) && !running;
@@ -398,15 +384,15 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
         return (
           <article key={c.key} id={`case-${c.key.replace(":", "-")}`} className="scroll-mt-20 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
             <header className="flex items-start gap-3 px-5 pt-5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white">{i + 1}</span>
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white">{label}</span>
               <div>
                 <h2 className="text-xl font-semibold tracking-tight">{c.title}</h2>
                 <p className="mt-0.5 text-[15px] text-zinc-600">{c.context}</p>
               </div>
             </header>
             <div className="mt-4 grid grid-cols-2 gap-2 px-5 sm:gap-4">
-              <Photo src={c.incident.photo} caption={c.incident.caption} />
-              <Photo src={c.report.photo} caption={c.report.caption} cutout={done && typeof r?.cutout === "object" ? r.cutout : undefined} />
+              <Photo src={c.incident.photo} caption={c.incident.caption} real={c.real} />
+              <Photo src={c.report.photo} caption={c.report.caption} real={c.real} cutout={done && typeof r?.cutout === "object" ? r.cutout : undefined} />
             </div>
 
             {running ? (
@@ -470,7 +456,7 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
                 />
                 {r?.seen && r.seen.length > 0 && (
                   // Open on the first two cards; the later ones keep it a click away so the page stays short.
-                  <details open={i < 2} className="group mx-5 mt-3 rounded-lg bg-zinc-50 px-4 py-3">
+                  <details open={featured && i < 2} className="group mx-5 mt-3 rounded-lg bg-zinc-50 px-4 py-3">
                     <summary className="cursor-pointer list-none text-xs font-medium text-zinc-500 [&::-webkit-details-marker]:hidden">
                       <span className="mr-1 inline-block transition-transform group-open:rotate-90">›</span>
                       What Muse Spark wrote, comparing the two photos
@@ -569,7 +555,43 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
             </div>
           </article>
         );
-      })}
+  };
+
+  return (
+    <div className="mt-8 space-y-8">
+      {ready && (batchRunning || unsent.length > 1) && (
+        <div
+          className={`flex flex-col items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/95 px-4 py-3 backdrop-blur sm:flex-row sm:items-center ${batchRunning ? "sticky top-16 z-10" : ""}`}
+        >
+          {batchRunning ? (
+            <p className="flex items-center gap-2 text-sm font-medium text-zinc-800" role="status">
+              <Spinner /> Sending: {batchDone} of {batch.length} done
+            </p>
+          ) : (
+            <>
+              <button onClick={sendAll} disabled={pausedReplay} className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-40">
+                Send the other {unsent.length} reports at once
+              </button>
+              <p className="text-sm text-zinc-600">
+                Each replays its recorded run in seconds.{liveOn && <> &ldquo;Run it live&rdquo; on any card then calls Muse Spark and SAM 3.1 now.</>}
+              </p>
+            </>
+          )}
+        </div>
+      )}
+      {cases.map((c, i) => caseCard(c, i, String(i + 1), true))}
+
+      {real.length > 0 && (
+        <section className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">Real 311 photos from San Francisco</h2>
+            <p className="mt-1 text-[15px] leading-relaxed text-zinc-600">
+              Four pairs of real requests, two residents at one spot each, sent at their own place and time. Photos: {REAL_CREDIT}.
+            </p>
+          </div>
+          {real.map((c, i) => caseCard(c, i, String(i + 1), false))}
+        </section>
+      )}
 
       {/* Closed until the visitor opens it or has sent one of its reports, so the page stays short. */}
       <details open={others.some((o) => sent[o.key] || o.key in busy)} className="group">

@@ -10,6 +10,7 @@
 // running it never puts another scenario's steps out of reach.
 import { and, asc, desc, eq, inArray, like } from "drizzle-orm";
 import { messageSample } from "../dataset/messages";
+import { REAL_PAIRS, realSample } from "../dataset/real";
 import { sample } from "../dataset/static";
 import { agentRuns, briefs, images, incidentEvents, incidents, infoRequests, reportAnalyses, reports, segmentations, staffDecisions } from "../db/schema";
 import { locationOnly } from "../eval/ablations";
@@ -24,7 +25,8 @@ import { liveBudgetLeft, type Runtime } from "../server/runtime";
 // `why` tells the visitor what is about to happen and why that answer is the right one.
 type Step =
   | { kind: "repair"; asset: string; hours_ago: number; text: string; why: string }
-  | { kind: "report"; sample: string; observed_hours_ago: number; text: string; why: string; expect: Label }
+  // A real San Francisco 311 photo keeps its own time (lib/dataset/real.ts); observed_hours_ago is for dataset photos.
+  | { kind: "report"; sample: string; observed_hours_ago?: number; text: string; why: string; expect: Label }
   | { kind: "message"; message: string; text: string; why: string; expect: Label; urgent?: boolean }
   // The resident answers the question the previous step's report was asked, with a dataset photo.
   | { kind: "answer"; sample: string; text: string; why: string; expect: Label }
@@ -220,6 +222,42 @@ export const SCENARIOS: Scenario[] = [
       },
     ],
   },
+  {
+    id: "sf311",
+    title: "Real 311 photos from San Francisco",
+    story: "Four pairs of real requests, each two residents at one spot: three photograph the same problem, one reports new trash after Public Works cleared the first.",
+    world: REAL_PAIRS.map((p) => p.id),
+    steps: [
+      {
+        kind: "report",
+        sample: "sf_t058_2",
+        text: "A second resident reports the wooden panel by the tree on 24th Street, a day later",
+        why: "The same panel at the same tree pit and yellow curb. Expect a duplicate.",
+        expect: "DUPLICATE",
+      },
+      {
+        kind: "report",
+        sample: "sf_a123_2",
+        text: "A resident reports trash at the corner tree on Alemany Boulevard, six days after the cleanup",
+        why: "The same tree, pole and crosswalk, with different material after Public Works cleared the spot. Expect a possible recurrence, kept apart.",
+        expect: "POSSIBLE_RECURRENCE",
+      },
+      {
+        kind: "report",
+        sample: "sf_t052_2",
+        text: "A second resident reports the orange bags at the balustrade on Highland Avenue",
+        why: "The same bags at the same balustrade, so a duplicate is the right call.",
+        expect: "DUPLICATE",
+      },
+      {
+        kind: "report",
+        sample: "sf_r085_2",
+        text: "A second resident reports the broken utility cover on Pacific Avenue, two days later",
+        why: "The same vault cover, so a duplicate is the right call.",
+        expect: "DUPLICATE",
+      },
+    ],
+  },
 ];
 
 const demoTag = (scenarioId: string, index: number) => `demo:${scenarioId}:${index}`;
@@ -236,7 +274,9 @@ async function checkWorld(rt: Runtime, scenario: Scenario, index: number) {
   const agent = kind === "verify" || kind === "brief";
   for (const asset of scenario.world) {
     const id = seedIncidentId(asset);
-    const repaired = scenario.steps.slice(0, index).some((s) => s.kind === "repair" && s.asset === asset);
+    // A real pair made after a cleanup is seeded resolved, as Public Works closed it.
+    const seededResolved = REAL_PAIRS.some((p) => p.id === asset && p.resolved_at);
+    const repaired = seededResolved || scenario.steps.slice(0, index).some((s) => s.kind === "repair" && s.asset === asset);
     const [incident] = await rt.database.select({ status: incidents.status }).from(incidents).where(eq(incidents.id, id));
     const events = await rt.database.select({ type: incidentEvents.type }).from(incidentEvents).where(eq(incidentEvents.incident_id, id));
     const types = events
@@ -414,14 +454,15 @@ export async function runStep(rt: Runtime, scenarioId: string, index: number, { 
     await answerReport(rt, asked.id, { photo: { sample_id: step.sample } });
     return analyzed(rt, { report_id: asked.id, tracking_code: asked.tracking_code });
   }
-  const s = sample(step.sample);
+  const real = realSample(step.sample);
+  const s = real ? { id: real.id, lat: real.lat, lng: real.lng, category: real.pair.category } : sample(step.sample);
   if (!s) throw new UserError(`Unknown sample ${step.sample}`);
   const created = await createReport(rt, {
     photo: { sample_id: s.id },
     voice: null,
     lat: s.lat,
     lng: s.lng,
-    observed_at: hoursAgo(step.observed_hours_ago),
+    observed_at: real ? real.observed_at : hoursAgo(step.observed_hours_ago ?? 0),
     observed_at_source: "user",
     description: null,
     category_hint: s.category,

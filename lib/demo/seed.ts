@@ -2,12 +2,15 @@
 // Created: 2026-10-27
 
 // The demo world: every main dataset asset has one open incident, created a few days ago from its
-// first report (the front photo). Everything else in the dataset is left for residents to submit.
+// first report (the front photo). Everything else in the dataset is left for residents to submit. Beside them,
+// the real San Francisco 311 pairs (lib/dataset/real.ts): each earlier request is an incident at its own place
+// and time, resolved when Public Works closed it for a pair made after the cleanup.
 // seedDemo only writes the database, so /api/demo/reset can run it on a deployment; uploadDataset
 // puts the photos in the blob store once, from a machine that has dataset/images.
 import { readdir, readFile } from "node:fs/promises";
 import { desc, sql } from "drizzle-orm";
 import { imageId, type AssetFile } from "../dataset/assets";
+import { REAL_PAIRS, realFile } from "../dataset/real";
 import { VOICE_DIR, voiceBlobKey } from "../dataset/messages";
 import type { BlobStore } from "../db/blobs";
 import type { Db } from "../db/client";
@@ -58,6 +61,18 @@ export async function uploadDataset(store: BlobStore, dir = "dataset/images"): P
   for (const name of (await readdir(/*turbopackIgnore: true*/ dir)).filter((f) => f.endsWith(".webp"))) {
     if (await store.has(name)) continue;
     await store.put(name, await readFile(/*turbopackIgnore: true*/ `${dir}/${name}`), "image/webp");
+    uploaded += 1;
+  }
+  return uploaded;
+}
+
+/** Uploads the real San Francisco 311 photos the blob store does not have yet. */
+export async function uploadReal(store: BlobStore): Promise<number> {
+  let uploaded = 0;
+  for (const photo of REAL_PAIRS.flatMap((p) => [p.earlier, p.later])) {
+    const key = blobKey(photo.id, "image/jpeg");
+    if (await store.has(key)) continue;
+    await store.put(key, await readFile(/*turbopackIgnore: true*/ realFile(photo.id)), "image/jpeg");
     uploaded += 1;
   }
   return uploaded;
@@ -115,5 +130,49 @@ export async function seedDemo(database: Db, file: AssetFile, now = new Date()):
     });
     await database.insert(incidentEvents).values({ incident_id: incident, type: "created", actor: "system", summary: "Opened from the first resident report", created_at: created });
   }
-  return { incidents: mains.length };
+  for (const p of REAL_PAIRS) {
+    const incident = seedIncidentId(p.id);
+    const report = seedReportId(p.id);
+    const at = p.earlier.observed_at;
+    const loc = { lat: p.earlier.lat, lng: p.earlier.lng };
+    await database.insert(incidents).values({
+      id: incident,
+      category: p.category,
+      status: p.resolved_at ? "resolved" : "open",
+      ...loc,
+      title: p.title,
+      created_at: at,
+      resolved_at: p.resolved_at,
+      representative_report_id: report,
+    });
+    await database.insert(reports).values({
+      id: report,
+      tracking_code: `CF-${p.id}A`,
+      incident_id: incident,
+      ...loc,
+      observed_at: at,
+      observed_at_source: "user",
+      submitted_at: at,
+      status: "new_incident",
+      triage: { category: p.category, sam_prompt: p.sam_prompt },
+      is_synthetic: false,
+      dataset_case_id: `sf311-${p.pair}-1`,
+    });
+    await database.insert(images).values({
+      id: p.earlier.id,
+      report_id: report,
+      kind: "original",
+      storage_path: blobKey(p.earlier.id, "image/jpeg"),
+      mime: "image/jpeg",
+      width: p.earlier.width,
+      height: p.earlier.height,
+      is_synthetic: false,
+      dataset_image_id: p.earlier.id,
+    });
+    await database.insert(incidentEvents).values({ incident_id: incident, type: "created", actor: "system", summary: `Opened from San Francisco 311 request ${p.earlier.case}`, created_at: at });
+    if (p.resolved_at) {
+      await database.insert(incidentEvents).values({ incident_id: incident, type: "repair_recorded", actor: "staff", summary: "Public Works closed the request as resolved", created_at: p.resolved_at });
+    }
+  }
+  return { incidents: mains.length + REAL_PAIRS.length };
 }

@@ -244,9 +244,22 @@ San Francisco publishes each 311 request with the resident's photo. Among street
 
 On real photos the fast path closed no request about material dumped after a cleanup. Once (sf04, a corner with a one-way sign and a yellow-banded pole) the comparison matched the spot by its fixed features (0.93) and the rules suggested a possible recurrence. It linked few duplicates: residents photograph a request from different spots and at different items, and Public Works merges requests by spot, so most pairs share no fixed feature the comparison could see, and the rules asked for a wider shot. Three pairs read as different places (0.90 to 0.95) and became new problems. One later photo was read as out of scope and went to staff. Nine sets are a check, not a measurement, and the duplicate labels are Public Works' operational ones, not ground truth.
 
+### Pairs picked by eye
+
+Most of those sets pair different items that Public Works merged by spot, so a second check paired requests by the photos themselves. From pairs of photo requests within 6 m (trash within a day, pavement or sidewalk defects within two weeks, and new requests 1 hour to 7 days after a cleanup), a seeded random sample of 140 was screened by eye before any model call: 37 were kept because both photos clearly show the same pile or the same damage, or, after a cleanup, the same fixed surroundings with different material ([picks and expectations](sf311/pairs-expectations.md), [all candidates](sf311/pairs.json)). In the same-problem runs the earlier request is an open incident; after a cleanup it is resolved at Public Works' closing time ([results](sf311/pairs-results.json), $2.21 in all).
+
+| Pairs | Reports | Suggestions | Outcome |
+|---|---|---|---|
+| Same pile of trash | 18 | duplicate 10, staff review 4, one question 3, new problem 1 | 10 merged, 1 miss |
+| Same road or sidewalk damage | 15 | duplicate 4, one question 9, staff review 1, new problem 1 | 4 merged, 1 miss |
+| After the cleanup | 4 | possible recurrence 2, one question 2 | **0 critical**; location alone would close all 4 |
+
+When both photos clearly show the same thing, the fast path merged 14 of 33 and gave a second incident to 2; the other 17 got a question or went to staff. Road damage asked most often: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Four of these pairs, run once before this check to choose photos, are the demo's real cases; their photos are published blurred in [dataset/real-sf/](../dataset/real-sf/), and the blurred versions gave the same suggestions.
+
 ```bash
-npx tsx scripts/sf311-photos.ts   # downloads and normalizes the 27 photos into .cache/sf311/
+npx tsx scripts/sf311-photos.ts   # downloads and normalizes the photos of both checks into .cache/sf311/ and .cache/sf311pairs/
 npm run analyze -- .cache/sf311/sf04_after.jpg --world scripts/worlds/sf311/sf04-after.json --observed 2026-08-29T13:31:13.000Z --category trash
+npm run analyze -- .cache/sf311pairs/a123_2.jpg --world scripts/worlds/sf311-pairs/a123.json --observed 2026-09-15T13:42:12.000Z --category trash
 ```
 
 ## Running the evaluation

@@ -7,7 +7,7 @@
 import { blobs } from "../lib/db/blobs";
 import { db, migratePostgres } from "../lib/db/client";
 import { ASSET_FILE } from "../lib/dataset/static";
-import { seedDemo, uploadDataset, uploadVoices } from "../lib/demo/seed";
+import { seedDemo, uploadDataset, uploadReal, uploadVoices } from "../lib/demo/seed";
 
 async function main() {
   if (process.env.DATABASE_URL) await migratePostgres(process.env.DATABASE_URL);
@@ -15,9 +15,11 @@ async function main() {
   if (uploaded > 0) console.log(`uploaded ${uploaded} dataset photos`);
   const voices = await uploadVoices(await blobs());
   if (voices > 0) console.log(`uploaded ${voices} sample recordings`);
+  const real = await uploadReal(await blobs());
+  if (real > 0) console.log(`uploaded ${real} San Francisco 311 photos`);
   // The same world the app's reset seeds: the holdout assets stay out of it.
   const result = await seedDemo(await db(), ASSET_FILE);
-  console.log(`seeded ${result.incidents} open incidents into ${process.env.DATABASE_URL ? "Postgres (DATABASE_URL)" : "local PGlite (.cache/pglite)"}`);
+  console.log(`seeded ${result.incidents} incidents into ${process.env.DATABASE_URL ? "Postgres (DATABASE_URL)" : "local PGlite (.cache/pglite)"}`);
   process.exit(0);
 }
 
