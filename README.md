@@ -2,7 +2,7 @@
 
 <p align="center">
   <b>Fold the duplicates. Keep recurrences apart.</b><br>
-  Photo-based duplicate and recurrence checks for city 311 staff, built on Muse Spark and SAM 3.1. It only suggests; staff decide.
+  Matching 311 reports by location alone would close a problem that came back after its repair. CiviFold compares the photos with Muse Spark and SAM 3.1, applies the repair history and suggests. Staff decide.
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@ CiviFold groups duplicate photo reports for city staff and keeps a recurrence, o
 | **Controlled test**: new or returning problems wrongly merged | 24 / 33 | **0 / 33** |
 | **Real SF 311** requests made after a cleanup, closed as already fixed | 13 / 13 | **0 / 13** |
 
-The controlled test was generated with Muse Image, with look-alikes and repairs placed on purpose and every answer known, and scored on its first run. On real photos CiviFold suggests fewer merges than location alone: of 33 pairs showing the same pile or damage it suggested merging 14, asked or sent 17 to staff, and wrongly suggested 2 as new problems. The real checks are small and picked by eye ([results](#results)).
+The demo uses real San Francisco 311 photos. Situations hard to find in real records were generated with Muse Image, for the controlled test and the demo's hard cases. On real photos CiviFold suggests fewer merges than location alone: of 33 pairs showing the same pile or damage it suggested merging 14, asked or sent 17 to staff, and wrongly suggested 2 as new problems. The real checks are small and picked by eye ([results](#results)).
 
 > [!TIP]
 > **Try it in three minutes**
