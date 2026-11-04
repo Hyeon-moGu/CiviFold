@@ -15,7 +15,7 @@ const SUGGESTION_TEXT: Record<Label, string> = {
   LATE_REPORT: "This looks like a problem that was already fixed after your photo was taken. Staff will confirm.",
   ALREADY_RESOLVED: "This looks fixed already. Staff will confirm.",
   NEW: "This looks like a new problem. Staff will review it.",
-  POSSIBLE_RECURRENCE: "This may be the same problem coming back after a repair. Staff will review it first.",
+  POSSIBLE_RECURRENCE: "This may be the same problem coming back after it was fixed or cleared. Staff will review it first.",
   HUMAN_REVIEW: "A staff member will look at your report.",
   NEEDS_INFO: "We need one more thing from you.",
 };
