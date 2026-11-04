@@ -6,6 +6,7 @@
 </p>
 
 <p align="center">
+  <a href="https://youtu.be/wcGPEWtgwMY"><b>Video (3 min)</b></a> ·
   <a href="https://civi-fold.vercel.app/demo"><b>Live demo</b></a> ·
   <a href="#results">Results</a> ·
   <a href="eval/README.md">Evaluation notes</a> ·
