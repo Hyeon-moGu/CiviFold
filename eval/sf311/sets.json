@@ -1,0 +1,1176 @@
+{
+ "source": "DataSF 311 Cases (vw6y-z8j6), Public Works street and sidewalk cleaning, requests 2026-07-15 to 2026-11-03 with a photo; PDDL 1.0",
+ "built": "2026-11-04",
+ "sets": [
+  {
+   "set": "sf01",
+   "selected": false,
+   "reason": "Q3: bedding and belongings; the later photo shows a bare sidewalk",
+   "address": "1208 UTAH ST, SAN FRANCISCO, CA 94110, US",
+   "first": {
+    "case": "101004625661",
+    "requested_local": "2026-08-14T13:56:43.000",
+    "requested_utc": "2026-08-14T20:56:43.000Z",
+    "lat": 37.7540531183898,
+    "lng": -122.40555681288242,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1786741003/san-francisco/production/pnzrnxtgmnt1i6julsym.jpg",
+    "closed_local": "2026-09-01T16:03:24.000",
+    "closed_utc": "2026-09-01T23:03:24.000Z"
+   },
+   "dup": {
+    "case": "101004625665",
+    "requested_local": "2026-08-14T13:57:19.000",
+    "requested_utc": "2026-08-14T20:57:19.000Z",
+    "lat": 37.75408121737506,
+    "lng": -122.4056151509285,
+    "status_notes": "Case is a Duplicate - Request is a duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1786741039/san-francisco/production/hag0gf3keah2ihefw8qm.jpg"
+   },
+   "after": {
+    "case": "202000028794",
+    "requested_local": "2026-09-03T09:48:23.000",
+    "requested_utc": "2026-09-03T16:48:23.000Z",
+    "lat": 37.75407406008736,
+    "lng": -122.40557692945004,
+    "status_notes": "case_resolved - No Work Needed",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788454090/san-francisco/production/geozz2mufsmeam35cmx8.jpg"
+   },
+   "dup_m": 6.0,
+   "dup_h": 0.0,
+   "after_m": 2.9,
+   "after_h": 41.7
+  },
+  {
+   "set": "sf02",
+   "selected": false,
+   "reason": "Q2: the duplicate is the same image as the first report (perceptual hash distance 0)",
+   "address": "1106 EVANS AVE, Virtual, SAN FRANCISCO, CA 94",
+   "first": {
+    "case": "101004645591",
+    "requested_local": "2026-08-18T07:42:28.000",
+    "requested_utc": "2026-08-18T14:42:28.000Z",
+    "lat": 37.73785958064323,
+    "lng": -122.3792201118006,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787064147/san-francisco/production/otyso61uowywsvt6pbbn.jpg",
+    "closed_local": "2026-08-18T12:40:46.000",
+    "closed_utc": "2026-08-18T19:40:46.000Z"
+   },
+   "dup": {
+    "case": "101004645638",
+    "requested_local": "2026-08-18T07:49:27.000",
+    "requested_utc": "2026-08-18T14:49:27.000Z",
+    "lat": 37.73785958064323,
+    "lng": -122.3792201118006,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787064566/san-francisco/production/bnjg9uoqnx4bsofbdokx.jpg"
+   },
+   "after": {
+    "case": "101004674198",
+    "requested_local": "2026-08-22T13:21:42.000",
+    "requested_utc": "2026-08-22T20:21:42.000Z",
+    "lat": 37.737755,
+    "lng": -122.37921166666666,
+    "status_notes": "Case resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787430101/san-francisco/production/zljdpz0n7k5ls45pf0ii.jpg"
+   },
+   "dup_m": 0.0,
+   "dup_h": 0.1,
+   "after_m": 11.6,
+   "after_h": 96.7
+  },
+  {
+   "set": "sf03",
+   "selected": false,
+   "reason": "Q1: the first photo shows a tree base and no dumped material",
+   "address": "1 BARTLETT ST, SAN FRANCISCO, CA 94110, US",
+   "first": {
+    "case": "101004691881",
+    "requested_local": "2026-08-25T12:02:08.000",
+    "requested_utc": "2026-08-25T19:02:08.000Z",
+    "lat": 37.75672742173089,
+    "lng": -122.41993347890215,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787684527/san-francisco/production/xz2jmpm0wrl3pf16fb2g.jpg",
+    "closed_local": "2026-08-27T12:26:29.000",
+    "closed_utc": "2026-08-27T19:26:29.000Z"
+   },
+   "dup": {
+    "case": "202000000701",
+    "requested_local": "2026-08-27T07:39:50.000",
+    "requested_utc": "2026-08-27T14:39:50.000Z",
+    "lat": 37.756749740609244,
+    "lng": -122.41987117128386,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787841581/san-francisco/production/uagobhrxhpesa973h0sp.jpg"
+   },
+   "after": {
+    "case": "202000002131",
+    "requested_local": "2026-08-27T13:15:31.000",
+    "requested_utc": "2026-08-27T20:15:31.000Z",
+    "lat": 37.756649427398,
+    "lng": -122.41983043670645,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787861721/san-francisco/production/vla2fptlixgqmdooz8nu.jpg"
+   },
+   "dup_m": 6.0,
+   "dup_h": 43.6,
+   "after_m": 12.5,
+   "after_h": 0.8
+  },
+  {
+   "set": "sf04",
+   "selected": true,
+   "reason": null,
+   "address": "INTERSECTION BARTLETT ST, 22ND ST, SAN FRANCI",
+   "first": {
+    "case": "202000004026",
+    "requested_local": "2026-08-28T06:11:04.000",
+    "requested_utc": "2026-08-28T13:11:04.000Z",
+    "lat": 37.75537247626864,
+    "lng": -122.41986082435552,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787922656/san-francisco/production/xx3zxaq6s7hnqq2r99mz.jpg",
+    "closed_local": "2026-08-28T12:08:58.000",
+    "closed_utc": "2026-08-28T19:08:58.000Z"
+   },
+   "dup": {
+    "case": "202000004087",
+    "requested_local": "2026-08-28T06:53:37.000",
+    "requested_utc": "2026-08-28T13:53:37.000Z",
+    "lat": 37.755373489304944,
+    "lng": -122.41987173945107,
+    "status_notes": "case_is_a_duplicate - Request merged to SR:2000004026 due to duplications or service type grouping at this location.",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787925204/san-francisco/production/ebefasriptf9ob4wcfda.jpg"
+   },
+   "after": {
+    "case": "202000008230",
+    "requested_local": "2026-08-29T06:31:13.000",
+    "requested_utc": "2026-08-29T13:31:13.000Z",
+    "lat": 37.755370575249884,
+    "lng": -122.41986989034248,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788010263/san-francisco/production/elbbtb5i5pcrifveznur.jpg"
+   },
+   "dup_m": 1.0,
+   "dup_h": 0.7,
+   "after_m": 0.8,
+   "after_h": 18.4
+  },
+  {
+   "set": "sf05",
+   "selected": true,
+   "reason": null,
+   "address": "218 SAN CARLOS ST, SAN FRANCISCO, CA 94110, U",
+   "first": {
+    "case": "202000004324",
+    "requested_local": "2026-08-28T08:06:01.000",
+    "requested_utc": "2026-08-28T15:06:01.000Z",
+    "lat": 37.75991185008504,
+    "lng": -122.42006120911891,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787929547/san-francisco/production/zh4dvlqzuellv8jnd8bc.jpg",
+    "closed_local": "2026-08-28T09:53:33.000",
+    "closed_utc": "2026-08-28T16:53:33.000Z"
+   },
+   "dup": {
+    "case": "202000004327",
+    "requested_local": "2026-08-28T08:06:26.000",
+    "requested_utc": "2026-08-28T15:06:26.000Z",
+    "lat": 37.75992058071863,
+    "lng": -122.42005152013594,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1787929573/san-francisco/production/nea8zglm94kg5evxced1.jpg"
+   },
+   "after": {
+    "case": "202000016490",
+    "requested_local": "2026-08-31T07:33:59.000",
+    "requested_utc": "2026-08-31T14:33:59.000Z",
+    "lat": 37.75994870514741,
+    "lng": -122.42004705143006,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788186832/san-francisco/production/d7nwg1nko6rlrg252hy3.jpg"
+   },
+   "dup_m": 1.3,
+   "dup_h": 0.0,
+   "after_m": 4.3,
+   "after_h": 69.7
+  },
+  {
+   "set": "sf06",
+   "selected": false,
+   "reason": "Q2: the duplicate is the same image as the first report (perceptual hash distance 0)",
+   "address": "1699 15TH ST, Virtual, SAN FRANCISCO, CA 9410",
+   "first": {
+    "case": "202000032076",
+    "requested_local": "2026-09-04T09:57:45.000",
+    "requested_utc": "2026-09-04T16:57:45.000Z",
+    "lat": 37.766479008406016,
+    "lng": -122.42189197875524,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788541052/san-francisco/production/wektrhrmmg3qetyoj4qm.jpg",
+    "closed_local": "2026-09-05T09:54:56.000",
+    "closed_utc": "2026-09-05T16:54:56.000Z"
+   },
+   "dup": {
+    "case": "202000032079",
+    "requested_local": "2026-09-04T09:58:36.000",
+    "requested_utc": "2026-09-04T16:58:36.000Z",
+    "lat": 37.766479008406016,
+    "lng": -122.42189197875524,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788541106/san-francisco/production/zvzm2facmf0gsfxbrshf.jpg"
+   },
+   "after": {
+    "case": "202000048465",
+    "requested_local": "2026-09-09T13:04:43.000",
+    "requested_utc": "2026-09-09T20:04:43.000Z",
+    "lat": 37.76658333333334,
+    "lng": -122.42191333333334,
+    "status_notes": null,
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788984277/san-francisco/production/qqdeit86sp7rfiur1o91.jpg"
+   },
+   "dup_m": 0.0,
+   "dup_h": 0.0,
+   "after_m": 11.7,
+   "after_h": 99.2
+  },
+  {
+   "set": "sf07",
+   "selected": false,
+   "reason": "Q1: the later photo shows a bare sidewalk",
+   "address": "1 MYRTLE ST, Virtual, SAN FRANCISCO, CA 94109",
+   "first": {
+    "case": "202000038523",
+    "requested_local": "2026-09-06T13:26:09.000",
+    "requested_utc": "2026-09-06T20:26:09.000Z",
+    "lat": 37.78558536943434,
+    "lng": -122.41814689924878,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788726340/san-francisco/production/s6dgxpvz86cfs0to6qs4.jpg",
+    "closed_local": "2026-09-08T12:14:25.000",
+    "closed_utc": "2026-09-08T19:14:25.000Z"
+   },
+   "dup": {
+    "case": "202000038525",
+    "requested_local": "2026-09-06T13:26:19.000",
+    "requested_utc": "2026-09-06T20:26:19.000Z",
+    "lat": 37.785575851088645,
+    "lng": -122.4181133029884,
+    "status_notes": "case_is_a_duplicate - Same as SR # 202000038523",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788726372/san-francisco/production/nzuct2l38owm8i7clnfx.jpg"
+   },
+   "after": {
+    "case": "202000055436",
+    "requested_local": "2026-09-11T11:06:27.000",
+    "requested_utc": "2026-09-11T18:06:27.000Z",
+    "lat": 37.785496573705394,
+    "lng": -122.41825539833778,
+    "status_notes": "in progress",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789149980/san-francisco/production/atfbfsiwjuynhvtg1ysi.jpg"
+   },
+   "dup_m": 3.1,
+   "dup_h": 0.0,
+   "after_m": 13.7,
+   "after_h": 70.9
+  },
+  {
+   "set": "sf08",
+   "selected": true,
+   "reason": null,
+   "address": "390 SAN CARLOS ST, SAN FRANCISCO, CA 94110, U",
+   "first": {
+    "case": "202000039953",
+    "requested_local": "2026-09-07T07:40:19.000",
+    "requested_utc": "2026-09-07T14:40:19.000Z",
+    "lat": 37.75723562883029,
+    "lng": -122.41982421251763,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788792012/san-francisco/production/vfw2lge1sxpm8jwuqv8k.jpg",
+    "closed_local": "2026-09-07T11:46:53.000",
+    "closed_utc": "2026-09-07T18:46:53.000Z"
+   },
+   "dup": {
+    "case": "202000039956",
+    "requested_local": "2026-09-07T07:40:41.000",
+    "requested_utc": "2026-09-07T14:40:41.000Z",
+    "lat": 37.757224170680786,
+    "lng": -122.41982783891238,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788792032/san-francisco/production/jg9u77odfgqeowszxse5.jpg"
+   },
+   "after": {
+    "case": "202000048527",
+    "requested_local": "2026-09-09T13:16:20.000",
+    "requested_utc": "2026-09-09T20:16:20.000Z",
+    "lat": 37.75717317048433,
+    "lng": -122.4197897976786,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788984970/san-francisco/production/tqzk0daz6cryva7x65i1.jpg"
+   },
+   "dup_m": 1.3,
+   "dup_h": 0.0,
+   "after_m": 7.6,
+   "after_h": 49.5
+  },
+  {
+   "set": "sf09",
+   "selected": false,
+   "reason": "Q1: the first photo shows empty stairs",
+   "address": "INTERSECTION ANZA ST, JEAN WAY, SAN FRANCISCO",
+   "first": {
+    "case": "202000040649",
+    "requested_local": "2026-09-07T11:01:43.000",
+    "requested_utc": "2026-09-07T18:01:43.000Z",
+    "lat": 37.780687755802575,
+    "lng": -122.44923155754803,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788804093/san-francisco/production/ttw2egjvkfkz6zptggzh.jpg",
+    "closed_local": "2026-09-08T09:05:52.000",
+    "closed_utc": "2026-09-08T16:05:52.000Z"
+   },
+   "dup": {
+    "case": "202000041888",
+    "requested_local": "2026-09-07T17:07:41.000",
+    "requested_utc": "2026-09-08T00:07:41.000Z",
+    "lat": 37.780671856439206,
+    "lng": -122.44923625141381,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788826052/san-francisco/production/xnqqwblwuht0rvewzjei.jpg"
+   },
+   "after": {
+    "case": "202000043920",
+    "requested_local": "2026-09-08T10:39:26.000",
+    "requested_utc": "2026-09-08T17:39:26.000Z",
+    "lat": 37.780685827651396,
+    "lng": -122.44933558221683,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788889153/san-francisco/production/p6swvj46vpdtcsx6jbqi.jpg"
+   },
+   "dup_m": 1.8,
+   "dup_h": 6.1,
+   "after_m": 9.1,
+   "after_h": 1.6
+  },
+  {
+   "set": "sf10",
+   "selected": false,
+   "reason": "Q2: the duplicate is the same image as the first report (perceptual hash distance 0)",
+   "address": "1637 MCALLISTER ST, SAN FRANCISCO, CA 94115, ",
+   "first": {
+    "case": "202000043090",
+    "requested_local": "2026-09-08T08:05:29.000",
+    "requested_utc": "2026-09-08T15:05:29.000Z",
+    "lat": 37.777675824106915,
+    "lng": -122.43910549532474,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788879916/san-francisco/production/xcivdvqzygzhmiuf2qa9.jpg",
+    "closed_local": "2026-09-08T11:21:11.000",
+    "closed_utc": "2026-09-08T18:21:11.000Z"
+   },
+   "dup": {
+    "case": "202000043095",
+    "requested_local": "2026-09-08T08:06:05.000",
+    "requested_utc": "2026-09-08T15:06:05.000Z",
+    "lat": 37.777675824106915,
+    "lng": -122.43910549532474,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788879953/san-francisco/production/owwveuuznnzlwqycndxh.jpg"
+   },
+   "after": {
+    "case": "202000055171",
+    "requested_local": "2026-09-11T10:12:26.000",
+    "requested_utc": "2026-09-11T17:12:26.000Z",
+    "lat": 37.77766320733439,
+    "lng": -122.43895110650952,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789146721/san-francisco/production/yyo2lszw4qncjd9gh62v.jpg"
+   },
+   "dup_m": 0.0,
+   "dup_h": 0.0,
+   "after_m": 13.6,
+   "after_h": 70.9
+  },
+  {
+   "set": "sf11",
+   "selected": false,
+   "reason": "Q1: the first photo shows an empty sidewalk",
+   "address": "25 6TH ST, Virtual, SAN FRANCISCO, CA 94103, ",
+   "first": {
+    "case": "202000047020",
+    "requested_local": "2026-09-09T08:18:46.000",
+    "requested_utc": "2026-09-09T15:18:46.000Z",
+    "lat": 37.78199387682344,
+    "lng": -122.40985572338104,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788967119/san-francisco/production/m0moplrgiemah8uvvgo5.jpg",
+    "closed_local": "2026-09-09T09:44:29.000",
+    "closed_utc": "2026-09-09T16:44:29.000Z"
+   },
+   "dup": {
+    "case": "202000047025",
+    "requested_local": "2026-09-09T08:19:23.000",
+    "requested_utc": "2026-09-09T15:19:23.000Z",
+    "lat": 37.782060387947844,
+    "lng": -122.4099311605096,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1788967156/san-francisco/production/sl9xjbmmgvv4mo9iakwt.jpg"
+   },
+   "after": {
+    "case": "202000054439",
+    "requested_local": "2026-09-11T07:49:49.000",
+    "requested_utc": "2026-09-11T14:49:49.000Z",
+    "lat": 37.78201189577939,
+    "lng": -122.40981012582779,
+    "status_notes": "case_resolved - No Work Needed",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789138180/san-francisco/production/y1nxmn6fyv4qpvkhhee3.jpg"
+   },
+   "dup_m": 9.9,
+   "dup_h": 0.0,
+   "after_m": 4.5,
+   "after_h": 46.1
+  },
+  {
+   "set": "sf12",
+   "selected": false,
+   "reason": "Q2: the duplicate is the same image as the first report (perceptual hash distance 0)",
+   "address": "1615 MCALLISTER ST, SAN FRANCISCO, CA 94115, ",
+   "first": {
+    "case": "202000061107",
+    "requested_local": "2026-09-13T07:43:46.000",
+    "requested_utc": "2026-09-13T14:43:46.000Z",
+    "lat": 37.777699747790265,
+    "lng": -122.4385435743338,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789310616/san-francisco/production/itunvjipgdqyj1kgjnj2.jpg",
+    "closed_local": "2026-09-13T10:09:58.000",
+    "closed_utc": "2026-09-13T17:09:58.000Z"
+   },
+   "dup": {
+    "case": "202000061109",
+    "requested_local": "2026-09-13T07:44:26.000",
+    "requested_utc": "2026-09-13T14:44:26.000Z",
+    "lat": 37.777699747790265,
+    "lng": -122.4385435743338,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789310656/san-francisco/production/wpr58cv4cjonghdaw1mp.jpg"
+   },
+   "after": {
+    "case": "202000083329",
+    "requested_local": "2026-09-19T09:08:54.000",
+    "requested_utc": "2026-09-19T16:08:54.000Z",
+    "lat": 37.777654537317034,
+    "lng": -122.43842941943973,
+    "status_notes": "case_resolved - No Work Needed",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789834128/san-francisco/production/zdo9ocdrvuf3rol8vpnd.jpg"
+   },
+   "dup_m": 0.0,
+   "dup_h": 0.0,
+   "after_m": 11.2,
+   "after_h": 143.0
+  },
+  {
+   "set": "sf13",
+   "selected": true,
+   "reason": null,
+   "address": "INTERSECTION 19TH ST, SAN CARLOS ST, SAN FRAN",
+   "first": {
+    "case": "202000064320",
+    "requested_local": "2026-09-14T07:25:32.000",
+    "requested_utc": "2026-09-14T14:25:32.000Z",
+    "lat": 37.76023055555556,
+    "lng": -122.42002777777778,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789395926/san-francisco/production/jmabttc5nyni4ivwguwa.jpg",
+    "closed_local": "2026-09-14T11:29:17.000",
+    "closed_utc": "2026-09-14T18:29:17.000Z"
+   },
+   "dup": {
+    "case": "202000064455",
+    "requested_local": "2026-09-14T07:49:58.000",
+    "requested_utc": "2026-09-14T14:49:58.000Z",
+    "lat": 37.76020182994399,
+    "lng": -122.42001826054894,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789397392/san-francisco/production/isbesx4nkkctfovoyqkx.jpg"
+   },
+   "after": {
+    "case": "202000072689",
+    "requested_local": "2026-09-16T09:17:26.000",
+    "requested_utc": "2026-09-16T16:17:26.000Z",
+    "lat": 37.76021099398146,
+    "lng": -122.41998941387709,
+    "status_notes": "case_resolved - No Work Needed",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789575436/san-francisco/production/yycuhathkq60cosiw7dj.jpg"
+   },
+   "dup_m": 3.3,
+   "dup_h": 0.4,
+   "after_m": 4.0,
+   "after_h": 45.8
+  },
+  {
+   "set": "sf14",
+   "selected": true,
+   "reason": null,
+   "address": "871 LINCOLN WAY, Virtual, SAN FRANCISCO, CA 9",
+   "first": {
+    "case": "202000064863",
+    "requested_local": "2026-09-14T08:50:14.000",
+    "requested_utc": "2026-09-14T15:50:14.000Z",
+    "lat": 37.76581433839194,
+    "lng": -122.46714417481842,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789401010/san-francisco/production/mbvslp8dsezttz0g2tra.jpg",
+    "closed_local": "2026-09-14T14:01:19.000",
+    "closed_utc": "2026-09-14T21:01:19.000Z"
+   },
+   "dup": {
+    "case": "202000064973",
+    "requested_local": "2026-09-14T09:06:04.000",
+    "requested_utc": "2026-09-14T16:06:04.000Z",
+    "lat": 37.76573770613123,
+    "lng": -122.4672323231326,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789401957/san-francisco/production/is2pixtfbc5rbcijku4o.jpg"
+   },
+   "after": {
+    "case": "202000080430",
+    "requested_local": "2026-09-18T09:33:15.000",
+    "requested_utc": "2026-09-18T16:33:15.000Z",
+    "lat": 37.765810551240875,
+    "lng": -122.46725901961328,
+    "status_notes": null,
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789749183/san-francisco/production/quqcrbjampdoryrvebcr.jpg"
+   },
+   "dup_m": 11.5,
+   "dup_h": 0.3,
+   "after_m": 10.1,
+   "after_h": 91.5
+  },
+  {
+   "set": "sf15",
+   "selected": true,
+   "reason": null,
+   "address": "INTERSECTION JUDAH ST, 12TH AVE, SAN FRANCISC",
+   "first": {
+    "case": "202000068829",
+    "requested_local": "2026-09-15T09:05:03.000",
+    "requested_utc": "2026-09-15T16:05:03.000Z",
+    "lat": 37.76201666666667,
+    "lng": -122.46943666666667,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789488294/san-francisco/production/vuxl91i7yqbbimnkpixv.jpg",
+    "closed_local": "2026-09-15T11:33:14.000",
+    "closed_utc": "2026-09-15T18:33:14.000Z"
+   },
+   "dup": {
+    "case": "202000069207",
+    "requested_local": "2026-09-15T10:14:33.000",
+    "requested_utc": "2026-09-15T17:14:33.000Z",
+    "lat": 37.7620065081456,
+    "lng": -122.46956909008045,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789492463/san-francisco/production/vk3uztyobp48uznh6zio.jpg"
+   },
+   "after": {
+    "case": "202000084029",
+    "requested_local": "2026-09-19T11:43:54.000",
+    "requested_utc": "2026-09-19T18:43:54.000Z",
+    "lat": 37.76196238322149,
+    "lng": -122.46950200356673,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789843405/san-francisco/production/prgp3ukswaaonp8hgvdy.jpg"
+   },
+   "dup_m": 11.7,
+   "dup_h": 1.2,
+   "after_m": 8.3,
+   "after_h": 96.2
+  },
+  {
+   "set": "sf16",
+   "selected": false,
+   "reason": "Q1: in the later photo the material is not clear among wood chips",
+   "address": "3549 19TH ST, SAN FRANCISCO, CA 94110, US",
+   "first": {
+    "case": "202000080089",
+    "requested_local": "2026-09-18T08:23:27.000",
+    "requested_utc": "2026-09-18T15:23:27.000Z",
+    "lat": 37.759985382198636,
+    "lng": -122.4225310498925,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789744999/san-francisco/production/icjb0jeq6lhaoklbo0qj.jpg",
+    "closed_local": "2026-09-20T14:34:27.000",
+    "closed_utc": "2026-09-20T21:34:27.000Z"
+   },
+   "dup": {
+    "case": "202000083652",
+    "requested_local": "2026-09-19T10:24:40.000",
+    "requested_utc": "2026-09-19T17:24:40.000Z",
+    "lat": 37.759982435456635,
+    "lng": -122.42260957686182,
+    "status_notes": "case_is_a_duplicate -",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1789838668/san-francisco/production/g9fia3ohivo6rydjwafn.jpg"
+   },
+   "after": {
+    "case": "202000097320",
+    "requested_local": "2026-09-23T09:23:28.000",
+    "requested_utc": "2026-09-23T16:23:28.000Z",
+    "lat": 37.75994375121192,
+    "lng": -122.422414247467,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1790180599/san-francisco/production/ygkhssvrbk0zfrczrqij.jpg"
+   },
+   "dup_m": 6.9,
+   "dup_h": 26.0,
+   "after_m": 11.2,
+   "after_h": 66.8
+  },
+  {
+   "set": "sf17",
+   "selected": false,
+   "reason": "Q1: the first photo shows a corner and a fence, no material",
+   "address": "INTERSECTION EARL ST, INNES AVE, SAN FRANCISC",
+   "first": {
+    "case": "202000094083",
+    "requested_local": "2026-09-22T10:59:05.000",
+    "requested_utc": "2026-09-22T17:59:05.000Z",
+    "lat": 37.729837139333775,
+    "lng": -122.37197167360449,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1790099929/san-francisco/production/ymchbrljkqhj1ooih4gv.jpg",
+    "closed_local": "2026-09-22T12:43:50.000",
+    "closed_utc": "2026-09-22T19:43:50.000Z"
+   },
+   "dup": {
+    "case": "202000094094",
+    "requested_local": "2026-09-22T11:00:59.000",
+    "requested_utc": "2026-09-22T18:00:59.000Z",
+    "lat": 37.7297863790758,
+    "lng": -122.37189542500013,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1790100044/san-francisco/production/nc5qkihj1jspvp0ypqkt.jpg"
+   },
+   "after": {
+    "case": "202000097805",
+    "requested_local": "2026-09-23T11:24:53.000",
+    "requested_utc": "2026-09-23T18:24:53.000Z",
+    "lat": 37.72977476870578,
+    "lng": -122.37198002002322,
+    "status_notes": null,
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1790187882/san-francisco/production/vcqy5zdqbhb3dwyd2m0s.jpg"
+   },
+   "dup_m": 8.7,
+   "dup_h": 0.0,
+   "after_m": 7.0,
+   "after_h": 22.7
+  },
+  {
+   "set": "sf18",
+   "selected": true,
+   "reason": null,
+   "address": "1499 IRVING ST, SAN FRANCISCO, CA 94122, US",
+   "first": {
+    "case": "202000103825",
+    "requested_local": "2026-09-25T08:07:00.000",
+    "requested_utc": "2026-09-25T15:07:00.000Z",
+    "lat": 37.763603859462606,
+    "lng": -122.47383581892015,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1790348810/san-francisco/production/w2cncooquye6qwicmytp.jpg",
+    "closed_local": "2026-09-25T11:58:50.000",
+    "closed_utc": "2026-09-25T18:58:50.000Z"
+   },
+   "dup": {
+    "case": "202000103864",
+    "requested_local": "2026-09-25T08:12:01.000",
+    "requested_utc": "2026-09-25T15:12:01.000Z",
+    "lat": 37.76353821393906,
+    "lng": -122.47391449163372,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1790349111/san-francisco/production/emzxfe4d9lc6bs1mhiv1.jpg"
+   },
+   "after": {
+    "case": "202000121269",
+    "requested_local": "2026-09-30T10:13:24.000",
+    "requested_utc": "2026-09-30T17:13:24.000Z",
+    "lat": 37.763621666666666,
+    "lng": -122.47376333333334,
+    "status_notes": null,
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1790788400/san-francisco/production/w7gtlz90turlecpsxtlb.jpg"
+   },
+   "dup_m": 10.0,
+   "dup_h": 0.1,
+   "after_m": 6.7,
+   "after_h": 118.2
+  },
+  {
+   "set": "sf19",
+   "selected": false,
+   "reason": "Q2: the duplicate is the same image as the first report (perceptual hash distance 0)",
+   "address": "5847 CALIFORNIA ST, SAN FRANCISCO, CA 94121, ",
+   "first": {
+    "case": "202000143922",
+    "requested_local": "2026-10-05T12:00:09.000",
+    "requested_utc": "2026-10-05T19:00:09.000Z",
+    "lat": 37.784015264495345,
+    "lng": -122.4805582821164,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791226801/san-francisco/production/s6uzwtqoomkg9sve4937.jpg",
+    "closed_local": "2026-10-06T10:32:16.000",
+    "closed_utc": "2026-10-06T17:32:16.000Z"
+   },
+   "dup": {
+    "case": "202000143923",
+    "requested_local": "2026-10-05T12:00:16.000",
+    "requested_utc": "2026-10-05T19:00:16.000Z",
+    "lat": 37.784015264495345,
+    "lng": -122.4805582821164,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791226806/san-francisco/production/bw1vnozkcxcc6jua2abv.jpg"
+   },
+   "after": {
+    "case": "202000150488",
+    "requested_local": "2026-10-06T17:43:32.000",
+    "requested_utc": "2026-10-07T00:43:32.000Z",
+    "lat": 37.78401462235858,
+    "lng": -122.48066168278457,
+    "status_notes": null,
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791333800/san-francisco/production/ppunio702dl54hpmsf99.jpg"
+   },
+   "dup_m": 0.0,
+   "dup_h": 0.0,
+   "after_m": 9.1,
+   "after_h": 7.2
+  },
+  {
+   "set": "sf20",
+   "selected": false,
+   "reason": "Q2: the duplicate is the same image as the first report (perceptual hash distance 0)",
+   "address": "1451 ELLIS ST, SAN FRANCISCO, CA 94115, US",
+   "first": {
+    "case": "202000147744",
+    "requested_local": "2026-10-06T07:46:43.000",
+    "requested_utc": "2026-10-06T14:46:43.000Z",
+    "lat": 37.782628333333335,
+    "lng": -122.43026166666667,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791297996/san-francisco/production/ahastnkwt7msrsryv1oq.jpg",
+    "closed_local": "2026-10-06T10:48:39.000",
+    "closed_utc": "2026-10-06T17:48:39.000Z"
+   },
+   "dup": {
+    "case": "202000147747",
+    "requested_local": "2026-10-06T07:47:04.000",
+    "requested_utc": "2026-10-06T14:47:04.000Z",
+    "lat": 37.782628333333335,
+    "lng": -122.43026166666667,
+    "status_notes": "case_is_a_duplicate -",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791298020/san-francisco/production/xqrrmsv4pkvfchboq3m8.jpg"
+   },
+   "after": {
+    "case": "202000151617",
+    "requested_local": "2026-10-07T07:36:55.000",
+    "requested_utc": "2026-10-07T14:36:55.000Z",
+    "lat": 37.78262,
+    "lng": -122.430175,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791383798/san-francisco/production/vcqcjeqtog29izccfi3k.jpg"
+   },
+   "dup_m": 0.0,
+   "dup_h": 0.0,
+   "after_m": 7.7,
+   "after_h": 20.8
+  },
+  {
+   "set": "sf21",
+   "selected": false,
+   "reason": "Q1: the duplicate shows wet pavement by a pole, no material",
+   "address": "3306 22ND ST, Virtual, SAN FRANCISCO, CA 9411",
+   "first": {
+    "case": "202000158057",
+    "requested_local": "2026-10-08T12:25:55.000",
+    "requested_utc": "2026-10-08T19:25:55.000Z",
+    "lat": 37.75534627790818,
+    "lng": -122.42115275915738,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791487549/san-francisco/production/zljvnrkt0rso7mk6pukx.jpg",
+    "closed_local": "2026-10-10T13:09:23.000",
+    "closed_utc": "2026-10-10T20:09:23.000Z"
+   },
+   "dup": {
+    "case": "202000158063",
+    "requested_local": "2026-10-08T12:27:20.000",
+    "requested_utc": "2026-10-08T19:27:20.000Z",
+    "lat": 37.755358392477554,
+    "lng": -122.4211658465737,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791487634/san-francisco/production/xxxoqej6sjqxpppypsyx.jpg"
+   },
+   "after": {
+    "case": "202000193583",
+    "requested_local": "2026-10-17T11:56:50.000",
+    "requested_utc": "2026-10-17T18:56:50.000Z",
+    "lat": 37.75533682323538,
+    "lng": -122.42120349443918,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792263404/odbibsdx2megald8g591.jpg"
+   },
+   "dup_m": 1.8,
+   "dup_h": 0.0,
+   "after_m": 4.6,
+   "after_h": 166.8
+  },
+  {
+   "set": "sf22",
+   "selected": false,
+   "reason": "Q1: the first photo shows a tree base, no material",
+   "address": "611 HYDE ST, SAN FRANCISCO, CA 94109, US",
+   "first": {
+    "case": "202000171790",
+    "requested_local": "2026-10-11T15:32:33.000",
+    "requested_utc": "2026-10-11T22:32:33.000Z",
+    "lat": 37.786492384807865,
+    "lng": -122.41670474410057,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791757944/san-francisco/production/e45qiyzpo6me2cra2j7k.jpg",
+    "closed_local": "2026-10-13T21:52:35.000",
+    "closed_utc": "2026-10-14T04:52:35.000Z"
+   },
+   "dup": {
+    "case": "202000178841",
+    "requested_local": "2026-10-13T11:03:18.000",
+    "requested_utc": "2026-10-13T18:03:18.000Z",
+    "lat": 37.786445311936596,
+    "lng": -122.41661577821664,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791914589/san-francisco/production/a4zql6rrri3aa0dry5yd.jpg"
+   },
+   "after": {
+    "case": "202000201783",
+    "requested_local": "2026-10-19T21:40:09.000",
+    "requested_utc": "2026-10-20T04:40:09.000Z",
+    "lat": 37.78641103941816,
+    "lng": -122.41664908826353,
+    "status_notes": "in progress",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792471195/zn0c2lrhbcaqp1cnyfhe.jpg"
+   },
+   "dup_m": 9.4,
+   "dup_h": 43.5,
+   "after_m": 10.3,
+   "after_h": 143.8
+  },
+  {
+   "set": "sf23",
+   "selected": false,
+   "reason": "Q1: the material is unclear and may not be dumping",
+   "address": "901 ULLOA ST, SAN FRANCISCO, CA 94127, US",
+   "first": {
+    "case": "202000175172",
+    "requested_local": "2026-10-12T12:23:01.000",
+    "requested_utc": "2026-10-12T19:23:01.000Z",
+    "lat": 37.74092622109146,
+    "lng": -122.46622596017468,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791832977/san-francisco/production/kf6bud1xjcmcwlvoh00q.jpg",
+    "closed_local": "2026-10-13T11:28:16.000",
+    "closed_utc": "2026-10-13T18:28:16.000Z"
+   },
+   "dup": {
+    "case": "202000175178",
+    "requested_local": "2026-10-12T12:24:25.000",
+    "requested_utc": "2026-10-12T19:24:25.000Z",
+    "lat": 37.741038459388456,
+    "lng": -122.46621094655474,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1791833061/san-francisco/production/u41qfgzrgtijxwmcelqf.jpg"
+   },
+   "after": {
+    "case": "202000196464",
+    "requested_local": "2026-10-18T11:57:35.000",
+    "requested_utc": "2026-10-18T18:57:35.000Z",
+    "lat": 37.74094218381543,
+    "lng": -122.46612454613697,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792349846/gf6qf7snkuotp8jycyns.jpg"
+   },
+   "dup_m": 12.5,
+   "dup_h": 0.0,
+   "after_m": 9.1,
+   "after_h": 120.5
+  },
+  {
+   "set": "sf24",
+   "selected": false,
+   "reason": "Q2: the duplicate is the same image as the first report (perceptual hash distance 0)",
+   "address": "3050 21ST ST, Virtual, SAN FRANCISCO, CA 9411",
+   "first": {
+    "case": "202000189237",
+    "requested_local": "2026-10-16T08:21:21.000",
+    "requested_utc": "2026-10-16T15:21:21.000Z",
+    "lat": 37.7572897752552,
+    "lng": -122.41574870696881,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792164071/mkqsnsvn2pwuobts3rcg.jpg",
+    "closed_local": "2026-10-17T10:13:55.000",
+    "closed_utc": "2026-10-17T17:13:55.000Z"
+   },
+   "dup": {
+    "case": "202000189254",
+    "requested_local": "2026-10-16T08:23:32.000",
+    "requested_utc": "2026-10-16T15:23:32.000Z",
+    "lat": 37.7572897752552,
+    "lng": -122.41574870696881,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792164206/ffd7lj8vp7zmzq9w15mv.jpg"
+   },
+   "after": {
+    "case": "202000195669",
+    "requested_local": "2026-10-18T08:44:32.000",
+    "requested_utc": "2026-10-18T15:44:32.000Z",
+    "lat": 37.75736607138133,
+    "lng": -122.41586097175262,
+    "status_notes": null,
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792338263/ph2ovonkxjx9lrcobgxx.jpg"
+   },
+   "dup_m": 0.0,
+   "dup_h": 0.0,
+   "after_m": 13.0,
+   "after_h": 22.5
+  },
+  {
+   "set": "sf25",
+   "selected": false,
+   "reason": "Q2: the duplicate is the same image as the first report (perceptual hash distance 0)",
+   "address": "1400 PHELPS ST, Virtual, SAN FRANCISCO, CA 94",
+   "first": {
+    "case": "202000202761",
+    "requested_local": "2026-10-20T09:02:56.000",
+    "requested_utc": "2026-10-20T16:02:56.000Z",
+    "lat": 37.736657159087024,
+    "lng": -122.39423952468843,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792512166/tqwwd6ndhemb70zlqsn1.jpg",
+    "closed_local": "2026-10-20T11:21:15.000",
+    "closed_utc": "2026-10-20T18:21:15.000Z"
+   },
+   "dup": {
+    "case": "202000202812",
+    "requested_local": "2026-10-20T09:12:42.000",
+    "requested_utc": "2026-10-20T16:12:42.000Z",
+    "lat": 37.736657159087024,
+    "lng": -122.39423952468843,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792512749/hzwnjs86mkt4yjsi7zyl.jpg"
+   },
+   "after": {
+    "case": "202000219385",
+    "requested_local": "2026-10-24T16:27:16.000",
+    "requested_utc": "2026-10-24T23:27:16.000Z",
+    "lat": 37.73664850270335,
+    "lng": -122.39426686964435,
+    "status_notes": "in progress",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792884424/gwnk9k2og5gzcuc2cst8.jpg"
+   },
+   "dup_m": 0.0,
+   "dup_h": 0.2,
+   "after_m": 2.6,
+   "after_h": 101.1
+  },
+  {
+   "set": "sf26",
+   "selected": true,
+   "reason": null,
+   "address": "INTERSECTION JONES ST, ELLIS ST, SAN FRANCISC",
+   "first": {
+    "case": "202000203999",
+    "requested_local": "2026-10-20T13:47:19.000",
+    "requested_utc": "2026-10-20T20:47:19.000Z",
+    "lat": 37.784831753587554,
+    "lng": -122.41266419006365,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792529233/h0bcjjxvblmaxenh0ef4.jpg",
+    "closed_local": "2026-10-21T17:24:46.000",
+    "closed_utc": "2026-10-22T00:24:46.000Z"
+   },
+   "dup": {
+    "case": "202000207270",
+    "requested_local": "2026-10-21T11:43:18.000",
+    "requested_utc": "2026-10-21T18:43:18.000Z",
+    "lat": 37.78493001589147,
+    "lng": -122.41264754366384,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792608188/iszjcdxzwmyzjvff4prg.jpg"
+   },
+   "after": {
+    "case": "202000209836",
+    "requested_local": "2026-10-22T07:55:05.000",
+    "requested_utc": "2026-10-22T14:55:05.000Z",
+    "lat": 37.784933632964254,
+    "lng": -122.41265188467906,
+    "status_notes": null,
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792680895/b4w8fbwr96yeal49uo7v.jpg"
+   },
+   "dup_m": 11.0,
+   "dup_h": 21.9,
+   "after_m": 11.4,
+   "after_h": 14.5
+  },
+  {
+   "set": "sf27",
+   "selected": false,
+   "reason": "Q1: the first photo shows dark spots on gravel, unclear",
+   "address": "39 BARTLETT ST, SAN FRANCISCO, CA 94110, US",
+   "first": {
+    "case": "202000208176",
+    "requested_local": "2026-10-21T15:32:53.000",
+    "requested_utc": "2026-10-21T22:32:53.000Z",
+    "lat": 37.75630010907081,
+    "lng": -122.41984991569382,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792621964/khazjocw5c5nsidmvt89.jpg",
+    "closed_local": "2026-10-26T11:54:51.000",
+    "closed_utc": "2026-10-26T18:54:51.000Z"
+   },
+   "dup": {
+    "case": "202000213309",
+    "requested_local": "2026-10-23T07:34:31.000",
+    "requested_utc": "2026-10-23T14:34:31.000Z",
+    "lat": 37.756304866793904,
+    "lng": -122.41985669505914,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792766055/vvguds0jogjriief5hcp.jpg"
+   },
+   "after": {
+    "case": "202000227396",
+    "requested_local": "2026-10-26T14:01:58.000",
+    "requested_utc": "2026-10-26T21:01:58.000Z",
+    "lat": 37.756338442405124,
+    "lng": -122.41983597048703,
+    "status_notes": "case_resolved - No Work Needed",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1793048504/giewx3pqfprreqknqt1l.jpg"
+   },
+   "dup_m": 0.8,
+   "dup_h": 40.0,
+   "after_m": 4.4,
+   "after_h": 2.1
+  },
+  {
+   "set": "sf28",
+   "selected": false,
+   "reason": "Q1: the first photo shows a bus stop corner, no material",
+   "address": "801 LEAVENWORTH ST, SAN FRANCISCO, CA 94109, ",
+   "first": {
+    "case": "202000211736",
+    "requested_local": "2026-10-22T16:12:22.000",
+    "requested_utc": "2026-10-22T23:12:22.000Z",
+    "lat": 37.78845036926936,
+    "lng": -122.41534446826974,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792710732/al5bndpt1bizlrgwydwy.jpg",
+    "closed_local": "2026-10-23T16:10:16.000",
+    "closed_utc": "2026-10-23T23:10:16.000Z"
+   },
+   "dup": {
+    "case": "202000214106",
+    "requested_local": "2026-10-23T10:04:14.000",
+    "requested_utc": "2026-10-23T17:04:14.000Z",
+    "lat": 37.78842980945065,
+    "lng": -122.4154095724225,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792775028/mulpkve1zatajv7ftg0s.jpg"
+   },
+   "after": {
+    "case": "202000216427",
+    "requested_local": "2026-10-23T20:15:24.000",
+    "requested_utc": "2026-10-24T03:15:24.000Z",
+    "lat": 37.78844623489022,
+    "lng": -122.41549287666774,
+    "status_notes": null,
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792811715/vmsyanjlhymo7cx2q5jx.jpg"
+   },
+   "dup_m": 6.2,
+   "dup_h": 17.9,
+   "after_m": 13.0,
+   "after_h": 4.1
+  },
+  {
+   "set": "sf29",
+   "selected": true,
+   "reason": null,
+   "address": "137 SAN CARLOS ST, SAN FRANCISCO, CA 94110, U",
+   "first": {
+    "case": "202000215065",
+    "requested_local": "2026-10-23T13:23:04.000",
+    "requested_utc": "2026-10-23T20:23:04.000Z",
+    "lat": 37.76122362933444,
+    "lng": -122.42000881152188,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792786974/zs8bofe7dxusdkcedned.jpg",
+    "closed_local": "2026-10-24T09:27:32.000",
+    "closed_utc": "2026-10-24T16:27:32.000Z"
+   },
+   "dup": {
+    "case": "202000215066",
+    "requested_local": "2026-10-23T13:23:31.000",
+    "requested_utc": "2026-10-23T20:23:31.000Z",
+    "lat": 37.761238333333324,
+    "lng": -122.41988284436003,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1792787002/ylt94wccqifhvunlw63x.jpg"
+   },
+   "after": {
+    "case": "202000225216",
+    "requested_local": "2026-10-26T07:37:09.000",
+    "requested_utc": "2026-10-26T14:37:09.000Z",
+    "lat": 37.76135333333333,
+    "lng": -122.42005333333333,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1793025419/igqdpwevz7diwwuc585a.jpg"
+   },
+   "dup_m": 11.2,
+   "dup_h": 0.0,
+   "after_m": 14.9,
+   "after_h": 46.2
+  },
+  {
+   "set": "sf30",
+   "selected": false,
+   "reason": "Q1: the duplicate is a close-up of a utility box, no material",
+   "address": "INTERSECTION DUBOCE AVE, CHURCH ST, SAN FRANC",
+   "first": {
+    "case": "202000242279",
+    "requested_local": "2026-10-30T07:12:53.000",
+    "requested_utc": "2026-10-30T14:12:53.000Z",
+    "lat": 37.76954733575277,
+    "lng": -122.42920127754155,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1793369566/c0jrlfrowq7mo8tisncq.jpg",
+    "closed_local": "2026-10-31T10:39:14.000",
+    "closed_utc": "2026-10-31T17:39:14.000Z"
+   },
+   "dup": {
+    "case": "202000242287",
+    "requested_local": "2026-10-30T07:18:19.000",
+    "requested_utc": "2026-10-30T14:18:19.000Z",
+    "lat": 37.769619435756,
+    "lng": -122.42920440688228,
+    "status_notes": "case_is_a_duplicate - Duplicate",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1793369889/rjx7vknok9nhge3bg3yg.jpg"
+   },
+   "after": {
+    "case": "202000253419",
+    "requested_local": "2026-11-02T07:03:36.000",
+    "requested_utc": "2026-11-02T15:03:36.000Z",
+    "lat": 37.76961779338268,
+    "lng": -122.42919155401766,
+    "status_notes": "case_resolved - Resolved",
+    "photo_url": "https://spot-sf-res.cloudinary.com/image/upload/v1793631809/oto0pxe1sgtotvzu6po6.jpg"
+   },
+   "dup_m": 8.0,
+   "dup_h": 0.1,
+   "after_m": 7.9,
+   "after_h": 44.4
+  }
+ ]
+}

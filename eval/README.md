@@ -233,6 +233,22 @@ Triage read all three as dumped trash with the problem visible. The comparison m
 npm run analyze -- dataset/real/dump1_side.jpg --world scripts/worlds/real-dump1-far-first.json --observed 2026-10-27T14:08:17.000Z
 ```
 
+## Real 311 photos: San Francisco
+
+San Francisco publishes each 311 request with the resident's photo. Among street and sidewalk cleaning requests from July 15 to November 3, 2026, 30 spots had three photo requests: one that Public Works resolved, one it closed as a duplicate while the first was open, and one made within 7 days after the cleanup. The photos were screened before any model saw them, and 9 of 30 sets were kept: the dumped material visible in all three, the duplicate not the same image sent twice, no encampment or person as the subject. What would count as right, a miss or critical was written down first ([selection and expectations](sf311/expectations.md), [all 30 sets](sf311/sets.json)). Each report ran once, live, through the unchanged fast path at its own location and time ([results](sf311/results.json), $1.10 in all). The photos are not copied into this repository.
+
+| Run | Reports | Suggestions | Outcome |
+|---|---|---|---|
+| After the cleanup (the first request resolved) | 9 | possible recurrence 1, new problem 2, one question 5, staff review 1 | **0 critical**; location alone would have closed all 9 |
+| Duplicate while open (Public Works merged it) | 9 | duplicate 1, staff review 1, one question 4, new problem 3 | 3 misses (a second incident); no wrong link is possible here |
+
+On real photos the fast path closed no request about material dumped after a cleanup. Once (sf04, a corner with a one-way sign and a yellow-banded pole) the comparison matched the spot by its fixed features (0.93) and the rules suggested a possible recurrence. It linked few duplicates: residents photograph a request from different spots and at different items, and Public Works merges requests by spot, so most pairs share no fixed feature the comparison could see, and the rules asked for a wider shot. Three pairs read as different places (0.90 to 0.95) and became new problems. One later photo was read as out of scope and went to staff. Nine sets are a check, not a measurement, and the duplicate labels are Public Works' operational ones, not ground truth.
+
+```bash
+npx tsx scripts/sf311-photos.ts   # downloads and normalizes the 27 photos into .cache/sf311/
+npm run analyze -- .cache/sf311/sf04_after.jpg --world scripts/worlds/sf311/sf04-after.json --observed 2026-08-29T13:31:13.000Z --category trash
+```
+
 ## Running the evaluation
 
 These commands evaluate the current code. They do not reproduce historical runs made with earlier code or prompts, and the model cache those runs used is not in the repository, so they need a Meta Model API key. `--run` defaults to 1, which is the number of the published results. Pass a new number so they are not overwritten.

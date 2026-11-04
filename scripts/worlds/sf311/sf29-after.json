@@ -1,0 +1,27 @@
+{
+  "asOf": "2026-10-26T14:37:09.000Z",
+  "report_at": {
+    "lat": 37.76135333333333,
+    "lng": -122.42005333333333
+  },
+  "incidents": [
+    {
+      "id": "inc_sf29",
+      "category": "trash",
+      "status": "resolved",
+      "lat": 37.76122362933444,
+      "lng": -122.42000881152188,
+      "title": "Dumped material on the sidewalk",
+      "created_at": "2026-10-23T20:23:04.000Z",
+      "resolved_at": "2026-10-24T16:27:32.000Z",
+      "recurrence_of": null,
+      "photos": [
+        {
+          "path": ".cache/sf311/sf29_first.jpg",
+          "report_id": "r_sf29_first",
+          "observed_at": "2026-10-23T20:23:04.000Z"
+        }
+      ]
+    }
+  ]
+}

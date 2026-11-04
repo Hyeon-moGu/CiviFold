@@ -1,0 +1,602 @@
+{
+ "run": 1,
+ "date": "2026-11-04",
+ "mode": "live (cached_then_live, no recording existed)",
+ "config": "C_rules fast path, unchanged",
+ "total_usd": 1.0986,
+ "results": [
+  {
+   "set": "sf04",
+   "run": "dup",
+   "case": "202000004087",
+   "incident_case": "202000004026",
+   "distance_m": 1.0,
+   "hours": 0.7,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEW",
+   "rule_id": "R3",
+   "confidence": 0.92,
+   "ask": [],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "different",
+     "confidence": 0.92
+    }
+   ],
+   "outcome": "miss",
+   "cost_usd": 0.0755,
+   "latency_ms": 110660
+  },
+  {
+   "set": "sf04",
+   "run": "after",
+   "case": "202000008230",
+   "incident_case": "202000004026",
+   "distance_m": 0.8,
+   "hours": 18.4,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "POSSIBLE_RECURRENCE",
+   "rule_id": "R7d",
+   "confidence": 0.93,
+   "ask": [],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.92
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.93
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0714,
+   "latency_ms": 111238
+  },
+  {
+   "set": "sf05",
+   "run": "dup",
+   "case": "202000004327",
+   "incident_case": "202000004324",
+   "distance_m": 1.3,
+   "hours": 0.0,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "different_angle"
+   ],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0783,
+   "latency_ms": 96500
+  },
+  {
+   "set": "sf05",
+   "run": "after",
+   "case": "202000016490",
+   "incident_case": "202000004324",
+   "distance_m": 4.3,
+   "hours": 69.7,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "different_angle"
+   ],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0545,
+   "latency_ms": 61182
+  },
+  {
+   "set": "sf08",
+   "run": "dup",
+   "case": "202000039956",
+   "incident_case": "202000039953",
+   "distance_m": 1.3,
+   "hours": 0.0,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context"
+   ],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0535,
+   "latency_ms": 62276
+  },
+  {
+   "set": "sf08",
+   "run": "after",
+   "case": "202000048527",
+   "incident_case": "202000039953",
+   "distance_m": 7.6,
+   "hours": 49.5,
+   "triage": {
+    "category": "other",
+    "quality": "ok",
+    "problem_visible": false
+   },
+   "label": "HUMAN_REVIEW",
+   "rule_id": "R0s",
+   "confidence": 0,
+   "ask": [],
+   "comparisons": [],
+   "outcome": "ok",
+   "cost_usd": 0.014,
+   "latency_ms": 22896
+  },
+  {
+   "set": "sf13",
+   "run": "dup",
+   "case": "202000064455",
+   "incident_case": "202000064320",
+   "distance_m": 3.3,
+   "hours": 0.4,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEW",
+   "rule_id": "R3",
+   "confidence": 0.9,
+   "ask": [],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "different",
+     "confidence": 0.9
+    }
+   ],
+   "outcome": "miss",
+   "cost_usd": 0.0583,
+   "latency_ms": 79723
+  },
+  {
+   "set": "sf13",
+   "run": "after",
+   "case": "202000072689",
+   "incident_case": "202000064320",
+   "distance_m": 4.0,
+   "hours": 45.8,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "different_angle"
+   ],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0607,
+   "latency_ms": 72410
+  },
+  {
+   "set": "sf14",
+   "run": "dup",
+   "case": "202000064973",
+   "incident_case": "202000064863",
+   "distance_m": 11.5,
+   "hours": 0.3,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "DUPLICATE",
+   "rule_id": "R6a",
+   "confidence": 0.75,
+   "ask": [],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.75
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.75
+    }
+   ],
+   "outcome": "linked",
+   "cost_usd": 0.0999,
+   "latency_ms": 142773
+  },
+  {
+   "set": "sf14",
+   "run": "after",
+   "case": "202000080430",
+   "incident_case": "202000064863",
+   "distance_m": 10.1,
+   "hours": 91.5,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "close_up"
+   ],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0704,
+   "latency_ms": 88435
+  },
+  {
+   "set": "sf15",
+   "run": "dup",
+   "case": "202000069207",
+   "incident_case": "202000068829",
+   "distance_m": 11.7,
+   "hours": 1.2,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "HUMAN_REVIEW",
+   "rule_id": "R6b",
+   "confidence": 0.9,
+   "ask": [],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "same",
+     "confidence": 0.75
+    },
+    {
+     "stage": 2,
+     "verdict": "same",
+     "confidence": 0.9
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0769,
+   "latency_ms": 101436
+  },
+  {
+   "set": "sf15",
+   "run": "after",
+   "case": "202000084029",
+   "incident_case": "202000068829",
+   "distance_m": 8.3,
+   "hours": 96.2,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEW",
+   "rule_id": "R3",
+   "confidence": 0.95,
+   "ask": [],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "different",
+     "confidence": 0.95
+    },
+    {
+     "stage": 2,
+     "verdict": "different",
+     "confidence": 0.95
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0351,
+   "latency_ms": 31174
+  },
+  {
+   "set": "sf18",
+   "run": "dup",
+   "case": "202000103864",
+   "incident_case": "202000103825",
+   "distance_m": 10.0,
+   "hours": 0.1,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEW",
+   "rule_id": "R3",
+   "confidence": 0.95,
+   "ask": [],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "different",
+     "confidence": 0.9
+    },
+    {
+     "stage": 2,
+     "verdict": "different",
+     "confidence": 0.95
+    }
+   ],
+   "outcome": "miss",
+   "cost_usd": 0.0519,
+   "latency_ms": 56184
+  },
+  {
+   "set": "sf18",
+   "run": "after",
+   "case": "202000121269",
+   "incident_case": "202000103825",
+   "distance_m": 6.7,
+   "hours": 118.2,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEW",
+   "rule_id": "R3",
+   "confidence": 0.95,
+   "ask": [],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "different",
+     "confidence": 0.95
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0473,
+   "latency_ms": 52453
+  },
+  {
+   "set": "sf26",
+   "run": "dup",
+   "case": "202000207270",
+   "incident_case": "202000203999",
+   "distance_m": 11.0,
+   "hours": 21.9,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "close_up",
+    "wider_context",
+    "different_angle"
+   ],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0728,
+   "latency_ms": 82764
+  },
+  {
+   "set": "sf26",
+   "run": "after",
+   "case": "202000209836",
+   "incident_case": "202000203999",
+   "distance_m": 11.4,
+   "hours": 14.5,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "close_up",
+    "wider_context",
+    "different_angle"
+   ],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0683,
+   "latency_ms": 85058
+  },
+  {
+   "set": "sf29",
+   "run": "dup",
+   "case": "202000215066",
+   "incident_case": "202000215065",
+   "distance_m": 11.2,
+   "hours": 0.0,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "different_angle"
+   ],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0547,
+   "latency_ms": 55540
+  },
+  {
+   "set": "sf29",
+   "run": "after",
+   "case": "202000225216",
+   "incident_case": "202000215065",
+   "distance_m": 14.9,
+   "hours": 46.2,
+   "triage": {
+    "category": "trash",
+    "quality": "ok",
+    "problem_visible": true
+   },
+   "label": "NEEDS_INFO",
+   "rule_id": "R5",
+   "confidence": 0,
+   "ask": [
+    "wider_context",
+    "different_angle"
+   ],
+   "comparisons": [
+    {
+     "stage": 1,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    },
+    {
+     "stage": 2,
+     "verdict": "uncertain",
+     "confidence": 0.5
+    }
+   ],
+   "outcome": "ok",
+   "cost_usd": 0.0553,
+   "latency_ms": 64948
+  }
+ ]
+}
