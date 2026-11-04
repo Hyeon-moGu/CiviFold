@@ -124,7 +124,7 @@ export function Actions({
   const choices: Choice[] = [
     { action: "link", text: focusId ? "Merge into the incident on file" : "Merge", approve: "Approve: merge it", needs: true },
     { action: "new_incident", text: "Open a new incident", approve: "Approve: open a new incident" },
-    { action: "recurrence", text: focusId ? "Recurrence of the incident on file" : "Recurrence", approve: "Approve: keep it apart as a recurrence", needs: true },
+    { action: "recurrence", text: focusId ? "Open as a recurrence of the incident on file" : "Open as a recurrence", approve: "Approve: keep it apart as a recurrence", needs: true },
     { action: "request_info", text: askFor === "photo" ? "Ask for a photo" : "Ask the resident", approve: askFor === "photo" ? "Approve: ask for a photo" : "Approve: ask the resident" },
     { action: "dismiss", text: "Dismiss", approve: "Approve: dismiss" },
   ];

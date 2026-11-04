@@ -8,7 +8,7 @@
 
 CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Every link and closure is a suggestion until a staff member approves it.
 
-On a pre-registered holdout of 80 synthetic reports, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) suggested closing **none of the 33 reports that needed a person**. Two live runs and a re-run after one later change all gave 0 of 33. Grouping by location alone would have closed 24 ([results](#results)).
+On a pre-registered holdout of 80 synthetic reports, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) suggested closing **none of the 33 reports that needed a person**. Two live runs and a re-run after one later change, all on the same 80 reports, gave 0 of 33. Grouping by location alone would have closed 24 ([results](#results)).
 
 **Try it in three minutes:** open the [demo](https://civi-fold.vercel.app/demo) and send the cases (or press "Run it live" on one) · open case 3 in the staff view and press "Verify with the agent" · approve, and the demo card and the resident's page show the decision.
 
@@ -26,7 +26,7 @@ In September 2026, New York City's 311 recorded 3,662 street pothole requests. T
 | Similar hydrant, 28 m away | **New problem** | Different shop sign, bollard and doorway |
 | Same hydrant, damaged after repair | **Possible recurrence** | Matching location, new damage and a later observation |
 
-CiviFold is for the staff who review incoming reports at a 311 center or public works office. It puts the candidates' photos beside the new one, says what matched and what differed, and puts the suggested action first. To run for a city it needs the open and recently repaired incidents with photos and repair dates, read from the existing 311 or work-order system (an Open311-style API or an export, not built yet). Without repair dates, a late report and a recurrence cannot be told apart.
+CiviFold is for the staff who review incoming reports at a 311 center or public works office. It puts the candidates' photos beside the new one, says what matched and what differed, and leads with the suggested action. To run for a city it needs the open and recently repaired incidents with photos and repair dates, read from the existing 311 or work-order system (an Open311-style API or an export, not built yet). Without repair dates, a late report and a recurrence cannot be told apart.
 
 ## What staff see
 
@@ -49,7 +49,7 @@ The suggestion and why (seen 24 hours after the repair, with a new problem), bot
 | **Muse Voice Transcribe** | Turns a spoken report into text |
 | **Muse Image** | Generated the 504-image synthetic evaluation set, for about $5 |
 
-Muse Spark returns its judgment as structured fields the rules can check (same fixture, problem visible, signs of repair, the features that matched), not as a similarity score. The two views catch different mistakes: on holdout2, cut-outs alone made no critical error but got 60 of 80 right, and whole photos alone got 70 right with one critical error, so the fast path uses both ([ablations](eval/README.md#results-base-sets)).
+Muse Spark returns its judgment as structured fields the rules can check (same fixture, problem visible, signs of repair, the features that matched), not as a similarity score. Neither view is enough alone: on holdout2, cut-outs alone made no critical error but got only 60 of 80 right, and whole photos alone got 70 right with one critical error. The fast path gives the rules both ([ablations](eval/README.md#results-base-sets)).
 
 ## Results
 
@@ -82,7 +82,7 @@ The latest holdout has 80 reports from 16 assets (8 fixtures or places and their
 - **Synthetic evaluation.** No study with real residents or city staff, and no measured time savings. The harness supplies the correct incident history rather than carrying earlier mistakes forward.
 - **Four evaluated categories:** hydrants, street lights, dumped trash and road damage. Signs, benches and graffiti are accepted but not evaluated. Look-alikes in identical surroundings are not tested separately.
 - **Fixtures far away.** SAM sometimes misses a thin street light pole from across the street, and the report then needs a second photo. Boxing fixtures with Muse Spark found them, but once matched a look-alike of the same model on the pole alone, so fixtures keep SAM's noun phrase.
-- **Coarse evidence.** The evidence check counts lines, not independent features, and a problem is visible or not, with no "not observable" state. Search uses the type the resident chose, the analysis the type read from the photo.
+- **Coarse evidence.** The evidence check counts lines, not independent features, and a problem is visible or not, with no "not observable" state. The search uses the category the resident chose; the analysis uses the one Muse Spark read from the photo.
 - **Agents.** Staff-requested verification and the case brief have no separate evaluation. On holdout3 the fast path ran twice before the later change and once after, and the automatic agent twice; holdout2 was partly re-run after a harness fix; every other configuration ran once per set.
 - **Demo deployment.** No login, no undo and no audit trail: anyone with the URL can act as staff, and anyone can reset the demo world (once a minute, and three times in 15 minutes from one network). Every action that writes or calls the models is paced per network, and repeated overuse holds that action back for an hour.
 
@@ -103,9 +103,9 @@ npm run dev                 # http://localhost:3000
 | `/report` | Resident reporting form |
 | `/admin` | Staff queue and evidence review |
 
-`npm run lint`, `npm run typecheck` and `npm test` need no API key, and CI runs them on every push. Evaluation commands are in [the evaluation guide](eval/README.md#running-the-evaluation).
+`npm run lint`, `npm run typecheck` and `npm test` need no API key, and CI runs them and the production build on every push to main. Evaluation commands are in [the evaluation guide](eval/README.md#running-the-evaluation).
 
-The public deployment replays recorded model runs and allows live calls within a daily budget (`LIVE_DAILY_USD`). "Run it live" on a demo card, the agent checks staff ask for, and uploads with the demo access code call the models now. Live runs keep no recording, so a reset always replays the same world. Once the day's budget is spent, cases replay and say so, and a report with no recorded result is marked unavailable. The demo world sits on a map of Menlo Park, California.
+The public deployment replays recorded model runs and allows live calls within a daily budget (`LIVE_DAILY_USD`). "Run it live" on a demo card always calls the models now, and so does anything with no recording yet, such as an upload made with the demo access code or an agent check on it. Live runs keep no recording, so a reset always replays the same world. Once the day's budget is spent, cases replay and say so, and a report with no recorded result is marked unavailable. The demo world sits on a map of Menlo Park, California.
 
 **Stack:** Next.js 16 · React 19 · Tailwind 4 · TypeScript · zod · Drizzle · Neon Postgres / local PGlite · Vercel Blob · Leaflet / OpenStreetMap · vitest. Meta calls share caching, retries and cost tracking through `lib/meta/`.
 

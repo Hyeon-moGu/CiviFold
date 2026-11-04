@@ -111,7 +111,7 @@ describe("demo scenarios", () => {
     // The fast path compares the incident's first photo only, which a link does not change; an agent reads the linked photo too.
     fastSays("NEW", null);
     expect(await runStep(rt, "lookalike", 0)).toMatchObject({ label: "NEW" });
-    await expect(runStep(rt, "duplicate", 1)).rejects.toThrow(/Reset the demo/);
+    await expect(runStep(rt, "duplicate", 1)).rejects.toThrow(/Reset it to the start/);
     await expect(runStep(rt, "duplicate", decide)).rejects.toThrow(/nothing to decide now/);
   });
 
@@ -176,6 +176,6 @@ describe("demo scenarios", () => {
 
   it("asks for a reset when the world a step expects has moved on", async () => {
     await runStep(rt, "after-repair", 0);
-    await expect(runStep(rt, "after-repair", 0)).rejects.toThrow(/Reset the demo/);
+    await expect(runStep(rt, "after-repair", 0)).rejects.toThrow(/Reset it to the start/);
   });
 });

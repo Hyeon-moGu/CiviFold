@@ -307,9 +307,9 @@ export function ReportForm({
             {source === "upload" && (
               <div className="mt-3 rounded-xl bg-zinc-50 px-3.5 py-3 text-xs text-zinc-600">
                 <p className="mb-2 rounded-lg bg-white px-2.5 py-2 text-zinc-700 ring-1 ring-zinc-200">
-                  Your own photo runs live: Muse Spark and SAM 3.1 check it in about a minute, with the demo access code entered in the last step. To
-                  be compared with an incident, put the pin on one of its dots in the next step. Without the code, pick a sample photo, or use &ldquo;Run it
-                  live&rdquo; on the demo page.
+                  Your own photo runs live: Muse Spark and SAM 3.1 check it in about a minute. It needs the demo access code, which you enter in the
+                  last step. To compare it with an incident, put the pin on that incident&apos;s dot in the next step. Without the code, pick a sample
+                  photo, or use &ldquo;Run it live&rdquo; on the demo page.
                 </p>
                 <p className="font-medium text-zinc-900">What makes a photo easy to match</p>
                 <p className="mt-1">
@@ -322,7 +322,7 @@ export function ReportForm({
             {source === "none" && (
               <div className="mt-5 space-y-3">
                 <p className="text-sm text-zinc-600">
-                  Without a photo the system never matches your report to an existing one on its own: it may ask you for a photo, and staff see the reports nearby.
+                  Without a photo, the system never matches your report to an existing one on its own: it may ask you for a photo, and staff see the incidents nearby.
                   Pick a sample message, or write your own in the last step.
                 </p>
                 <ul className="grid gap-2 sm:grid-cols-2">
@@ -353,7 +353,7 @@ export function ReportForm({
         {step === 1 && (
           <Step
             title="Where is it?"
-            hint="Tap the map where the problem is. Dots are incidents already on file (red open, green fixed): tap one to report at it, since a report is compared only with incidents near its pin."
+            hint="Tap the map where the problem is. Dots are incidents already on file (red: open, green: fixed). Tap one to report there, since a report is compared only with incidents near its pin."
           >
             <div className="relative h-[46vh] min-h-[280px] overflow-hidden rounded-xl border border-zinc-200">
               <PinMap
@@ -376,7 +376,7 @@ export function ReportForm({
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
               <label className="text-sm text-zinc-700">
-                Report at an incident on file:{" "}
+                Jump to an incident on file:{" "}
                 <select
                   value=""
                   onChange={(e) => {
@@ -502,7 +502,7 @@ export function ReportForm({
                 <input type="checkbox" checked={danger} onChange={(e) => setDanger(e.target.checked)} className="h-4 w-4 accent-rose-600" />
                 Someone may be in danger right now
               </label>
-              <p>Ticked, or described in your message, the report goes to the top of the staff queue.</p>
+              <p>If you check this box or describe the danger in your message, the report goes to the top of the staff queue.</p>
             </div>
           </Step>
         )}

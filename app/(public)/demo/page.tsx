@@ -126,7 +126,7 @@ export default function DemoPage() {
   const live = defaultMode() !== "cached" || liveDailyUsd() > 0;
   return (
     <main className="mx-auto max-w-5xl px-4 pb-10 pt-8">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Same spot isn&apos;t the same problem.</h1>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Same spot isn&apos;t always the same problem.</h1>
       <p className="mt-2 max-w-3xl text-lg leading-relaxed text-zinc-700">
         Grouping duplicate reports by location also folds in the look-alike next door and the hydrant that broke again after its repair, and either
         can be closed without anyone going back out. CiviFold checks the photos first. Staff make the call.
@@ -136,8 +136,8 @@ export default function DemoPage() {
         <p className="border-t border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500">
           Pre-registered held-out test of 80 synthetic reports; every merge is a suggestion until staff approve it. Location alone also merged{" "}
           {HELD_OUT.location.wrongIncident} duplicates into the wrong incident; CiviFold none.{" "}
-          {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} came after one follow-up question, answered by a simulated resident;
-          earlier test sets had 1 to 3 wrong merges. The other 8 reports were already fixed and sit in neither row.{" "}
+          {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} correct merges came after one follow-up question, answered by a simulated resident;
+          on earlier test sets, CiviFold made 1 to 3 wrong merges each. The other 8 reports were already fixed and sit in neither row.{" "}
           <Link href="/#results" className="font-medium text-zinc-900 underline underline-offset-2">
             How it was measured →
           </Link>

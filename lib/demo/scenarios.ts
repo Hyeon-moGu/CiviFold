@@ -225,7 +225,7 @@ export const SCENARIOS: Scenario[] = [
 const demoTag = (scenarioId: string, index: number) => `demo:${scenarioId}:${index}`;
 
 const RESET =
-  "The demo is not in the state this step expects (another visitor may have run other scenarios, or staff changed an incident). Press Reset the demo, then run the steps in order.";
+  "The demo is not in the state this case expects (another visitor may have sent other cases, or staff changed an incident). Use “Reset it to the start” at the bottom of this page, then send it again.";
 
 /** Each incident the scenario relies on is open, or repaired once by an earlier step of the same scenario, and nothing else has happened to it. */
 async function checkWorld(rt: Runtime, scenario: Scenario, index: number) {

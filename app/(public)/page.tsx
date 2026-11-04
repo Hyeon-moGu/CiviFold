@@ -25,7 +25,7 @@ const FLOW = [
 ];
 
 const SCOPE = [
-  { title: "Fixed assets", examples: "Fire hydrants, street lights; also accepted, not evaluated: traffic signs, benches", handled: "Matched by the fixture and its surroundings" },
+  { title: "Street fixtures", examples: "Fire hydrants, street lights; also accepted, not evaluated: traffic signs, benches", handled: "Matched by the fixture and its surroundings" },
   { title: "Problems at a place", examples: "Road damage, illegal dumping; also accepted, not evaluated: graffiti", handled: "Matched by the spot's fixed surroundings" },
   { title: "People or behavior", examples: "Noise, loitering, parking", handled: "Never matched by image; sent to staff" },
   { title: "Possible emergencies", examples: "Smoke, a gas smell, a fallen power line", handled: "No matching; top of the staff queue, resident told to call 911", urgent: true },
@@ -82,20 +82,20 @@ export default function Home() {
             </div>
             <p className="mt-3 text-xs leading-relaxed text-zinc-500">
               Location alone also merged {HELD_OUT.location.wrongIncident} duplicates into the wrong incident; CiviFold none.{" "}
-              {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} came after one follow-up question, answered by a simulated
+              {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} correct merges came after one follow-up question, answered by a simulated
               resident. The other 8 of the 80 were already fixed and sit in neither row.
             </p>
           </div>
           <div>
             <p className="text-sm leading-relaxed text-zinc-600">
-              Every unseen set, first run: of the reports that needed attention, the share that got a one-click &ldquo;duplicate, late or already
+              Every unseen set, first run: of the reports that needed attention, the share that wrongly got a one-click &ldquo;duplicate, late or already
               fixed&rdquo; suggestion.
             </p>
             <table className="mt-4 w-full text-left text-sm">
               <thead className="text-xs text-zinc-500">
                 <tr className="border-b border-zinc-200">
                   <th className="py-2 font-medium">Set</th>
-                  <th className="py-2 text-right font-medium">Location only</th>
+                  <th className="py-2 text-right font-medium">Location alone</th>
                   <th className="py-2 text-right font-medium">CiviFold</th>
                 </tr>
               </thead>
@@ -122,7 +122,7 @@ export default function Home() {
             <p className="mt-3 text-xs leading-relaxed text-zinc-500">
               Synthetic photos generated with Muse Image. Each set was unseen when it ran. Rules were changed after the test set and the first unseen set,
               so those two rows used earlier rules. Later, Muse Spark began boxing road damage and dumped piles for SAM; re-run on holdout3 after that
-              change (photos already seen), the current version again made 0 of 33. Every run is in the{" "}
+              change (photos already seen), the current version again suggested closing none of the 33. Every run is in the{" "}
               <a href="https://github.com/Hyeon-moGu/CiviFold/blob/main/eval/README.md" className="underline underline-offset-2 hover:text-zinc-900">
                 evaluation notes
               </a>

@@ -444,7 +444,7 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
               <>
                 <div className="mt-4 grid gap-3 px-5 sm:grid-cols-2">
                   <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                    <p className="text-sm text-zinc-500">Location only would say</p>
+                    <p className="text-sm text-zinc-500">Location alone would say</p>
                     <div className="mt-1">{r?.location_only && <Plain label={r.location_only.label} />}</div>
                     {lo && <p className={`mt-1 text-sm font-medium ${lo.tone}`}>{lo.text}</p>}
                   </div>
@@ -682,7 +682,7 @@ export function DemoRunner({ cases, others, live: liveOn }: { cases: CaseView[];
                       <span className="font-medium">Asked the resident:</span> “{r.asked}”
                     </p>
                   )}
-                  {buried && !running && <p className="mt-1 text-xs font-medium text-rose-700">Location only would merge it into an open incident.</p>}
+                  {buried && !running && <p className="mt-1 text-xs font-medium text-rose-700">Location alone would merge it into an open incident.</p>}
                   {(r?.error || then?.error) && !running && <p className="mt-1 text-xs text-rose-700">{r?.error ?? then?.error}</p>}
                 </div>
               </li>

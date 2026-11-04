@@ -288,7 +288,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               >
                 {incidentLabels[report.incident_id] ?? "an incident"}
               </Link>{" "}
-              from this report before the demo begins. It is part of the starting history that new reports are compared with, so it never went through the
+              from this report before the demo started. It is part of the starting history that new reports are compared with, so it never went through the
               automatic check.
             </p>
           </Panel>
@@ -465,7 +465,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                       title={
                         focus
                           ? linked
-                            ? `Linked: the ${focus.title ?? "incident"}`
+                            ? `${report.status === "linked" ? "Linked" : "Suggested"}: the ${focus.title ?? "incident"}`
                             : compared
                               ? `Compared with the ${focus.title ?? "incident"}`
                               : `Nearest incident: the ${focus.title ?? "incident"}`
@@ -567,7 +567,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                               final.label === "POSSIBLE_RECURRENCE" ? (
                                 <span className="text-rose-300">possible recurrence</span>
                               ) : (
-                                <span className="text-sky-300">linked</span>
+                                <span className="text-sky-300">{report.status === "linked" ? "merged" : "suggested merge"}</span>
                               )
                             ) : final?.incident_id === c.incident_id ? (
                               <span className="text-amber-300">staff decides</span>
@@ -921,6 +921,7 @@ const upToLandscape = (width: number, height: number) => (width / height < 1.5 ?
 function noPhotoText(rule: string | undefined): string {
   if (rule === "R0e") return "No photo. Matching was skipped because this may be an emergency.";
   if (rule === "R0s") return "No photo. Reports about people or behavior are never matched by image.";
+  if (rule === "R1p") return "No photo. Nothing of this kind is nearby, so there was nothing to match it with.";
   return "No photo. Words and GPS cannot tell this place from a look-alike nearby, so nothing was matched.";
 }
 
@@ -979,12 +980,12 @@ function PipelineTrace(props: {
     },
     {
       name: "Triage",
-      value: triage ? `${triage.category.replace("_", " ")} · ${triage.image_quality.replace("_", " ")}` : props.hasPhoto ? "skipped" : "no photo",
+      value: triage ? `${triage.category.replaceAll("_", " ")} · ${triage.image_quality.replaceAll("_", " ")}` : props.hasPhoto ? "skipped" : "no photo",
       tone: triage ? (triage.image_quality === "ok" ? "ok" : "warn") : "skip",
     },
     {
       name: "Search",
-      value: `${candidates.length} nearby`,
+      value: decision?.reasons.at(-1)?.rule_id === "R0" ? "not searched" : `${candidates.length} nearby`,
       tone: candidates.length ? "ok" : "skip",
     },
     {

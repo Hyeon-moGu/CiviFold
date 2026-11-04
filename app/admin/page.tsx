@@ -94,8 +94,8 @@ export default async function AdminQueue({ searchParams }: { searchParams: Promi
         >
           <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500" />
           <span>
-            <span className="font-semibold">{urgentOpen === 1 ? "1 possible emergency" : `${urgentOpen} possible emergencies`} waiting.</span> First in Review,
-            with no matching done.
+            <span className="font-semibold">{urgentOpen === 1 ? "1 possible emergency" : `${urgentOpen} possible emergencies`} waiting.</span> First in Review;
+            matching was skipped.
           </span>
         </Link>
       )}

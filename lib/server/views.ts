@@ -16,7 +16,7 @@ const SUGGESTION_TEXT: Record<Label, string> = {
   ALREADY_RESOLVED: "This looks fixed already. Staff will confirm.",
   NEW: "This looks like a new problem. Staff will review it.",
   POSSIBLE_RECURRENCE: "This may be the same problem coming back after a repair. Staff will review it first.",
-  HUMAN_REVIEW: "A member of staff will look at your report.",
+  HUMAN_REVIEW: "A staff member will look at your report.",
   NEEDS_INFO: "We need one more thing from you.",
 };
 
@@ -37,7 +37,7 @@ const STATUS_TEXT: Record<string, string> = {
   new_incident: "Staff opened a case from your report.",
   dismissed: "Staff closed your report without opening a case.",
   unavailable: "The public demo has no recorded check for this report. Staff will look at it themselves.",
-  failed: "The automatic check failed. A member of staff will look at your report.",
+  failed: "The automatic check failed. A staff member will look at your report.",
 };
 
 export type ResidentView = {

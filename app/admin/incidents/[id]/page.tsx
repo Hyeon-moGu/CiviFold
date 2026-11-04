@@ -50,7 +50,7 @@ export default async function IncidentDetail({ params }: { params: Promise<{ id:
       </div>
 
       <header className="mt-3 flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold text-white">{incident.title}</h1>
+        <h1 className="text-xl font-semibold text-white">{named(incident.title, "Incident")}</h1>
         <span
           className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${
             open ? "bg-amber-500/10 text-amber-300 ring-amber-500/40" : "bg-emerald-500/10 text-emerald-300 ring-emerald-500/40"
