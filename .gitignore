@@ -26,6 +26,4 @@ coverage/
 next-env.d.ts
 *.tsbuildinfo
 
-# Raw phone originals (EXIF, 10 MB each); the normalized copies live in dataset/real
-실데이터/
 .vercel

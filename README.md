@@ -114,10 +114,9 @@ Two checks on public San Francisco 311 requests. Requests were picked by eye fro
 
 - **After a cleanup, no closing suggestion.** Of the 13 requests made within 7 days after Public Works' cleanup, it flagged 3 as possible recurrences and kept the other 10 open: 2 as new problems, 7 with a question to the resident and 1 for staff.
 - **It suggests fewer merges on real duplicates and asks more.** When both photos clearly show the same pile or damage, it suggested merging 14 of 33, asked or sent 17 to staff, and suggested 2 as new problems. Road damage asked most: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Of 9 further requests that Public Works closed as duplicates, mostly different items at one corner, it suggested merging 1 and opening 3 as new.
-- **Three real photos** of one dumped pile in Korea, run once with the expectations written first, gave no wrong link and no confirmed duplicate either: the views share no fixed feature, so the fast path asked for a wider shot ([details](eval/README.md#real-world-check)).
 - These are small checks picked by eye, not a measurement, and the duplicate labels are Public Works' operational ones. The demo's four real cases are pairs from the second check.
 
-**[Methods, ablations, every set and every recorded run →](eval/README.md)**
+**[Methods, ablations, and every run of each set →](eval/README.md)**
 
 ## Limitations
 
@@ -125,7 +124,7 @@ Two checks on public San Francisco 311 requests. Requests were picked by eye fro
 - **Four evaluated categories:** hydrants, street lights, dumped trash and road damage. Signs, benches and graffiti are accepted but not evaluated. Look-alikes in identical surroundings are not tested separately.
 - **Fixtures far away.** SAM sometimes misses a thin street light pole from across the street, and the report then needs a second photo. Boxing fixtures with Muse Spark found them, but once matched a look-alike of the same model on the pole alone, so fixtures keep SAM's noun phrase.
 - **Coarse evidence.** The evidence check counts lines, not independent features, and a problem is visible or not, with no "not observable" state. The search uses the category the resident chose; the analysis uses the one Muse Spark read from the photo.
-- **Agents.** Staff-requested verification and the case brief have no separate evaluation. On holdout3 the fast path ran twice before the later change and once after, and the automatic agent twice; holdout2 was partly re-run after a harness fix; every other configuration ran once per set.
+- **Agents.** Staff-requested verification and the case brief have no separate evaluation. On holdout3 the fast path ran twice before the later change and once after, and the automatic agent twice; holdout2 was partly re-run after a harness fix. test and the first holdout were also re-run during rule changes (runs 7 to 12 in [eval/results/](eval/results/)), and no results table uses those runs. The whole-photo, cut-out and location-only configurations ran once per set.
 - **Demo deployment.** No login, no undo and no audit trail: anyone with the URL can act as staff, and anyone can reset the demo world (once a minute, and three times in 15 minutes from one network). Every action that writes or calls the models is paced per network, and repeated overuse holds that action back for an hour.
 
 ## Run locally

@@ -1,6 +1,6 @@
 # CiviFold evaluation
 
-How CiviFold's suggestions were measured, with every recorded run. The raw results are in [results/](results/). Each JSON file holds the per-case outcomes, the summary, and fingerprints of the code and prompts it ran with (`code_hash`, `prompt_hash`).
+How CiviFold's suggestions were measured, with every run of each set. The raw results are in [results/](results/). Each JSON file holds the per-case outcomes, the summary, and fingerprints of the code and prompts it ran with (`code_hash`, `prompt_hash`).
 
 ## Dataset
 
@@ -40,12 +40,13 @@ The headline number counts critical outcomes among the reports that need attenti
 
 ## Process
 
-- **dev** was used for tuning, and **val** only to check direction. **test** was the first unseen set, run once.
+- **dev** was used for tuning, and **val** only to check direction. **test** was the first unseen set, and the results below are from its first run.
 - **holdout** was created after the test run, while the rules were being improved from the test failures. It was pre-registered (cases and fingerprints recorded) before its run.
 - **holdout2** was created and fingerprinted before the second round of rule changes, and pre-registered before its run. After it, the fast path (rules, triage, comparison and after-fix prompts, thresholds) was frozen.
 - **holdout3** was created and locked after the verification agent was tuned on dev, before its run. Only the agent changed in that round.
-- Holdout runs refuse to start without `HOLDOUT_FINAL_RUN=yes`, and holdout assets are excluded from the app.
-- Each configuration's first evaluation on each set is a single run. Four re-measurements were made afterwards, and all are reported below: the 23 affected holdout2 cases after a harness fix, the agent configuration on holdout3 after removing meaningful identifiers, the fast path on holdout3 a second time, live, to see model variance, and the current fast path on holdout3 after the later change below.
+- Runs on holdout2 and holdout3 refuse to start without `HOLDOUT_FINAL_RUN=yes`, and holdout assets are excluded from the app.
+- Each configuration's first evaluation on each set is a single run. Four re-measurements are reported below: the 23 affected holdout2 cases after a harness fix, the agent configuration on holdout3 after removing meaningful identifiers, the fast path on holdout3 a second time, live, to see model variance, and the current fast path on holdout3 after the later change below.
+- test and holdout were also re-run with later rules during development (`C_rules_test_7` to `_11`, `D_hybrid_test_10` to `_12`, `C_rules_holdout_11`, `D_hybrid_holdout_11` and `_12`). Those files are in [results/](results/), no results table uses them, and they are not evidence.
 - After holdout3 the fast path changed in one place: for road damage and dumped trash, Muse Spark boxes the reported thing and SAM segments inside the box. It was checked on dev, val and test, then holdout3 was run once more as a re-measurement on photos already seen ([below](#after-holdout3-road-damage-and-dumped-piles)).
 - Live runs used the Meta Model API. Replays of recorded calls cost nothing and give the same results.
 
@@ -87,7 +88,7 @@ Critical counts only the reports that need attention. Correct, deferred and link
 | C_rules | 3 / 16 | 33 | 3 | 41.0% | 41.0% |
 | D_hybrid | 3 / 16 | 33 | 3 | 41.0% | 41.0% |
 
-test and holdout ran before two fixes to the simulated resident. The first fix came after the holdout run: in 85 of the 277 cases that existed then, the simulated answer was the same image as the report photo. One of the holdout's critical outcomes (S9-t6) was a result of it. The second fix came after holdout2: some answers reused a photo the report or incident already had (test 4 cases, holdout 7, holdout2 11). test and holdout were not re-run, so their correct counts may be higher than a fixed harness would give.
+test and holdout ran before two fixes to the simulated resident. The first fix came after the holdout run: in 85 of the 277 cases that existed then, the simulated answer was the same image as the report photo. One of the holdout's critical outcomes (S9-t6) was a result of it. The second fix came after holdout2: some answers reused a photo the report or incident already had (test 4 cases, holdout 7, holdout2 11). The first runs of test and holdout are reported as they came out, so their correct counts may be higher than a fixed harness would give.
 
 **holdout2**: 16 assets, 80 reports, 33 need attention. Original run, then C and D re-run on the 23 cases the second harness fix affected (`*_holdout2_20.json`), with the decision code unchanged.
 
@@ -215,22 +216,6 @@ The app runs the fast path and offers two agents only when staff ask. Neither ha
 
 **Case brief.** On any analyzed report, the agent gets the same tools, limits and neutral names as the verifier, plus a numbered list of facts it can cite without a call: the triage, the candidates, every comparison, the incident's events and photos, and incidents of the same kind within 60 m. Its only terminal tool writes the brief. The server keeps an item only if it cites a successful tool call of that run or a listed fact, and shows how many were deleted. The brief has no label field and changes nothing. It writes no calendar dates, only times relative to the report and the repair, because a replayed brief is shown on later days.
 
-## Real-world check
-
-Three real photos of one pile of dumped bags at a street tree, taken by the author on a street in Korea within two minutes on 2026-10-27 at 23:07 KST: from across the street (`dump1_far`), from the sidewalk (`dump1_side`) and close up (`dump1_close`). They were normalized the way the app normalizes an upload (turned upright, longest side 1920 px, JPEG) and are not published in this repository. The phone's location tag was off, so the worlds place every photo at the resident's pin, 0 m apart. The photos are in no evaluation set and not in the demo.
-
-The expectations were written before the run and nothing was changed after it. With no incident nearby, each photo should be a new problem. With one of the photos already on file, each of the other two should be linked as a duplicate or get a question; a second incident for the same pile would be a miss. With one site and an open incident, no critical outcome is possible, so this checks behavior, not the headline number.
-
-| World | New report | Suggestion | Comparisons |
-|---|---|---|---|
-| No incident nearby | far, side, close | New problem (R1), each | none |
-| Far shot on file | side | Question: wider shot, another angle (R5) | uncertain, full frame and cut-outs |
-| Far shot on file | close | Question: wider shot (R5) | uncertain |
-| Close shot on file | far | Question: wider shot, another angle (R5) | uncertain |
-| Close shot on file | side | Question: wider shot (R5) | uncertain |
-
-Triage read all three as dumped trash with the problem visible. The comparison model's evidence lines name what one view shows and the other does not: a storefront sign and striped shutters across the street in the far shot, a lit pizza sign in the side shot, only the tree, pavers and a road marking in the close-up. Nothing fixed is visible in two of these views at once, so "uncertain" is the honest reading, and the rules asked the resident rather than link. After the later change to how dumped piles are found ([above](#after-holdout3-road-damage-and-dumped-piles)), all seven runs were repeated on November 3 with the same suggestions, using the same code as the app's fast path (`npm run analyze`).
-
 ## Real 311 photos: San Francisco
 
 San Francisco publishes each 311 request, with the resident's photo when there is one. Among street and sidewalk cleaning requests from July 15 to November 3, 2026, 30 spots had three photo requests: one that Public Works resolved, one it closed as a duplicate while the first was open, and one made within 7 days after the cleanup. The photos were screened before any model saw them, and 9 of 30 sets were kept: the dumped material visible in all three, the duplicate not the same image sent twice, no encampment or person as the subject. What would count as right, a miss or critical was written down first ([selection and expectations](sf311/expectations.md), [all 30 sets](sf311/sets.json)). Each report ran once, live, through the unchanged fast path at its own location and time ([results](sf311/results.json), $1.10 in all). The photos are not copied into this repository.
@@ -244,7 +229,7 @@ On real photos the fast path suggested closing no request about material dumped 
 
 ### Pairs picked by eye
 
-Most of those sets pair different items that Public Works merged by spot, so a second check paired requests by the photos themselves. From pairs of photo requests within 6 m (trash within a day, pavement or sidewalk defects within two weeks, and new requests 1 hour to 7 days after a cleanup), a seeded random sample of 140 was screened by eye before any model call: 37 were kept because both photos clearly show the same pile or the same damage, or, after a cleanup, the same fixed surroundings with different material ([picks and expectations](sf311/pairs-expectations.md), [all candidates](sf311/pairs.json)). In the same-problem runs the earlier request is an open incident; after a cleanup it is resolved at Public Works' closing time ([results](sf311/pairs-results.json), $2.21 in all).
+Most of those sets pair different items that Public Works merged by spot, so a second check paired requests by the photos themselves. From pairs of photo requests within 6 m (trash within a day, pavement or sidewalk defects within two weeks, and new requests 1 hour to 7 days after a cleanup), a seeded random sample of 140 was screened by eye before any model call: 37 were kept because both photos clearly show the same pile or the same damage, or, after a cleanup, the same fixed surroundings with different material ([picks and expectations](sf311/pairs-expectations.md), [all candidates](sf311/pairs.json)). In the same-problem runs the earlier request is an open incident; after a cleanup it is resolved at Public Works' closing time ([results](sf311/pairs-results.json), $2.21 in all). In the city's records, 17 of the 33 earlier requests in the same-problem runs were already closed when the later one arrived; the check treats them as open because both photos show the problem still there.
 
 | Pairs | Reports | Suggestions | Outcome |
 |---|---|---|---|

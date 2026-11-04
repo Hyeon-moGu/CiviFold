@@ -216,7 +216,7 @@ function SameBlock() {
       <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
         <Pair
           title="The same panel, a day later"
-          before={{ src: "/api/images/sf_t058_1?w=480", alt: "The open request: a wooden panel left at a street tree on 24th Street", when: "Open, Sep 14" }}
+          before={{ src: "/api/images/sf_t058_1?w=480", alt: "The request on file: a wooden panel left at a street tree on 24th Street", when: "On file, Sep 14" }}
           after={{ src: "/api/samples/sf_t058_2/image?w=480", alt: "A new request the next day: the same panel at the same tree", when: "New, Sep 15" }}
           verdict="Duplicate"
           tone="bg-sky-50 text-sky-800 ring-sky-300"
