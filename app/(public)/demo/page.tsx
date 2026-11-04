@@ -9,11 +9,10 @@ import { ASSET_FILE } from "@/lib/dataset/static";
 import { SCENARIOS } from "@/lib/demo/scenarios";
 import { defaultMode } from "@/lib/meta/call";
 import { liveDailyUsd } from "@/lib/server/runtime";
-import { HELD_OUT, REAL_SF, RealScoreboard, Scoreboard } from "@/app/_ui/scoreboard";
+import { HELD_OUT, Scoreboard } from "@/app/_ui/scoreboard";
 import type { Label } from "@/lib/tools/types";
 import { DemoRunner, type CaseView, type OtherView } from "./demo-runner";
 
-const EVAL_REAL = "https://github.com/Hyeon-moGu/CiviFold/blob/main/eval/README.md#real-311-photos-san-francisco";
 
 export const metadata = { title: "Demo · CiviFold" };
 export const dynamic = "force-dynamic";
@@ -183,25 +182,14 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
   // A replay-only deployment with no live budget offers no live run, rather than one that falls back to the replay.
   const live = defaultMode() !== "cached" || liveDailyUsd() > 0;
   const realIntro = (
-    <>
-      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-        <RealScoreboard />
-        <p className="border-t border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500">
-          Two checks on public San Francisco 311 requests, chosen by looking at the photos only, with the right answer for each written down before the
-          checks ran. Of the {REAL_SF.afterCleanup} requests made after a cleanup, CiviFold suggested closing none: it flagged {REAL_SF.civifold.recurrence} as
-          possible recurrences, suggested 2 as new problems, asked the resident about 7 and sent 1 to staff. Every merge is a suggestion until staff approve
-          it.{" "}
-          <a href={EVAL_REAL} className="whitespace-nowrap font-medium text-zinc-900 underline underline-offset-2">
-            How it was checked →
-          </a>
-        </p>
-      </div>
-      <p className="max-w-3xl text-sm text-zinc-500">
-        Four pairs from those checks. In each, two residents reported the same spot, and the demo sends the second report with its real place and
-        time. Case 1 is where location alone goes wrong. Cases 2 to 4 are true duplicates, so location alone is right too: CiviFold suggests merging one, sends
-        one to staff and asks about one. Photos: {REAL_CREDIT}.
-      </p>
-    </>
+    <p className="max-w-3xl text-sm text-zinc-500">
+      Four pairs of real San Francisco 311 requests, chosen by looking at the photos only. In each, two residents reported the same spot, and the demo
+      sends the second report with its real place and time. Case 1 is where location alone goes wrong. Cases 2 to 4 are true duplicates, so location
+      alone is right too: CiviFold suggests merging one, sends one to staff and asks about one. Photos: {REAL_CREDIT}.{" "}
+      <Link href="/#results" className="whitespace-nowrap font-medium text-zinc-900 underline underline-offset-2">
+        How it was measured →
+      </Link>
+    </p>
   );
   const syntheticIntro = (
     <>

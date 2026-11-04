@@ -12,17 +12,17 @@
   <a href="#run-locally">Run locally</a>
 </p>
 
-![Still broken, or broken again? Two real San Francisco 311 photos of one corner tree: trash reported and cleared on September 9, and new trash at the same corner on September 15. Location alone closes the new request as already fixed; CiviFold keeps it apart as a possible recurrence for staff. Real requests made after a cleanup and closed as fixed: location alone 13 of 13, CiviFold 0 of 13. New or returning problems wrongly merged on a pre-registered synthetic holdout: location alone 24 of 33, CiviFold 0 of 33.](media/hero.webp)
+![Still broken, or broken again? Two real San Francisco 311 photos of one corner tree: trash reported and cleared on September 9, and new trash at the same corner on September 15. Location alone closes the new request as already fixed; CiviFold keeps it apart as a possible recurrence for staff. On a controlled test of 80 pre-registered synthetic reports, repeats merged into the right incident: location alone 30 of 39, CiviFold 34 of 39; new or returning problems wrongly merged: location alone 24 of 33, CiviFold 0 of 33. Real requests made after a cleanup and closed as fixed: location alone 13 of 13, CiviFold 0 of 13.](media/hero.webp)
 
 CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Its default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) compares what the photos show, then applies the repair history. Every link and closure is a suggestion until a staff member approves it.
 
-| Suggestions, first run | Location alone | **CiviFold** |
+| Suggestions | Location alone | **CiviFold** |
 |---|---|---|
-| Real SF 311 requests made after a cleanup, closed as already fixed | 13 / 13 | **0 / 13** |
-| Real SF 311 pairs showing the same pile or damage, merged (the right call) | 33 / 33 | 14 / 33 |
-| Synthetic holdout (pre-registered): new or returning problems wrongly merged | 24 / 33 | **0 / 33** |
+| **Controlled test**, 80 synthetic reports, pre-registered: repeats merged into the right incident | 30 / 39 | **34 / 39** |
+| **Controlled test**: new or returning problems wrongly merged | 24 / 33 | **0 / 33** |
+| **Real SF 311** requests made after a cleanup, closed as already fixed | 13 / 13 | **0 / 13** |
 
-On real photos CiviFold suggests fewer merges than location alone: of those 33 pairs it asked or sent 17 to staff and wrongly suggested 2 as new problems. The real checks are small and picked by eye; the synthetic holdout places look-alikes and repairs on purpose ([results](#results)).
+The controlled test was generated with Muse Image, with look-alikes and repairs placed on purpose and every answer known, and scored on its first run. On real photos CiviFold suggests fewer merges than location alone: of 33 pairs showing the same pile or damage it suggested merging 14, asked or sent 17 to staff, and wrongly suggested 2 as new problems. The real checks are small and picked by eye ([results](#results)).
 
 > [!TIP]
 > **Try it in three minutes**
@@ -77,23 +77,7 @@ Muse Spark returns its judgment as structured fields the rules can check (same f
 
 ## Results
 
-### Real San Francisco 311 photos
-
-Two checks on public San Francisco 311 requests. Requests were picked by eye from the photos alone, and what counts as right, a miss or critical was written down before the runs; four pairs had been run once earlier to choose the demo photos, and their results count as they came out. Each report ran once, live, through the unchanged fast path at its own place and time ([details](eval/README.md#real-311-photos-san-francisco)). Location alone links each request to the earlier one at its spot.
-
-| Real SF 311 requests, suggestions | Location alone | **Fast path** |
-|---|---|---|
-| New trash after a cleanup at the same spot, closed as already fixed | 13 / 13 | **0 / 13** |
-| Same pile or damage in both photos, merged (the right call) | 33 / 33 | 14 / 33 |
-
-![Four real San Francisco 311 pairs from the demo, each two residents at one spot, with what CiviFold and location alone suggest: new trash at a corner tree after the cleanup, which CiviFold keeps apart as a possible recurrence and location alone closes as already fixed; the same wooden panel a day later, a duplicate for both; the same orange bags from a wider view, which CiviFold sends to staff; the same broken utility cover, where CiviFold asks for another angle. Photos: DataSF 311 public records, people and plates blurred.](media/real-sf.webp)
-
-- **After a cleanup, no closing suggestion.** Of the 13 requests made within 7 days after Public Works' cleanup, it flagged 3 as possible recurrences and kept the other 10 open: 2 as new problems, 7 with a question to the resident and 1 for staff.
-- **It suggests fewer merges on real duplicates and asks more.** When both photos clearly show the same pile or damage, it suggested merging 14 of 33, asked or sent 17 to staff, and suggested 2 as new problems. Road damage asked most: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Of 9 further requests that Public Works closed as duplicates, mostly different items at one corner, it suggested merging 1 and opening 3 as new.
-- **Three real photos** of one dumped pile in Korea, run once with the expectations written first, gave no wrong link and no confirmed duplicate either: the views share no fixed feature, so the fast path asked for a wider shot ([details](eval/README.md#real-world-check)).
-- These are small checks picked by eye, not a measurement, and the duplicate labels are Public Works' operational ones. The demo's four real cases are pairs from the second check.
-
-### Synthetic holdouts
+### Controlled test: synthetic holdouts
 
 ![Bar chart: wrong closing suggestions on reports that needed attention, location alone against CiviFold's fast path, on four evaluation sets. test 24 against 1 of 33, holdout 11 against 3 of 16, holdout2 22 against 1 of 33, holdout3 24 against 0 of 33.](media/results.svg)
 
@@ -115,6 +99,22 @@ The latest holdout has 80 reports from 16 assets (8 fixtures or places and their
 - **It asks rather than guesses.** The fast path asked one question (a wider shot, another angle, a close-up or the time) on 23 reports, and 21 ended correct after the simulated answer. Simulated residents always answer; reports nobody answers stay with staff.
 - **Verification stays optional.** On holdout3 it left the critical count unchanged and raised deferrals from 3 to 12. Across all sets it stopped one wrong suggestion.
 - **One change since.** SAM's noun phrase often missed a patched or lifted road surface and cut a dumped pile down to one bag, so those reports got a question even when the whole photos matched. Muse Spark now boxes the damage or the pile, and SAM segments inside the box. Re-run on holdout3, whose photos had been seen by then, the current version again made 0 / 33 wrong closing suggestions, got 60 of 80 right before any answer (51 before) and asked 14 questions instead of 23 ([details and the development-set check](eval/README.md#after-holdout3-road-damage-and-dumped-piles)).
+
+### Real San Francisco 311 photos
+
+Two checks on public San Francisco 311 requests. Requests were picked by eye from the photos alone, and what counts as right, a miss or critical was written down before the runs; four pairs had been run once earlier to choose the demo photos, and their results count as they came out. Each report ran once, live, through the unchanged fast path at its own place and time ([details](eval/README.md#real-311-photos-san-francisco)). Location alone links each request to the earlier one at its spot.
+
+| Real SF 311 requests, suggestions | Location alone | **Fast path** |
+|---|---|---|
+| New trash after a cleanup at the same spot, closed as already fixed | 13 / 13 | **0 / 13** |
+| Same pile or damage in both photos, merged (the right call) | 33 / 33 | 14 / 33 |
+
+![Four real San Francisco 311 pairs from the demo, each two residents at one spot, with what CiviFold and location alone suggest: new trash at a corner tree after the cleanup, which CiviFold keeps apart as a possible recurrence and location alone closes as already fixed; the same wooden panel a day later, a duplicate for both; the same orange bags from a wider view, which CiviFold sends to staff; the same broken utility cover, where CiviFold asks for another angle. Photos: DataSF 311 public records, people and plates blurred.](media/real-sf.webp)
+
+- **After a cleanup, no closing suggestion.** Of the 13 requests made within 7 days after Public Works' cleanup, it flagged 3 as possible recurrences and kept the other 10 open: 2 as new problems, 7 with a question to the resident and 1 for staff.
+- **It suggests fewer merges on real duplicates and asks more.** When both photos clearly show the same pile or damage, it suggested merging 14 of 33, asked or sent 17 to staff, and suggested 2 as new problems. Road damage asked most: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Of 9 further requests that Public Works closed as duplicates, mostly different items at one corner, it suggested merging 1 and opening 3 as new.
+- **Three real photos** of one dumped pile in Korea, run once with the expectations written first, gave no wrong link and no confirmed duplicate either: the views share no fixed feature, so the fast path asked for a wider shot ([details](eval/README.md#real-world-check)).
+- These are small checks picked by eye, not a measurement, and the duplicate labels are Public Works' operational ones. The demo's four real cases are pairs from the second check.
 
 **[Methods, ablations, every set and every recorded run →](eval/README.md)**
 

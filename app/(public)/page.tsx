@@ -73,7 +73,24 @@ export default function Home() {
 
       <section id="results" className="mx-auto max-w-6xl scroll-mt-16 border-t border-zinc-200 px-4 py-12">
         <h2 className="text-xl font-semibold tracking-tight text-zinc-900">What a location rule buries</h2>
-        <div className="mt-5 grid gap-x-10 gap-y-10 xl:grid-cols-2">
+        <div className="mt-5 grid gap-x-10 gap-y-10 xl:grid-cols-[1.1fr_1fr]">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-900">A controlled test with known answers</h3>
+            <p className="mt-1 text-sm leading-relaxed text-zinc-600">
+              A pre-registered synthetic holdout: 80 reports at 16 places CiviFold had never seen, generated with Muse Image, with look-alikes and repairs
+              placed on purpose and every answer known, scored on its first run. Location alone links a report to the nearest incident of the same kind
+              within {SEARCH_CONFIG.radius_m.fire_hydrant} m.
+            </p>
+            <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200">
+              <Scoreboard compact />
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+              More repeats merged into the right incident, and no problem wrongly merged. Location alone also merged {HELD_OUT.location.wrongIncident}{" "}
+              duplicates into the wrong incident; CiviFold merged none into the wrong incident. {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s{" "}
+              {HELD_OUT.civifold.right} correct merges came after one follow-up question, answered by a simulated resident. The other 8 of the 80 were already
+              fixed and are counted in neither row.
+            </p>
+          </div>
           <div>
             <h3 className="text-sm font-semibold text-zinc-900">Real San Francisco 311 photos</h3>
             <p className="mt-1 text-sm leading-relaxed text-zinc-600">
@@ -81,32 +98,17 @@ export default function Home() {
               checks ran. Location alone links a request to the earlier one at the same spot.
             </p>
             <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200">
-              <RealScoreboard compact />
+              <RealScoreboard compact closedOnly />
             </div>
             <p className="mt-3 text-xs leading-relaxed text-zinc-500">
               Of the {REAL_SF.afterCleanup} requests made after a cleanup, CiviFold suggested closing none: it flagged {REAL_SF.civifold.recurrence} as possible
-              recurrences, suggested 2 as new problems, asked the resident about 7 and sent 1 to staff. When both photos showed the same pile or damage, it
-              suggested fewer merges than location alone: without a sure match, it asks for another photo or leaves the call to staff. These are small spot checks,
-              not a benchmark.{" "}
+              recurrences, suggested 2 as new problems, asked the resident about 7 and sent 1 to staff. On {REAL_SF.samePairs} pairs whose photos showed the same
+              pile or damage, it suggested merging {REAL_SF.civifold.merged}, where location alone merges all of them: without a sure match, it asks for
+              another photo or leaves the call to staff. These are small spot checks, not a benchmark.{" "}
               <a href={EVAL_REAL} className="underline underline-offset-2 hover:text-zinc-900">
                 How they were picked, and every result
               </a>
               .
-            </p>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-900">Pre-registered synthetic holdout</h3>
-            <p className="mt-1 text-sm leading-relaxed text-zinc-600">
-              The newest holdout: 80 reports at 16 places CiviFold had never seen, with look-alikes and repairs placed on purpose, scored on its first
-              run. Location alone links a report to the nearest incident of the same kind within {SEARCH_CONFIG.radius_m.fire_hydrant} m.
-            </p>
-            <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200">
-              <Scoreboard compact />
-            </div>
-            <p className="mt-3 text-xs leading-relaxed text-zinc-500">
-              Location alone also merged {HELD_OUT.location.wrongIncident} duplicates into the wrong incident; CiviFold merged none into the wrong incident.{" "}
-              {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} correct merges came after one follow-up question, answered by a simulated
-              resident. The other 8 of the 80 were already fixed and are counted in neither row.
             </p>
           </div>
         </div>

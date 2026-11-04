@@ -89,15 +89,17 @@ export function Scoreboard({ compact = false }: { compact?: boolean }) {
 }
 
 /** The real San Francisco 311 photo checks. */
-export function RealScoreboard({ compact = false }: { compact?: boolean }) {
+export function RealScoreboard({ compact = false, closedOnly = false }: { compact?: boolean; closedOnly?: boolean }) {
   const { location: lo, civifold: cf } = REAL_SF;
   return (
     <Board
       compact={compact}
-      rows={[
+      rows={(
+        [
         { measure: "New trash after a cleanup, closed as fixed", note: "the same spot, should stay open", of: REAL_SF.afterCleanup, location: [lo.closed, "text-rose-700"], civifold: [cf.closed, "text-emerald-700"] },
         { measure: "Same pile or damage, merged", note: "the right call here", of: REAL_SF.samePairs, location: [lo.merged, "text-zinc-900"], civifold: [cf.merged, "text-zinc-900"] },
-      ]}
+        ] as Row[]
+      ).slice(0, closedOnly ? 1 : 2)}
     />
   );
 }
