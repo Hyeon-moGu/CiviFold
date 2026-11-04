@@ -289,6 +289,19 @@ async function checkWorld(rt: Runtime, scenario: Scenario, index: number) {
 }
 
 /**
+ * When a dataset photo was seen. A reset records a scenario's repair once and a visitor may send the report days
+ * later, so a photo seen before the repair keeps its distance from the recorded repair instead of drifting past it.
+ */
+async function observedAt(rt: Runtime, scenario: Scenario, hoursAgo: number): Promise<string> {
+  const repair = scenario.steps.find((s) => s.kind === "repair");
+  if (repair?.kind === "repair" && hoursAgo > repair.hours_ago) {
+    const [fixed] = await rt.database.select({ at: incidents.resolved_at }).from(incidents).where(eq(incidents.id, seedIncidentId(repair.asset)));
+    if (fixed?.at) return new Date(Date.parse(fixed.at) - (hoursAgo - repair.hours_ago) * 3_600_000).toISOString();
+  }
+  return new Date(Date.now() - hoursAgo * 3_600_000).toISOString();
+}
+
+/**
  * A few lines of what the comparison model wrote about the report's photo against the incident it was compared
  * with (the suggested one, else the nearest compared), from its most detailed comparison: the model's own words,
  * with its NEW and CANDIDATE named for a visitor. A different fixture gets three lines on what tells it apart;
@@ -462,7 +475,7 @@ export async function runStep(rt: Runtime, scenarioId: string, index: number, { 
     voice: null,
     lat: s.lat,
     lng: s.lng,
-    observed_at: real ? real.observed_at : hoursAgo(step.observed_hours_ago ?? 0),
+    observed_at: real ? real.observed_at : await observedAt(rt, scenario, step.observed_hours_ago ?? 0),
     observed_at_source: "user",
     description: null,
     category_hint: s.category,

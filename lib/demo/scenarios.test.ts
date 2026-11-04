@@ -194,6 +194,20 @@ describe("demo scenarios", () => {
     expect(((await runStep(rt, "sf311", 1)) as Sent).label).toBe("NEW");
   });
 
+  it("keeps a photo seen before the repair before it, however long after the reset it is sent", async () => {
+    await runStep(rt, "after-repair", 0);
+    fastSays("LATE_REPORT", seedIncidentId("H2"));
+    const fourDaysOn = vi.spyOn(Date, "now").mockReturnValue(Date.now() + 96 * 3_600_000);
+    try {
+      const sent = (await runStep(rt, "after-repair", 1)) as Sent;
+      const [report] = await rt.database.select({ observed_at: reports.observed_at }).from(reports).where(eq(reports.id, sent.report_id));
+      const [incident] = await rt.database.select({ resolved_at: incidents.resolved_at }).from(incidents).where(eq(incidents.id, seedIncidentId("H2")));
+      expect(Date.parse(incident!.resolved_at!) - Date.parse(report!.observed_at)).toBe(24 * 3_600_000);
+    } finally {
+      fourDaysOn.mockRestore();
+    }
+  });
+
   it("asks for a reset when the world a step expects has moved on", async () => {
     await runStep(rt, "after-repair", 0);
     await expect(runStep(rt, "after-repair", 0)).rejects.toThrow(/Reset it to the start/);
