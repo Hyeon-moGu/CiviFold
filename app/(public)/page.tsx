@@ -77,15 +77,15 @@ export default function Home() {
           <div>
             <h3 className="text-sm font-semibold text-zinc-900">Real San Francisco 311 photos</h3>
             <p className="mt-1 text-sm leading-relaxed text-zinc-600">
-              Public requests with residents&apos; photos, picked by eye with the expected answers written before any run, each run once. Location alone
-              links a request to the earlier one at the same spot.
+              Public requests with residents&apos; photos, picked by eye from the photos alone, with what counts as right written down before the runs.
+              Location alone links a request to the earlier one at the same spot.
             </p>
             <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200">
               <RealScoreboard compact />
             </div>
             <p className="mt-3 text-xs leading-relaxed text-zinc-500">
               Of the {REAL_SF.afterCleanup} requests made after a cleanup, CiviFold flagged {REAL_SF.civifold.recurrence} as possible recurrences and kept the
-              other {REAL_SF.afterCleanup - REAL_SF.civifold.recurrence} open. When both photos showed the same pile or damage, it merged fewer than location
+              other {REAL_SF.afterCleanup - REAL_SF.civifold.recurrence} open: 2 as new problems, 7 with a question and 1 for staff. When both photos showed the same pile or damage, it merged fewer than location
               alone: without a sure match it asks for another photo or leaves the call to staff. Small checks, not a measurement:{" "}
               <a href={EVAL_REAL} className="underline underline-offset-2 hover:text-zinc-900">
                 how they were picked and every result
@@ -94,9 +94,9 @@ export default function Home() {
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900">Pre-registered synthetic test</h3>
+            <h3 className="text-sm font-semibold text-zinc-900">Pre-registered synthetic holdout</h3>
             <p className="mt-1 text-sm leading-relaxed text-zinc-600">
-              The newest held-out set: 80 reports at 16 places CiviFold had never seen, with look-alikes and repairs placed on purpose, scored on its first
+              The newest holdout: 80 reports at 16 places CiviFold had never seen, with look-alikes and repairs placed on purpose, scored on its first
               run. Location alone links a report to the nearest incident of the same kind within {SEARCH_CONFIG.radius_m.fire_hydrant} m.
             </p>
             <div className="mt-4 overflow-hidden rounded-lg border border-zinc-200">
@@ -111,15 +111,15 @@ export default function Home() {
         </div>
         <div className="mt-10 max-w-3xl">
           <p className="text-sm leading-relaxed text-zinc-600">
-            Every synthetic unseen set, first run: of the reports that needed attention, the share that wrongly got a one-click &ldquo;duplicate, late or
+            Every unseen synthetic set, first run: of the reports that needed attention, the share that wrongly got a one-click &ldquo;duplicate, late or
             already fixed&rdquo; suggestion.
           </p>
           <table className="mt-4 w-full text-left text-sm">
             <thead className="text-xs text-zinc-500">
               <tr className="border-b border-zinc-200">
                 <th className="py-2 font-medium">Set</th>
-                <th className="py-2 text-right font-medium">Location alone</th>
-                <th className="py-2 text-right font-medium">CiviFold</th>
+                <th className="py-2 pl-3 text-right font-medium">Location alone</th>
+                <th className="py-2 pl-3 text-right font-medium">CiviFold</th>
               </tr>
             </thead>
             <tbody className="font-mono tabular-nums">
@@ -205,7 +205,11 @@ export default function Home() {
 function SameBlock() {
   return (
     <figure className="rounded-xl border border-zinc-200 bg-white p-3">
-      <div className="grid grid-cols-2 gap-3">
+      <p className="mb-3 flex items-center gap-2 px-1 text-xs font-medium text-zinc-600">
+        <span className="rounded bg-sky-700/85 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white">SF 311 PHOTO</span>
+        Real San Francisco 311 requests
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2 sm:gap-3">
         <Pair
           title="The same panel, a day later"
           before={{ src: "/api/images/sf_t058_1?w=480", alt: "The open request: a wooden panel left at a street tree on 24th Street", when: "Open, Sep 14" }}
@@ -226,8 +230,8 @@ function SameBlock() {
         />
       </div>
       <figcaption className="mt-3 px-1 text-[11px] leading-relaxed text-zinc-500">
-        Real San Francisco 311 requests (DataSF), people and plates blurred. Location alone would merge both and close the second as already fixed.
-        Results from the demo, which you can run yourself.
+        Location alone gets the first right too, but merges the second into the cleared request, closing it as already fixed. Photos: DataSF public
+        records, people and plates blurred. Results from the demo, which you can run yourself.
       </figcaption>
     </figure>
   );
@@ -245,7 +249,6 @@ function Pair({ title, before, after, verdict, tone, dot, why }: { title: string
             <div className="relative overflow-hidden rounded-md bg-zinc-100">
               {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
               <img src={s.src} alt={s.alt} className="aspect-[3/4] w-full object-cover" />
-              <span className="absolute left-1 top-1 rounded bg-sky-700/85 px-1 py-0.5 text-[8px] font-semibold tracking-wide text-white">SF 311</span>
             </div>
             <p className="mt-1 text-[11px] text-zinc-500">{s.when}</p>
           </div>

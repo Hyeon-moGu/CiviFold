@@ -96,7 +96,7 @@ export function RealScoreboard({ compact = false }: { compact?: boolean }) {
       compact={compact}
       rows={[
         { measure: "New trash after a cleanup, closed as fixed", note: "the same spot, should stay open", of: REAL_SF.afterCleanup, location: [lo.closed, "text-rose-700"], civifold: [cf.closed, "text-emerald-700"] },
-        { measure: "Same pile or damage, merged", note: `CiviFold asked or sent ${REAL_SF.civifold.asked} to staff, kept ${REAL_SF.civifold.apart} apart`, of: REAL_SF.samePairs, location: [lo.merged, "text-zinc-900"], civifold: [cf.merged, "text-zinc-900"] },
+        { measure: "Same pile or damage, merged (the right call)", note: `CiviFold asked or sent ${REAL_SF.civifold.asked} to staff; ${REAL_SF.civifold.apart} wrongly opened as new`, of: REAL_SF.samePairs, location: [lo.merged, "text-zinc-900"], civifold: [cf.merged, "text-zinc-900"] },
       ]}
     />
   );

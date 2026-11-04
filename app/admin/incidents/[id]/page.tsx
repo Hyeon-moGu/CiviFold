@@ -112,7 +112,7 @@ export default async function IncidentDetail({ params }: { params: Promise<{ id:
           <Panel title="Incident">
             <Fact k="Category" v={incident.category.replace("_", " ")} />
             <Fact k="Opened" v={when(incident.created_at)} />
-            <Fact k="Repair recorded" v={when(incident.resolved_at)} />
+            <Fact k={incident.category === "trash" ? "Cleanup recorded" : "Repair recorded"} v={when(incident.resolved_at)} />
             {incident.recurrence_of && (
               <Fact
                 k="Recurrence of"

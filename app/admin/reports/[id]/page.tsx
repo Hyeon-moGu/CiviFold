@@ -380,6 +380,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   linked={linked}
                   segmentations={segmentations}
                   names={names}
+                  fix={fix}
                 />
               ) : (
                 <div className={`grid gap-4 ${ruledOut ? "lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:grid-cols-2"}`}>
@@ -769,6 +770,7 @@ function PhotoComparison({
   linked,
   segmentations,
   names,
+  fix,
 }: {
   report: { observed: string; photos: PhotoRow[]; newImageId: string };
   incident: { id: string; title: string | null; status: string; resolved: string | null; photo: string; facts: { width: number; height: number; is_synthetic: boolean } | undefined };
@@ -776,6 +778,7 @@ function PhotoComparison({
   linked: boolean;
   segmentations: Record<string, SegRow | undefined>;
   names: Record<string, string>;
+  fix: Fix;
 }) {
   const result = comparison.result!;
   const seg = (id: string) => segmentations[id];
@@ -836,7 +839,7 @@ function PhotoComparison({
             >
               The incident on file
             </Link>
-            <span className="text-xs text-ops-dim">{[incident.title, fixed ? `fixed ${when(incident.resolved)}` : incident.status].filter(Boolean).join(" · ")}</span>
+            <span className="text-xs text-ops-dim">{[incident.title, fixed ? `${fix === "cleanup" ? "cleared" : "fixed"} ${when(incident.resolved)}` : incident.status].filter(Boolean).join(" · ")}</span>
           </p>
           <MaskedPhoto
             variant="ops"
@@ -1073,7 +1076,7 @@ function TimeBar({ observed, submitted, created, resolved, fix }: { observed: st
       ? [{ t: submitted, text: "Seen and reported", color: "bg-white" }]
       : [
           { t: observed, text: "Resident saw it", color: "bg-white" },
-          { t: submitted, text: "Report arrived", color: "bg-white" },
+          { t: submitted, text: "Sent in this demo", color: "bg-white" },
         ]),
   ].filter((m): m is { t: string; text: string; color: string } => Boolean(m.t));
   const times = marks.map((m) => new Date(m.t).getTime());

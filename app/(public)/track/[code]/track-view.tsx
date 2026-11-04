@@ -346,7 +346,10 @@ function Answer({ view, onAnswer }: { view: ResidentView; onAnswer: (form: FormD
               </button>
             </div>
           ) : (
-            <p className="text-xs text-zinc-600">There is no sample answer for this report, so it can only be answered with your own photo.</p>
+            <p className="text-xs text-zinc-600">
+              The demo has no prepared answer photo for this report. Answer with your own photo{view.live ? "" : " and the demo access code"}, or leave it:
+              staff see the question and decide.
+            </p>
           )}
           {source === "sample" ? (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">

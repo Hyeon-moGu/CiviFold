@@ -4,13 +4,13 @@
 
 **[Live demo](https://civi-fold.vercel.app/demo)** · real San Francisco 311 photos, plus generated hard cases · each case replays its recorded run in seconds, and "Run it live" calls Muse Spark and SAM 3.1 now
 
-![Four real San Francisco 311 pairs from the demo, each two residents at one spot: new trash at a corner tree after the cleanup, kept apart as a possible recurrence; the same wooden panel a day later, suggested as a duplicate; the same orange bags from a wider view, sent to staff; the same broken utility cover, with a question for another angle. Photos: DataSF 311 public records, people and plates blurred.](media/real-sf.webp)
+![Four real San Francisco 311 pairs from the demo, each two residents at one spot, with what CiviFold and location alone suggest: new trash at a corner tree after the cleanup, which CiviFold keeps apart as a possible recurrence and location alone closes as already fixed; the same wooden panel a day later, a duplicate for both; the same orange bags from a wider view, which CiviFold sends to staff; the same broken utility cover, where CiviFold asks for another angle. Photos: DataSF 311 public records, people and plates blurred.](media/real-sf.webp)
 
 CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Every link and closure is a suggestion until a staff member approves it.
 
-On real San Francisco 311 photos, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) closed **none of 13 requests made after a cleanup at the same spot**, where grouping by location alone would close all 13. On a pre-registered holdout of 80 synthetic reports, with look-alikes and repairs placed on purpose, it suggested closing **none of the 33 reports that needed a person**; location alone would have closed 24 ([results](#results)).
+On real San Francisco 311 photos, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) closed **none of 13 requests made after a cleanup at the same spot**, where grouping by location alone would close all 13. It merged fewer true duplicates than location alone (14 of 33) and asked or sent the rest to staff. On a pre-registered holdout of 80 synthetic reports, with look-alikes and repairs placed on purpose, it suggested closing **none of the 33 reports that needed a person**; location alone would have closed 24 ([results](#results)).
 
-**Try it in three minutes:** open the [demo](https://civi-fold.vercel.app/demo) and send the four real San Francisco cases (or press "Run it live" on one) · switch to Hard cases, open case 3 in the staff view and press "Verify with the agent" · approve, and the demo card and the resident's page show the decision.
+**Try it in three minutes:** open the [demo](https://civi-fold.vercel.app/demo), where the first real San Francisco case is already shown, and send the other three (or press "Run it live" on one) · switch to Hard cases, send case 3, open it in the staff view and press "Verify with the agent" · approve, and the demo card and the resident's page show the decision.
 
 - **Nothing closes by itself.** The system never links or closes a report. It suggests, shows the evidence and waits for staff.
 - **Models judge the photo, rules judge the time.** Muse Spark and SAM 3.1 decide whether two photos show the same fixture and the same damage. Rules then apply the observation time and the repair history. The comparison never sees a timestamp.
@@ -28,13 +28,13 @@ In September 2026, New York City's 311 recorded 3,662 street pothole requests. T
 
 ![Synthetic hard cases from the demo: the open incident by the BAKERY, the same hydrant from across the street, a look-alike by the LAUNDRY, and new damage after repair.](media/scenes.webp)
 
-*Synthetic hard cases from the demo, generated with Muse Image: look-alikes and repairs that real records rarely hold on purpose.*
+*Synthetic hard cases from the demo, generated with Muse Image: look-alikes and repairs placed on purpose, which real records rarely contain.*
 
 CiviFold is for the staff who review incoming reports at a 311 center or public works office. It puts the candidates' photos beside the new one, says what matched and what differed, and leads with the suggested action. To run for a city it needs the open and recently repaired incidents with photos and repair dates, read from the existing 311 or work-order system (an Open311-style API or an export, not built yet). Without repair dates, a late report and a recurrence cannot be told apart.
 
 ## What staff see
 
-![Staff console: a possible recurrence on a real San Francisco 311 request, seen 142 hours after Public Works cleared the corner tree on Alemany Boulevard, with its suggested decision, both photos with Muse Spark's box, SAM outlines and cut-outs, and what the comparison found about the place (same) and the problem (not the same).](media/staff-review.webp)
+![Staff console: a possible recurrence on a real San Francisco 311 request, seen about six days (142 hours) after Public Works cleared the corner tree on Alemany Boulevard, with its suggested decision, both photos with Muse Spark's box, SAM outlines and cut-outs, and what the comparison found about the place (same) and the problem (not the same).](media/staff-review.webp)
 
 The suggestion and why (seen six days after the cleanup, with new trash), both photos with Muse Spark's box, SAM's outline and the cut-outs, and what the comparison found about the place and the problem. Staff accept it in one click or choose another action. *Real San Francisco 311 photos.*
 
@@ -59,14 +59,14 @@ Muse Spark returns its judgment as structured fields the rules can check (same f
 
 ### Real San Francisco 311 photos
 
-Two checks on public San Francisco 311 requests. Each pick and each expected answer was written down before any model call, and each report ran once, live, through the unchanged fast path at its own place and time ([details](eval/README.md#real-311-photos-san-francisco)). Location alone links each request to the earlier one at its spot.
+Two checks on public San Francisco 311 requests. Requests were picked by eye from the photos alone, and what counts as right, a miss or critical was written down before the runs; four pairs had been run once earlier to choose the demo photos, and their results count as they came out. Each report ran once, live, through the unchanged fast path at its own place and time ([details](eval/README.md#real-311-photos-san-francisco)). Location alone links each request to the earlier one at its spot.
 
 | Real SF 311 requests | Location alone | **Fast path** |
 |---|---|---|
 | New trash after a cleanup at the same spot, closed as already fixed | 13 / 13 | **0 / 13** |
-| Same pile or damage in both photos, merged | 33 / 33 | 14 / 33 |
+| Same pile or damage in both photos, merged (the right call) | 33 / 33 | 14 / 33 |
 
-- **After a cleanup, nothing closed.** Of the 13 requests made within 7 days after Public Works' cleanup, it flagged 3 as possible recurrences and kept the other 10 open as new problems, with a question or for staff.
+- **After a cleanup, nothing closed.** Of the 13 requests made within 7 days after Public Works' cleanup, it flagged 3 as possible recurrences and kept the other 10 open: 2 as new problems, 7 with a question to the resident and 1 for staff.
 - **It merges fewer real duplicates and asks more.** When both photos clearly show the same pile or damage, it merged 14 of 33, asked or sent 17 to staff, and opened 2 as new problems. Road damage asked most: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Of 9 further requests that Public Works closed as duplicates, mostly different items at one corner, it merged 1 and opened 3 as new.
 - **Three real photos** of one dumped pile in Korea, run once with the expectations written first, gave no wrong link and no confirmed duplicate either: the views share no fixed feature, so the fast path asked for a wider shot ([details](eval/README.md#real-world-check)).
 - These are small checks picked by eye, not a measurement, and the duplicate labels are Public Works' operational ones. The demo's four real cases are pairs from the second check.

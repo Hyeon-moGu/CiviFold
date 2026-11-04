@@ -11,15 +11,18 @@ import { runtime } from "@/lib/server/runtime";
 import { ReportForm, type RealSampleView } from "./report-form";
 
 const DAY = new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: DEMO_TIME_ZONE });
+const SF_TIME = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: DEMO_TIME_ZONE });
+const sentence = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 // The later request of each real San Francisco pair, offered first; the earlier one is the incident on file.
 const REAL_SAMPLES: RealSampleView[] = REAL_PAIRS.map((p) => ({
   id: p.later.id,
-  title: p.title.charAt(0).toUpperCase() + p.title.slice(1),
+  title: sentence(p.later_title ?? p.title),
   detail: `311 request ${p.later.case}, ${DAY.format(new Date(p.later.observed_at))}`,
   category: p.category,
   lat: p.later.lat,
   lng: p.later.lng,
   observed_at: p.later.observed_at,
+  reported: `${SF_TIME.format(new Date(p.later.observed_at))} San Francisco time`,
 }));
 
 export const metadata = { title: "Report a problem · CiviFold" };

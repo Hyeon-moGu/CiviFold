@@ -96,8 +96,10 @@ const civifoldMark = (expect: Label, got: Label | undefined): Mark =>
     ? null
     : got === expect
       ? { text: "✓ right call", tone: "text-emerald-700" }
-      : MERGES.has(expect) && (got === "NEEDS_INFO" || got === "HUMAN_REVIEW")
+      : MERGES.has(expect) && got === "NEEDS_INFO"
         ? { text: "○ asks before merging: cautious, not wrong", tone: "text-amber-700" }
+        : MERGES.has(expect) && got === "HUMAN_REVIEW"
+          ? { text: "○ leaves it to staff: cautious, not wrong", tone: "text-amber-700" }
         : { text: "differs from the right call for this case", tone: "text-amber-700" };
 
 // What a sent report goes through. A replay steps through it at a reading pace. A live run reports no progress
@@ -630,6 +632,19 @@ export function DemoRunner({
       )}
       <div id="case-set" role="tabpanel" aria-labelledby={real.length > 0 ? `set-${set}` : undefined} className="space-y-8">
         {list.map((c, i) => caseCard(c, i, String(i + 1)))}
+        {set === "real" && cases.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              chooseSet("synthetic");
+              document.getElementById("set-synthetic")?.scrollIntoView({ block: "center" });
+            }}
+            className="w-full rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-left hover:bg-zinc-50"
+          >
+            <span className="block text-lg font-semibold tracking-tight">Next: {cases.length} hard cases with generated photos →</span>
+            <span className="mt-0.5 block text-[15px] text-zinc-600">A look-alike hydrant 28 m away, a fixture broken again after its repair, and the agent check in the staff view.</span>
+          </button>
+        )}
       </div>
 
       {/* Closed until the visitor opens it or has sent one of its reports, so the page stays short. */}

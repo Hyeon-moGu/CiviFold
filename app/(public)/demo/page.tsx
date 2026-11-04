@@ -115,7 +115,7 @@ const REAL: CaseView[] = [
     key: "sf311:1",
     title: "New trash at the same corner after the cleanup",
     context: "Public Works cleared the corner tree on Alemany Boulevard. Six days later a resident reports new trash there.",
-    evidence: "The same tree, pole and crosswalk, with different material after the cleanup. Location alone would close it as fixed; CiviFold keeps it apart for staff.",
+    evidence: "The same tree, pole and crosswalk, with different trash after the cleanup. Location alone would merge it into the cleared request, closing it as fixed; CiviFold keeps it apart for staff.",
     incident: { photo: realPhoto("sf_a123_1"), caption: "On file: request 202000046581, September 9, cleared the same morning" },
     report: { photo: photoOf("sf311:1")!, caption: "New request 202000068065, September 15" },
     expect: expectOf("sf311:1"),
@@ -139,7 +139,7 @@ const REAL: CaseView[] = [
     key: "sf311:2",
     title: "The same orange bags, from across the corner",
     context: "Two residents report bags at the Highland Avenue balustrade, 17 hours apart.",
-    evidence: "The same balustrade and tree, so the same place. From this wider view Muse Spark reads the pile as changed, so a person decides rather than a merge.",
+    evidence: "The same balustrade and tree, so the same place. From this wider view Muse Spark reads the pile as changed, so it goes to a person instead of being merged.",
     incident: { photo: realPhoto("sf_t052_1"), caption: "On file: request 202000063217, September 13" },
     report: { photo: photoOf("sf311:2")!, caption: "New request 202000065126, September 14" },
     expect: expectOf("sf311:2"),
@@ -187,16 +187,19 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
       <div className="max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <RealScoreboard />
         <p className="border-t border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500">
-          Two checks on public San Francisco 311 requests, picked by eye with the expected answers written before any run, each run once. Of the{" "}
-          {REAL_SF.afterCleanup} requests made after a cleanup, CiviFold flagged {REAL_SF.civifold.recurrence} as possible recurrences and kept the
-          other {REAL_SF.afterCleanup - REAL_SF.civifold.recurrence} open as new problems, with a question or for staff. Every merge is a suggestion until staff approve it.{" "}
+          Two checks on public San Francisco 311 requests, picked by eye from the photos alone, with what counts as right written down before the runs.
+          Of the {REAL_SF.afterCleanup} requests made after a cleanup, CiviFold flagged {REAL_SF.civifold.recurrence} as possible recurrences and kept the other{" "}
+          {REAL_SF.afterCleanup - REAL_SF.civifold.recurrence} open: 2 as new problems, 7 with a question to the resident and 1 for staff. Every merge is a
+          suggestion until staff approve it.{" "}
           <a href={EVAL_REAL} className="font-medium text-zinc-900 underline underline-offset-2">
             How it was checked →
           </a>
         </p>
       </div>
       <p className="max-w-3xl text-sm text-zinc-500">
-        Four pairs from those checks, two residents at one spot each, sent at their own place and time. Photos: {REAL_CREDIT}.
+        Four pairs from those checks, two residents at one spot each, sent at their own place and time. Case 1 is where location alone goes wrong.
+        Cases 2 to 4 are true duplicates, so location alone is right too: CiviFold merges one, sends one to staff and asks about one. Photos:{" "}
+        {REAL_CREDIT}.
       </p>
     </>
   );
@@ -205,18 +208,18 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
       <div className="max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <Scoreboard />
         <p className="border-t border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500">
-          Pre-registered held-out test of 80 synthetic reports; every merge is a suggestion until staff approve it. Location alone also merged{" "}
-          {HELD_OUT.location.wrongIncident} duplicates into the wrong incident; CiviFold none.{" "}
-          {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} correct merges came after one follow-up question, answered by a simulated resident;
-          on earlier test sets, CiviFold made 1 to 3 wrong merges or closures each. The other 8 reports were already fixed and sit in neither row.{" "}
+          Pre-registered synthetic holdout: 80 reports at 16 places CiviFold had never seen; 8 were already fixed and sit in neither row, and{" "}
+          {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} right merges came after one question answered by a simulated resident.
+          Location alone also merged {HELD_OUT.location.wrongIncident} duplicates into the wrong incident, and on earlier sets CiviFold made 1 to 3 wrong
+          merges or closures each.{" "}
           <Link href="/#results" className="font-medium text-zinc-900 underline underline-offset-2">
             How it was measured →
           </Link>
         </p>
       </div>
       <p className="max-w-3xl text-sm text-zinc-500">
-        Real records rarely hold the cases that trip a location rule on purpose: the same hydrant model a few doors down, or one broken again the day
-        after its repair. These use photos generated with Muse Image, like the held-out test.
+        Real records rarely contain the cases that trip a location rule: the same hydrant model a few doors down, or one broken again the day after
+        its repair. These were built on purpose with photos generated by Muse Image, like the holdout above.
       </p>
     </>
   );

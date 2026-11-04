@@ -85,7 +85,8 @@ export const readable = (text: string) =>
     // The rules count whole hours: "0h before" is under an hour.
     .replace(/\b0h (before|after)\b/g, "less than an hour $1")
     .replace(/\b1h (before|after)\b/g, "1 hour $1")
-    .replace(/\b(\d+)h (before|after)\b/g, "$1 hours $2")
+    // Two days and more read better in days, with the rules' hours kept.
+    .replace(/\b(\d+)h (before|after)\b/g, (_, h: string, side: string) => (Number(h) >= 48 ? `about ${Math.round(Number(h) / 24)} days (${h} hours) ${side}` : `${h} hours ${side}`))
     .replace(/±(\d+)h\b/g, "±$1 hours")
     // "Observed 23 hours before ... was resolved, the problem looks the same": two clauses, joined.
     .replace(/ was resolved, (?=the problem |unclear if )/g, " was resolved, and ")

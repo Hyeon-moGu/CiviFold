@@ -12,8 +12,8 @@ import { MAX_DESCRIPTION_CHARS } from "@/lib/limits";
 import type { Sample } from "@/lib/dataset/static";
 
 /** A real San Francisco 311 photo offered as a sample: sent at its own place and time (lib/dataset/real.ts). */
-export type RealSampleView = { id: string; title: string; detail: string; category: Category; lat: number; lng: number; observed_at: string };
-type Picked = { id: string; title: string; lat: number; lng: number; category: Category; observed_at?: string };
+export type RealSampleView = { id: string; title: string; detail: string; category: Category; lat: number; lng: number; observed_at: string; reported: string };
+type Picked = { id: string; title: string; lat: number; lng: number; category: Category; observed_at?: string; reported?: string };
 import type { Category } from "@/lib/tools/types";
 import { RealPhotoBadge, SyntheticBadge } from "@/app/_ui/labels";
 import type { MapPlace } from "@/app/_ui/pin-map";
@@ -348,12 +348,18 @@ export function ReportForm({
                       </span>
                       {picked?.id === s.id && <span className="absolute right-1.5 top-1.5 rounded-full bg-zinc-900 px-1.5 text-xs font-bold text-white">✓</span>}
                       <span className="block px-2 py-1.5 text-xs leading-snug">
-                        <span className="block truncate text-zinc-500">{tileTitle(s.title).place}</span>
-                        <span className="block truncate font-medium text-zinc-800">{tileTitle(s.title).view}</span>
+                        <span className="block text-zinc-500">{tileTitle(s.title).place}</span>
+                        <span className="block font-medium text-zinc-800 first-letter:uppercase">
+                          {tileTitle(s.title).state}, {tileTitle(s.title).view}
+                        </span>
                       </span>
                     </button>
                   ))}
                 </div>
+                <p className="mt-2 text-xs text-zinc-500">
+                  Generated with Muse Image for the evaluation, each marked SYNTHETIC: look-alikes a few doors apart and fixtures before and after a repair,
+                  which real records rarely contain.
+                </p>
               </>
             )}
 
@@ -501,7 +507,7 @@ export function ReportForm({
             {when === "custom" && <input type="datetime-local" value={custom} onChange={(e) => setCustom(e.target.value)} className={`${input} mt-2`} />}
             {source === "upload" && exif?.time && when === "custom" && custom === exif.time && <Note tone="ok">Read from the photo: when it was taken.</Note>}
             {source === "sample" && picked?.observed_at && when === "custom" && custom === localInput(picked.observed_at) && (
-              <Note tone="ok">From the 311 request: when it was reported.</Note>
+              <Note tone="ok">From the 311 request: when it was reported ({picked.reported}).</Note>
             )}
           </Step>
         )}
@@ -626,9 +632,10 @@ function Progress({ step, onJump }: { step: number; onJump: (at: number) => void
 // The search radius for every kind but benches (30 m); what the form tells a resident before the kind is known.
 const COMPARE_RADIUS_M = 40;
 
-function tileTitle(title: string): { place: string; view: string } {
+// A generated sample's title is "place, state, view" (lib/dataset/static.ts).
+function tileTitle(title: string): { place: string; state: string; view: string } {
   const parts = title.split(", ");
-  return parts.length === 3 ? { place: parts[0]!, view: parts[2]! } : { place: title, view: "" };
+  return parts.length === 3 ? { place: parts[0]!, state: parts[1]!, view: parts[2]! } : { place: title, state: "", view: "" };
 }
 
 function Step({ title, hint, children }: { title: string; hint: string; children: ReactNode }) {

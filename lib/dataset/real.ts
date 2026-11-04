@@ -14,6 +14,8 @@ export type RealPair = {
   category: Category;
   sam_prompt: string;
   title: string;
+  // What the later photo shows, when it is not what the request on file showed (new trash after a cleanup).
+  later_title?: string;
   earlier: Photo; // the request on file: the seeded incident's photo
   later: Photo; // the request the demo sends
   // When Public Works closed the earlier request as resolved, for a pair made after the cleanup.
@@ -37,6 +39,7 @@ export const REAL_PAIRS: RealPair[] = [
     category: "trash",
     sam_prompt: "trash",
     title: "cardboard and plastic at the corner tree on Alemany Boulevard",
+    later_title: "trash at the corner tree on Alemany Boulevard",
     earlier: { id: "sf_a123_1", case: "202000046581", observed_at: "2026-09-09T13:55:58.000Z", lat: 37.715791, lng: -122.444534, width: 864, height: 1152 },
     later: { id: "sf_a123_2", case: "202000068065", observed_at: "2026-09-15T13:42:12.000Z", lat: 37.715788, lng: -122.444566, width: 864, height: 1152 },
     resolved_at: "2026-09-09T15:45:44.000Z",
