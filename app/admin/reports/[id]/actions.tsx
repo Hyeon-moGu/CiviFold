@@ -54,14 +54,14 @@ export function Actions({
   ring: string;
   reportId: string;
   analysisId: number; // the analysis this screen shows; the server refuses a choice made on an older one
-  final: { label: Label } | null;
+  final: { label: Label; cleanup?: boolean } | null;
   focusId: string | null;
   askFor: RequestItem;
   decided: boolean;
   stale: boolean; // an incident the suggestion relied on changed since: no one-click suggestion
-  verify: { analysisId: number; running: boolean; again: boolean } | null; // the suggestion can be checked by the agent
+  verify: { analysisId: number; running: boolean; again: boolean; live?: boolean } | null; // the suggestion can be checked by the agent; live: no recorded run matches
   verifyLimit: number | null; // the suggestion could be checked, but this many runs is the most allowed
-  brief: { analysisId: number; again: boolean } | null; // staff can ask for a case brief of this analysis
+  brief: { analysisId: number; again: boolean; live?: boolean } | null; // staff can ask for a case brief of this analysis
   briefLimit: number | null; // this many briefs is the most allowed
   agentsOff?: boolean; // a replay-only deployment holds no recorded agent run for this report
   agentsElsewhere?: string | null; // the report of the same demo case whose recorded agent runs can be read
@@ -122,9 +122,9 @@ export function Actions({
   }
 
   const choices: Choice[] = [
-    { action: "link", text: focusId ? "Merge into the incident on file" : "Merge", approve: "Approve: merge it", needs: true },
+    { action: "link", text: focusId ? "Merge into the incident on file" : "Merge", approve: final?.label === "ALREADY_RESOLVED" ? `Approve: merge into the ${final.cleanup ? "cleared" : "fixed"} incident` : "Approve: merge it", needs: true },
     { action: "new_incident", text: "Open a new incident", approve: "Approve: open a new incident" },
-    { action: "recurrence", text: focusId ? "Open as a recurrence of the incident on file" : "Open as a recurrence", approve: "Approve: keep it apart as a recurrence", needs: true },
+    { action: "recurrence", text: "Open as a recurrence", approve: "Approve: keep it apart as a recurrence", needs: true },
     { action: "request_info", text: askFor === "photo" ? "Ask for a photo" : "Ask the resident", approve: askFor === "photo" ? "Approve: ask for a photo" : "Approve: ask the resident" },
     { action: "dismiss", text: "Dismiss", approve: "Approve: dismiss" },
   ];
@@ -142,7 +142,8 @@ export function Actions({
 
   return (
     <section className={`rounded-lg border border-ops-line bg-ops-panel ring-1 ring-inset ${ring}`}>
-      <div className="flex flex-col gap-3 px-4 py-3 xl:flex-row xl:items-center xl:gap-6">
+      {/* With one suggested decision the buttons sit beside the suggestion; with none, all of them go on their own row. */}
+      <div className={`flex flex-col gap-3 px-4 py-3 ${decided || primary ? "xl:flex-row xl:items-center xl:gap-6" : ""}`}>
         <div className="min-w-0 flex-1">{children}</div>
         {decided ? (
           <p className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
@@ -154,7 +155,7 @@ export function Actions({
             )}
           </p>
         ) : (
-          <div className="flex flex-wrap items-center gap-2 xl:max-w-[55%] xl:justify-end">
+          <div className={`flex flex-wrap items-center gap-2 ${primary ? "xl:max-w-[55%] xl:justify-end" : ""}`}>
             {primary ? (
               <>
                 <button
@@ -201,6 +202,8 @@ export function Actions({
               {verifying || verify.running ? "Verifying…" : verify.again ? "Verify again" : "Verify with the agent"}
             </AgentButton>
           )}
+          {/* Said before the press: with no recorded run to replay, it calls the model now and takes a while. */}
+          {verify && checking && verify.live && !verifying && !verify.running && <span className="text-[11px] text-ops-dim">runs live, about a minute</span>}
           {!verify && verifyLimit !== null && (
             <span title="Each report can be verified at most this many times." className="text-xs text-ops-dim">
               Verified {verifyLimit} times (the limit)
@@ -216,6 +219,7 @@ export function Actions({
               {writing ? "Writing…" : brief.again ? "Write a new brief" : "Write a brief"}
             </AgentButton>
           )}
+          {brief && briefing && brief.live && !writing && <span className="text-[11px] text-ops-dim">runs live, about a minute</span>}
           {!brief && briefLimit !== null && (
             <span title="Each report can have at most this many briefs." className="text-xs text-ops-dim">
               {briefLimit} briefs (the limit)

@@ -100,11 +100,17 @@ function noteOf(r: VerifyResult): State["note"] {
 // scroll-margin keeps it clear of the sticky band.
 export const intoView = (el: HTMLElement | null) => el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
 
+// A name brings its own article ("the red hydrant"), so one written before the id, or an adjective, would
+// read "still-open the red hydrant" or "the the red hydrant": the article goes first, once.
+// The model sometimes glosses an id ("incident_01 about a fire hydrant"); the name already says what it is.
+export const dropGloss = (text: string) => text.replace(/\b(inc_[a-z0-9_]+) about (?:an? |the )?[a-z ]+?(?= (?:is|was|has|had|at|in|on|and)\b)/g, "$1");
+
+export const tidyNames = (text: string) =>
+  text.replace(/\b(still-open|fixed|cleared|resolved|repaired|earlier|nearby)\s+the\s+/gi, "the $1 ").replace(/\b(?:the|a|an)\s+(the|this)\s+/gi, "$1 ");
+
 /** A step's summary with incident ids by name. */
 export const withNames = (text: string, names: Record<string, string>) =>
-  Object.entries(names)
-    .reduce((t, [id, label]) => t.replaceAll(id, label), text)
-    .replace(/\binc_[a-z0-9]+\b/g, "another incident");
+  tidyNames(Object.entries(names).reduce((t, [id, label]) => t.replaceAll(id, label), dropGloss(text))).replace(/\binc_[a-z0-9]+\b/g, "another incident");
 
 export const liveText = (live: "always" | "maybe") =>
   live === "always" ? "Running live on Muse Spark: usually under a minute, sometimes a little more. " : "No recorded run is known to match this report, so it may run live and take about a minute. ";

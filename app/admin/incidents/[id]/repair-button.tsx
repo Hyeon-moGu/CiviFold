@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { pauseFrom, usePaused } from "@/app/_ui/pause";
 
-export function RepairButton({ incidentId }: { incidentId: string }) {
+export function RepairButton({ incidentId, cleanup = false }: { incidentId: string; cleanup?: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,17 +25,17 @@ export function RepairButton({ incidentId }: { incidentId: string }) {
             if (res.ok) router.refresh();
             else {
               const body = (await res.json().catch(() => null)) as { error?: string } | null;
-              setError(body?.error ?? `The repair was not saved (HTTP ${res.status}). Try again.`);
+              setError(body?.error ?? `The ${cleanup ? "cleanup" : "repair"} was not saved (HTTP ${res.status}). Try again.`);
             }
           } catch {
-            setError("The repair was not saved: the connection dropped. Try again.");
+            setError(`The ${cleanup ? "cleanup" : "repair"} was not saved: the connection dropped. Try again.`);
           } finally {
             setBusy(false);
           }
         }}
         className="rounded-md bg-emerald-500 px-3.5 py-1.5 text-[13px] font-semibold text-black hover:bg-emerald-400 disabled:opacity-50"
       >
-        {busy ? "Saving…" : "Record repair"}
+        {busy ? "Saving…" : cleanup ? "Record cleanup" : "Record repair"}
       </button>
       {error && <p className="max-w-xs text-right text-sm text-rose-300">{error}</p>}
     </div>

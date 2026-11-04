@@ -11,8 +11,11 @@ import type { BriefEvent, BriefResult } from "@/lib/server/briefs";
 import type { BriefFact } from "@/lib/agent/brief";
 import type { Brief } from "@/lib/tools/write-brief";
 import { cost, when } from "@/app/_ui/format";
+import { readable } from "@/app/_ui/console";
+import { LABEL_TEXT } from "@/app/_ui/labels";
+import type { Label } from "@/lib/tools/types";
 import { plural, summarize, TOOL_TEXT, type StepView } from "./steps";
-import { clockOf, intoView, liveText, pacer, Spinner, useElapsed, withNames, type LiveRun } from "./verify";
+import { clockOf, dropGloss, intoView, liveText, pacer, Spinner, tidyNames, useElapsed, withNames, type LiveRun } from "./verify";
 import { pauseFrom } from "@/app/_ui/pause";
 
 type Phase = "idle" | "running" | "finished";
@@ -175,12 +178,15 @@ const SECTION_TEXT: Record<string, string> = {
 const LEFTOVER_ID = /\b(?:syn_[A-Za-z0-9_]+|img_[0-9a-f]+)\b/g;
 const ISO_TIME = /\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\b/g;
 
-function nameIds(text: string, names: Record<string, string>): string {
-  let out = text;
+function nameIds(text: string, names: Record<string, string>, cleared: ReadonlySet<string> = new Set()): string {
+  // The incident history names every fix a repair; for a dumped pile, staff call it a cleanup.
+  let out = dropGloss(text).replace(/\b([Aa]) repair (for|of|at) (inc_[a-z0-9_]+)\b/g, (m, a: string, p: string, id: string) => (cleared.has(id) ? `${a} cleanup ${p} ${id}` : m));
   for (const id of Object.keys(names).sort((a, b) => b.length - a.length)) out = out.split(id).join(names[id]);
-  out = out.replace(LEFTOVER_ID, "a photo").replace(ISO_TIME, (t) => when(t));
+  out = tidyNames(out).replace(LEFTOVER_ID, "a photo").replace(ISO_TIME, (t) => when(t));
   // The agent may name a thing twice ("Report report_01 shows", "Incident incident_01 opened"): keep the name alone.
   out = out.replace(/\b[Rr]eport (this report)\b/g, "$1").replace(/\b[Ii]ncident (the )/g, "$1");
+  // "this report reports trash" reads as a stutter once the id is a name.
+  out = out.replace(/\b(this report) reports\b/gi, "$1 is about");
   // A name put in place of an id can open a sentence ("this report shows ..."); an id itself keeps its case.
   return out.replace(/(^|[.!?]\s+)(this|the) /g, (_, before: string, word: string) => `${before}${word.charAt(0).toUpperCase()}${word.slice(1)} `);
 }
@@ -197,9 +203,24 @@ const keepOnScreen = (el: HTMLElement | null) => {
   if (shift) el.style.transform = `translateX(${shift}px)`;
 };
 
+// The citation chips stay on the line of the sentence's last word, never alone on a line of their own.
+function withLastWord(text: string, refs: ReactNode): ReactNode {
+  const at = text.trimEnd().lastIndexOf(" ");
+  if (at < 0) return <span className="whitespace-nowrap">{text}{refs}</span>;
+  return (
+    <>
+      {text.slice(0, at + 1)}
+      <span className="whitespace-nowrap">
+        {text.slice(at + 1).trimEnd()}
+        {refs}
+      </span>
+    </>
+  );
+}
+
 function Refs({ id, refs, number, explain, chip }: { id: string; refs: string[]; number: (ref: string) => number; explain: (ref: string) => string; chip: OpenChip }) {
   return (
-    <sup className="ml-0.5 inline-flex gap-0.5 align-super">
+    <sup className="relative -top-[0.2em] ml-1 inline-flex gap-0.5 align-baseline">
       {refs.map((ref) => {
         const key = `${id}-${ref}`;
         const open = chip.open === key;
@@ -220,7 +241,7 @@ function Refs({ id, refs, number, explain, chip }: { id: string; refs: string[];
                 ref={keepOnScreen}
                 id={`brief-ref-${key}`}
                 role="note"
-                className="absolute right-0 top-full z-20 mt-1 block w-72 max-w-[80vw] rounded-md border border-ops-line bg-ops-raised px-3 py-2 text-left text-[12px] font-normal leading-relaxed text-ops-text shadow-lg shadow-black/40"
+                className="absolute right-0 top-full z-20 mt-1 block w-72 max-w-[80vw] whitespace-normal rounded-md border border-ops-line bg-ops-raised px-3 py-2 text-left text-[12px] font-normal leading-relaxed text-ops-text shadow-lg shadow-black/40"
               >
                 <span className="mb-0.5 block font-mono text-[10px] text-violet-300">
                   Evidence {number(ref)}
@@ -243,31 +264,47 @@ const UP_FRONT = new Set(["missing", "next"]);
 // Facts are written for the model (and replayed word for word), so they keep its terse form; staff read them with
 // the categories and yes-or-no fields in words.
 function readableFact(text: string): string {
-  return text
+  return readable(
+    text
+      // "pipeline suggestion POSSIBLE_RECURRENCE → the yellow hydrant by rule R7d: …"
+      .replace(/^pipeline suggestion ([A-Z_]+)(?: → (.+?))?(?: by rule R\w+)?: ?/, (_, label: string, incident?: string) =>
+        `Pipeline suggestion: ${(LABEL_TEXT[label as Label] ?? label).toLowerCase()}${incident ? `, ${incident}` : ""}. `,
+      )
+      // "candidate the yellow hydrant: resolved, 0 m, created <time>, resolved <time>|never"
+      .replace(/^candidate (.+?): (\w+), ([\d.]+) m, created (.+?), resolved (.+)$/, (_, name: string, status: string, m: string, created: string, resolved: string) =>
+        `Nearby incident, ${name}: ${status === "resolved" || status === "closed" ? "closed" : status.replace("_", " ")}, ${Math.round(Number(m))} m away, opened ${created}, ${resolved === "never" ? "not fixed yet" : `closed ${resolved}`}`,
+      )
+      // "incident the yellow hydrant event repair_recorded at <time>: Repair recorded by staff"
+      .replace(/^incident (.+?) event \w+ at (.+?): /, "$2: ")
+      .replace(/photo quality: (\w+)/g, (_, q: string) => `photo quality: ${q.replace(/_/g, " ")}`)
+      .replace(/\.;/g, ";")
+      .replace(/asset (same|different|uncertain) \((\d(?:\.\d+)?)\)/g, (_, v: string, x: string) =>
+        `${v === "same" ? "same fixture" : v === "different" ? "a different fixture" : "unsure if the same fixture"} (model confidence ${Math.round(Number(x) * 100)}%)`,
+      ),
+  )
     .replace(/\b(?:fire_hydrant|traffic_sign|road_damage)\b/g, (c) => c.replace("_", " "))
     .replace(/;\s*out of scope: false/g, "")
     .replace(/\((full|crops)\):/g, (_, m: string) => (m === "crops" ? "(cut-outs):" : "(whole photos):"))
-    .replace(/asset (same|different|uncertain) \((\d(?:\.\d+)?)\)/g, (_, v: string, x: string) =>
-      `${v === "same" ? "same fixture" : v === "different" ? "a different fixture" : "unsure if the same fixture"} (model confidence ${Math.round(Number(x) * 100)}%)`,
-    )
     .replace(/problem visible true/g, "problem visible")
     .replace(/problem visible false/g, "no problem visible")
     .replace(/signature same/g, "same problem")
     .replace(/signature different/g, "a different problem")
     .replace(/signature uncertain/g, "unsure if the same problem")
     .replace(/, missing none/g, "")
-    .replace(/missing ([a-z_,]+)/g, (_, m: string) => `asks for ${m.replace(/_/g, " ").replace(/,/g, ", ")}`)
+    .replace(/, missing ([a-z_,]+)/g, (_, m: string) => `, asks for ${m.replace(/_/g, " ").replace(/,/g, ", ")}`)
     .replace(/ by rule R\w+/g, "")
     .replace(/\bcandidate\b/gi, "the incident's photo")
     .replace(/\bNEW\b/g, "this photo")
     .replace(/(^|; )new (?=shows|has|is)/g, "$1this photo ")
-    .replace(/repair signs: false/g, "no repair signs")
-    .replace(/repair signs: true/g, "repair signs seen")
+    .replace(/repair signs:? false/g, "no repair signs")
+    .replace(/repair signs:? true/g, "repair signs seen")
     .replace(/resident already asked: no/g, "the resident has not been asked yet")
-    .replace(/resident already asked: yes/g, "the resident was already asked");
+    .replace(/resident already asked: yes, by this suggestion \(([^)]*)\), no answer yet/g, (_, m: string) => `the resident was asked for ${m.replace(/_/g, " ")} with this suggestion and has not answered yet`)
+    .replace(/resident already asked: yes/g, "the resident was already asked")
+    .replace(/^./, (c) => c.toUpperCase());
 }
 
-export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale: boolean; names: Record<string, string> }) {
+export function BriefCard({ stored, stale, names, cleared }: { stored: StoredBrief; stale: boolean; names: Record<string, string>; cleared?: string[] }) {
   const brief = stored.brief as Brief | null;
   const steps = stored.steps as StepView[];
   const facts = stored.facts as BriefFact[];
@@ -297,7 +334,7 @@ export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale
     };
   }, [open]);
   const chip: OpenChip = { open, toggle: (key) => setOpen((o) => (o === key ? null : key)) };
-  const clean = (text: string) => nameIds(text, names);
+  const clean = (text: string) => nameIds(text, names, new Set(cleared));
   const explain = (ref: string): string => {
     const fact = facts.find((f) => f.ref === ref);
     if (fact) return readableFact(clean(fact.text));
@@ -314,17 +351,16 @@ export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale
   const called = steps.some((s) => s.tool !== "write_brief");
   return (
     <section ref={card} id="brief" className={`scroll-mt-72 rounded-lg border border-violet-500/40 bg-ops-panel ${fresh ? "ring-2 ring-violet-400/50" : ""}`}>
-      <header className="flex items-center gap-3 border-b border-ops-line px-4 py-2.5">
-        <h2 className="text-[13px] font-medium text-ops-text">Case brief</h2>
-        <span className="ml-auto text-xs text-ops-dim">Muse Spark · {called ? plural(reads, "read") : "from the stored facts"}</span>
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-0.5 border-b border-ops-line px-4 py-2.5">
+        <h2 className="shrink-0 whitespace-nowrap text-[13px] font-medium text-ops-text">Case brief</h2>
+        <span className="ml-auto text-xs text-ops-dim">Muse Spark · {called ? `stored facts and ${plural(reads, "tool result")}` : "stored facts only"}</span>
       </header>
       <div className="space-y-4 p-4">
         {brief ? (
           <>
             {brief.summary && (
               <p className="text-[14px] leading-relaxed text-white">
-                {clean(brief.summary.text)}
-                <Refs id="summary" refs={brief.summary.evidence_refs} number={number} explain={explain} chip={chip} />
+                {withLastWord(clean(brief.summary.text), <Refs id="summary" refs={brief.summary.evidence_refs} number={number} explain={explain} chip={chip} />)}
               </p>
             )}
             {shown.map((s) => (
@@ -333,8 +369,7 @@ export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale
                 <ul className="mt-1 space-y-1.5 text-[13px] leading-relaxed text-ops-text">
                   {s.items.map((item, i) => (
                     <li key={i}>
-                      {clean(item.text)}
-                      <Refs id={`${s.key}-${i}`} refs={item.evidence_refs} number={number} explain={explain} chip={chip} />
+                      {withLastWord(clean(item.text), <Refs id={`${s.key}-${i}`} refs={item.evidence_refs} number={number} explain={explain} chip={chip} />)}
                     </li>
                   ))}
                 </ul>
@@ -358,7 +393,7 @@ export function BriefCard({ stored, stale, names }: { stored: StoredBrief; stale
         {steps.length > 0 && (
           <details className="group text-[12px]">
             <summary className="cursor-pointer select-none text-ops-dim hover:text-white">
-              What the agent read ({plural(steps.length, "step")}, {cost(stored.cost_usd)}, {(stored.latency_ms / 1000).toFixed(1)}s)
+              What the agent read ({plural(steps.length, "step")}, {cost(stored.cost_usd)}, {stored.latency_ms < 100 ? "under 0.1s" : `${(stored.latency_ms / 1000).toFixed(1)}s`})
             </summary>
             <ol className="mt-2 space-y-1">
               {steps.map((st) => (

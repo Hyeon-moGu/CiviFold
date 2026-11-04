@@ -90,7 +90,30 @@ export const readable = (text: string) =>
     .replace(/±(\d+)h\b/g, "±$1 hours")
     // "Observed 23 hours before ... was resolved, the problem looks the same": two clauses, joined.
     .replace(/ was resolved, (?=the problem |unclear if )/g, " was resolved, and ")
-    .replace(/ was resolved, shows it fixed\./g, " was resolved, and the photo shows it fixed.");
+    .replace(/ was resolved, shows it fixed\./g, " was resolved, and the photo shows it fixed.")
+    // R2w: whole photos matched but the cut-outs did not confirm it.
+    .replace(/^Only full photos tie this report to (.+?); another view must confirm before it is (grouped|closed)\.$/, (_, incident: string, how: string) =>
+      `Only the whole photos match ${incident}; the cut-outs are not a sure match, so a second view is needed before ${how === "grouped" ? "merging" : "closing"}.`)
+    .replace(/ was resolved\b/g, " was closed");
+
+const CATEGORY_TEXT: Record<string, string> = {
+  fire_hydrant: "Fire hydrant",
+  streetlight: "Street light",
+  traffic_sign: "Traffic sign",
+  bench: "Bench",
+  road_damage: "Road damage",
+  trash: "Trash",
+  graffiti: "Graffiti",
+  other: "Other",
+};
+
+/** A category as staff say it; a report about people or behavior is out of scope whatever category it got. */
+export const categoryText = (category: string | null | undefined, outOfScope = false): string =>
+  outOfScope ? "People or behavior" : category ? (CATEGORY_TEXT[category] ?? category.replaceAll("_", " ")) : "";
+
+/** An incident's state as staff say it: trash is cleared, the rest is fixed. */
+export const statusWord = (status: string, category?: string | null): string =>
+  status === "resolved" || status === "closed" ? (category === "trash" ? "cleared" : "fixed") : status.replace("_", " ");
 
 /** What one image comparison concluded: is it the same fixture or spot? */
 export const VERDICT_TEXT: Record<string, string> = { same: "same", different: "not the same", uncertain: "unsure" };

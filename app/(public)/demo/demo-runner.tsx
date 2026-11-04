@@ -86,7 +86,7 @@ const buries = (expect: Label, urgent: boolean, got: Label | undefined) => (expe
 type Mark = { text: string; tone: string } | null;
 function locationMark(expect: Label, got: Label | undefined): Mark {
   if (!got) return null;
-  if (buries(expect, false, got)) return { text: "✕ buries a report that needs a person", tone: "text-rose-700" };
+  if (buries(expect, false, got)) return { text: "✕ buries a report that needs attention", tone: "text-rose-700" };
   if (got === expect) return { text: "✓ right call here", tone: "text-emerald-700" };
   if (MERGES.has(got) && MERGES.has(expect)) return { text: "≈ also merges it, which is right here", tone: "text-zinc-500" };
   return null;
@@ -174,9 +174,9 @@ function Photo({ src, caption, cutout, real = false }: { src: string; caption: s
           </svg>
         )}
         <span className="absolute left-2 top-2">{real ? <RealPhotoBadge /> : <SyntheticBadge />}</span>
-        {mask && <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 font-mono text-[10px] text-white">outlined by SAM 3.1</span>}
+        {mask && <span className="absolute bottom-2 right-2 hidden rounded bg-black/70 px-1.5 py-0.5 font-mono text-[10px] text-white sm:inline">outlined by SAM 3.1</span>}
       </div>
-      <figcaption className="mt-1.5 text-xs text-zinc-600 sm:text-sm">{caption}</figcaption>
+      <figcaption className="mt-1.5 text-pretty text-xs text-zinc-600 sm:text-sm">{caption}</figcaption>
     </figure>
   );
 }
@@ -242,7 +242,7 @@ function RunLine({
   if (!run.live) {
     return (
       <p className={`flex flex-wrap items-center gap-y-1 font-mono text-xs text-zinc-500 ${className}`}>
-        {sent?.wantedLive ? "Today's live budget is used up, so this replayed the recorded run." : "Replayed a recorded run, in seconds."}
+        {sent?.wantedLive ? "Today's live budget is used up, so this replayed the recorded run." : "Replayed a recorded run in seconds."}
         {onLive && !sent?.wantedLive && live}
       </p>
     );
@@ -486,17 +486,20 @@ export function DemoRunner({
                     </summary>
                     <div className="mt-2 flex gap-4">
                       {typeof r.cutout === "object" && (
-                        <figure className="w-20 shrink-0">
+                        <figure className="relative w-20 shrink-0">
                           {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
                           <img src={`/api/images/${r.cutout.crop}?w=160`} alt={`SAM 3.1 cut-out of the ${c.noun}`} className="h-24 w-20 rounded border border-zinc-200 bg-white object-contain" />
-                          <figcaption className="mt-1 text-[11px] leading-tight text-zinc-500">Cut out by SAM 3.1</figcaption>
+                          <figcaption className="mt-1 text-[11px] leading-tight text-zinc-500">
+                            Cut out by SAM 3.1
+                            <span className="block font-semibold tracking-wide">{c.real ? "SF 311 PHOTO" : "SYNTHETIC"}</span>
+                          </figcaption>
                         </figure>
                       )}
                       <ul className="min-w-0 space-y-0.5 text-sm text-zinc-700">
                         {r.seen.map((line) => (
                           <li key={line} className="flex gap-2">
                             <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-zinc-400" />
-                            {line}
+                            {line.charAt(0).toUpperCase() + line.slice(1)}
                           </li>
                         ))}
                       </ul>
@@ -588,7 +591,7 @@ export function DemoRunner({
             {(
               [
                 ["real", "Real 311 photos", `${real.length} San Francisco cases`],
-                ["synthetic", "Hard cases", `${cases.length} with generated photos`],
+                ["synthetic", "Hard cases", `${cases.length} generated cases`],
               ] as const
             ).map(([id, text, sub]) => (
               <button
@@ -612,7 +615,7 @@ export function DemoRunner({
       {real.length === 0 && intro.synthetic}
       {ready && (batchRunning || unsent.length > 1) && (
         <div
-          className={`flex flex-col items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/95 px-4 py-3 backdrop-blur sm:flex-row sm:items-center ${batchRunning ? "sticky top-16 z-10" : ""}`}
+          className={`flex flex-col items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/95 px-4 py-3 backdrop-blur sm:flex-row sm:items-center ${batchRunning ? "sticky top-[53px] z-10" : ""}`}
         >
           {batchRunning ? (
             <p className="flex items-center gap-2 text-sm font-medium text-zinc-800" role="status">
@@ -623,8 +626,8 @@ export function DemoRunner({
               <button onClick={sendAll} disabled={pausedReplay} className="shrink-0 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-40">
                 Send the other {unsent.length} reports at once
               </button>
-              <p className="text-sm text-zinc-600">
-                Each replays its recorded run in seconds.{liveOn && <> &ldquo;Run it live&rdquo; on any card then calls Muse Spark and SAM 3.1 now.</>}
+              <p className="text-balance text-sm text-zinc-600">
+                Each replays a recorded run in seconds.{liveOn && <> &ldquo;Run it live&rdquo; on a card calls Muse Spark and SAM 3.1 for real.</>}
               </p>
             </>
           )}
@@ -652,10 +655,10 @@ export function DemoRunner({
         <summary className="cursor-pointer list-none rounded-xl border border-zinc-200 bg-white px-4 py-3 hover:bg-zinc-50 [&::-webkit-details-marker]:hidden">
           <span className="flex items-baseline gap-2">
             <span aria-hidden className="inline-block text-zinc-500 transition-transform group-open:rotate-90">›</span>
-            <span className="text-xl font-semibold tracking-tight">When the right answer is to ask</span>
+            <span className="text-xl font-semibold tracking-tight">When the right answer is to ask, or to hand it to a person</span>
           </span>
           <span className="mt-1 block pl-4 text-[15px] text-zinc-600">
-            A voice message, a possible emergency, a noise complaint and two photos that do not show the place. CiviFold asks, or hands them to a person.
+            A voice message, two photos that cannot settle it alone, a possible emergency and a noise complaint.
           </span>
         </summary>
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -669,7 +672,7 @@ export function DemoRunner({
             const differs = Boolean((r?.label && r.label !== o.expect) || (then?.label && o.thenExpect && then.label !== o.thenExpect));
             return (
               <li key={o.key} id={`case-${o.key.replace(":", "-")}`} className="flex scroll-mt-20 gap-3 rounded-xl border border-zinc-200 p-3">
-                <div className="w-24 shrink-0">
+                <div className="w-16 shrink-0 sm:w-24">
                   {o.photo ? (
                     <div className="relative overflow-hidden rounded-lg border border-zinc-200">
                       {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
@@ -721,10 +724,15 @@ export function DemoRunner({
                         <Plain label={r.label} size="sm" urgent={o.urgent} />
                         {then?.label && (
                           <>
-                            <span className="text-zinc-400">then, with the photo</span>
+                            <span className="text-zinc-500">then, with the photo</span>
                             {o.thenPhoto && (
-                              // eslint-disable-next-line @next/next/no-img-element -- resized by our image route
-                              <img src={o.thenPhoto.replace("w=960", "w=120")} alt="The photo the resident answered with" className="h-12 w-[4.5rem] rounded border border-zinc-200 object-cover" />
+                              <span className="relative">
+                                {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
+                                <img src={o.thenPhoto.replace("w=960", "w=120")} alt="The photo the resident answered with" className="h-12 w-[4.5rem] rounded border border-zinc-200 object-cover" />
+                                <span className="absolute left-0.5 top-0.5 origin-top-left scale-75">
+                                  <SyntheticBadge />
+                                </span>
+                              </span>
                             )}
                             <Plain label={then.label} size="sm" />
                           </>
@@ -788,7 +796,7 @@ export function DemoRunner({
         <button onClick={resetWorld} disabled={resetting || pausedReset} className="font-medium text-zinc-900 underline underline-offset-2 disabled:opacity-50">
           {resetting ? "Resetting and replaying the recorded cases…" : "Reset it to the start"}
         </button>{" "}
-        (at most three times in 15 minutes).
+        <span className="whitespace-nowrap">(up to 3 times every 15 minutes).</span>
         {resetNote && <span className="mt-1 block">{resetNote}</span>}
       </p>
     </div>

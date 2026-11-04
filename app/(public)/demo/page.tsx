@@ -22,7 +22,7 @@ const assets = new Map(ASSET_FILE.assets.map((a) => [a.id, a]));
 const place = (assetId: string) => {
   const a = assets.get(assetId)!;
   // The incident's own name, as the staff console shows it, without the dataset's "(same model as …)".
-  return `${a.object.replace(/\s*\(.*\)$/, "")} by the ${a.sign_texts[0]}`;
+  return `${a.object.replace(/\s*\(.*\)$/, "")} by the ${a.sign_texts[0]} sign`;
 };
 const incidentPhoto = (assetId: string) => `/api/images/${imageId(assetId, "damaged_v1", "front")}?w=960`;
 
@@ -99,7 +99,7 @@ const CASES: CaseView[] = [
     title: "Dumped again after the cleanup",
     context: "Staff cleared the pile by the barber shop yesterday. Today a resident photographs a new pile at the same wall.",
     evidence: "Same wall and mural, a different pile after the cleanup. Staff should see it, not find it merged away.",
-    incident: { photo: incidentPhoto("W1"), caption: `Reported three days ago, cleared yesterday: the ${place("W1")}` },
+    incident: { photo: incidentPhoto("W1"), caption: `Reported three days ago, cleared yesterday: the pile by the ${assets.get("W1")!.sign_texts[0]} sign` },
     report: { photo: photoOf("dumping:3")!, caption: "New report, taken today" },
     expect: expectOf("dumping:3"),
     noun: "pile",
@@ -114,10 +114,10 @@ const REAL: CaseView[] = [
   {
     key: "sf311:1",
     title: "New trash at the same corner after the cleanup",
-    context: "Public Works cleared the corner tree on Alemany Boulevard. Six days later a resident reports new trash there.",
+    context: "Public Works cleared the trash at a corner tree on Alemany Boulevard. Six days later a resident reports new trash there.",
     evidence: "The same tree, pole and crosswalk, with different trash after the cleanup. Location alone would merge it into the cleared request, closing it as fixed; CiviFold keeps it apart for staff.",
-    incident: { photo: realPhoto("sf_a123_1"), caption: "On file: request 202000046581, September 9, cleared the same morning" },
-    report: { photo: photoOf("sf311:1")!, caption: "New request 202000068065, September 15" },
+    incident: { photo: realPhoto("sf_a123_1"), caption: "On file: request 202000046581, Sep 9, cleared that morning" },
+    report: { photo: photoOf("sf311:1")!, caption: "New request 202000068065, Sep 15" },
     expect: expectOf("sf311:1"),
     noun: "trash",
     boxed: true,
@@ -128,8 +128,8 @@ const REAL: CaseView[] = [
     title: "The same wooden panel, a day later",
     context: "Two residents report a panel left at a street tree on 24th Street, a day apart.",
     evidence: "The same tree pit, yellow curb and paint mark on the sidewalk. CiviFold suggests merging it; staff confirm.",
-    incident: { photo: realPhoto("sf_t058_1"), caption: "On file: request 202000065099, September 14" },
-    report: { photo: photoOf("sf311:0")!, caption: "New request 202000068943, September 15" },
+    incident: { photo: realPhoto("sf_t058_1"), caption: "On file: request 202000065099, Sep 14" },
+    report: { photo: photoOf("sf311:0")!, caption: "New request 202000068943, Sep 15" },
     expect: expectOf("sf311:0"),
     noun: "panel",
     boxed: true,
@@ -137,11 +137,11 @@ const REAL: CaseView[] = [
   },
   {
     key: "sf311:2",
-    title: "The same orange bags, from across the corner",
+    title: "The same orange bags, in a wider view",
     context: "Two residents report bags at the Highland Avenue balustrade, 17 hours apart.",
     evidence: "The same balustrade and tree, so the same place. From this wider view Muse Spark reads the pile as changed, so it goes to a person instead of being merged.",
-    incident: { photo: realPhoto("sf_t052_1"), caption: "On file: request 202000063217, September 13" },
-    report: { photo: photoOf("sf311:2")!, caption: "New request 202000065126, September 14" },
+    incident: { photo: realPhoto("sf_t052_1"), caption: "On file: request 202000063217, Sep 13" },
+    report: { photo: photoOf("sf311:2")!, caption: "New request 202000065126, Sep 14" },
     expect: expectOf("sf311:2"),
     noun: "bags",
     boxed: true,
@@ -151,9 +151,9 @@ const REAL: CaseView[] = [
     key: "sf311:3",
     title: "The same broken utility cover",
     context: "Two residents report a broken cover in the sidewalk on Pacific Avenue, two days apart.",
-    evidence: "The same vault and curb paint, but the cut-outs are not a sure match, so CiviFold asks for another angle before merging.",
-    incident: { photo: realPhoto("sf_r085_1"), caption: "On file: request 202000212553, October 23" },
-    report: { photo: photoOf("sf311:3")!, caption: "New request 202000222488, October 25" },
+    evidence: "The same utility cover and curb paint, but the cut-outs are not a sure match, so CiviFold asks for another angle before merging.",
+    incident: { photo: realPhoto("sf_r085_1"), caption: "On file: request 202000212553, Oct 23" },
+    report: { photo: photoOf("sf311:3")!, caption: "New request 202000222488, Oct 25" },
     expect: expectOf("sf311:3"),
     noun: "damage",
     boxed: true,
@@ -171,7 +171,7 @@ function messageOf(key: string): { quote: string; audio: string | null } {
 
 // Situations where the right answer is to ask, or to hand over to a person.
 const OTHERS: OtherView[] = [
-  { key: "voice:0", then: "voice:1", send: "Send the voice message", thenSend: "Answer with a photo", thenPhoto: photoOf("voice:1")!, thenExpect: expectOf("voice:1"), what: "A voice message with no photo", note: "Asks for a photo. With the photo, it is the same problem.", kind: "voice", ...messageOf("voice:0"), expect: expectOf("voice:0") },
+  { key: "voice:0", then: "voice:1", send: "Send the voice message", thenSend: "Answer with a photo", thenPhoto: photoOf("voice:1")!, thenExpect: expectOf("voice:1"), what: "A voice message with no photo", note: "Asks for a photo. Once it arrives, the report matches the open incident.", kind: "voice", ...messageOf("voice:0"), expect: expectOf("voice:0") },
   { key: "dumping:1", send: "Send the photo", what: "A cleaned-up spot, seen from across the street", note: "Asks for another photo before calling it fixed.", photo: photoOf("dumping:1")!, expect: expectOf("dumping:1") },
   { key: "closeup:0", send: "Send the photo", what: "A close-up with nothing around it", note: "Asks for a wider photo: nothing ties it to one place.", photo: photoOf("closeup:0")!, expect: expectOf("closeup:0") },
   { key: "messages:0", send: "Send the voice message", what: "Smoke from a street light", note: "A possible emergency goes straight to the top of the staff queue.", kind: "voice", urgent: true, ...messageOf("messages:0"), expect: expectOf("messages:0") },
@@ -184,35 +184,35 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
   const live = defaultMode() !== "cached" || liveDailyUsd() > 0;
   const realIntro = (
     <>
-      <div className="max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <RealScoreboard />
         <p className="border-t border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500">
-          Two checks on public San Francisco 311 requests, picked by eye from the photos alone, with what counts as right written down before the runs.
-          Of the {REAL_SF.afterCleanup} requests made after a cleanup, CiviFold flagged {REAL_SF.civifold.recurrence} as possible recurrences and kept the other{" "}
-          {REAL_SF.afterCleanup - REAL_SF.civifold.recurrence} open: 2 as new problems, 7 with a question to the resident and 1 for staff. Every merge is a
-          suggestion until staff approve it.{" "}
-          <a href={EVAL_REAL} className="font-medium text-zinc-900 underline underline-offset-2">
+          Two checks on public San Francisco 311 requests, chosen by looking at the photos only, with the right answer for each written down before the
+          checks ran. Of the {REAL_SF.afterCleanup} requests made after a cleanup, CiviFold suggested closing none: it flagged {REAL_SF.civifold.recurrence} as
+          possible recurrences, suggested 2 as new problems, asked the resident about 7 and sent 1 to staff. Every merge is a suggestion until staff approve
+          it.{" "}
+          <a href={EVAL_REAL} className="whitespace-nowrap font-medium text-zinc-900 underline underline-offset-2">
             How it was checked →
           </a>
         </p>
       </div>
       <p className="max-w-3xl text-sm text-zinc-500">
-        Four pairs from those checks, two residents at one spot each, sent at their own place and time. Case 1 is where location alone goes wrong.
-        Cases 2 to 4 are true duplicates, so location alone is right too: CiviFold merges one, sends one to staff and asks about one. Photos:{" "}
-        {REAL_CREDIT}.
+        Four pairs from those checks. In each, two residents reported the same spot, and the demo sends the second report with its real place and
+        time. Case 1 is where location alone goes wrong. Cases 2 to 4 are true duplicates, so location alone is right too: CiviFold suggests merging one, sends
+        one to staff and asks about one. Photos: {REAL_CREDIT}.
       </p>
     </>
   );
   const syntheticIntro = (
     <>
-      <div className="max-w-3xl overflow-hidden rounded-xl border border-zinc-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <Scoreboard />
         <p className="border-t border-zinc-100 bg-zinc-50 px-4 py-2 text-xs text-zinc-500">
-          Pre-registered synthetic holdout: 80 reports at 16 places CiviFold had never seen; 8 were already fixed and sit in neither row, and{" "}
-          {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} right merges came after one question answered by a simulated resident.
-          Location alone also merged {HELD_OUT.location.wrongIncident} duplicates into the wrong incident, and on earlier sets CiviFold made 1 to 3 wrong
-          merges or closures each.{" "}
-          <Link href="/#results" className="font-medium text-zinc-900 underline underline-offset-2">
+          Pre-registered synthetic holdout: 80 reports at 16 places CiviFold had never seen, scored on its first run. 8 were already fixed and are in neither row.{" "}
+          {HELD_OUT.civifold.afterQuestion} of CiviFold&apos;s {HELD_OUT.civifold.right} correct merges came after one question, answered by a simulated resident.
+          Location alone also merged {HELD_OUT.location.wrongIncident} duplicates into the wrong incident; on earlier sets, CiviFold made 1 to 3 wrong merges
+          or closures each.{" "}
+          <Link href="/#results" className="whitespace-nowrap font-medium text-zinc-900 underline underline-offset-2">
             How it was measured →
           </Link>
         </p>
@@ -226,9 +226,9 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
   return (
     <main className="mx-auto max-w-5xl px-4 pb-10 pt-8">
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Same spot isn&apos;t always the same problem.</h1>
-      <p className="mt-2 max-w-3xl text-lg leading-relaxed text-zinc-700">
-        Grouping duplicate reports by location also folds in the look-alike next door and the trash dumped again after a cleanup, and either can be
-        closed without anyone going back out. CiviFold checks the photos first. Staff make the call.
+      <p className="mt-2 max-w-3xl text-pretty text-lg leading-relaxed text-zinc-700">
+        Grouping reports by location alone also sweeps in the look-alike next door and trash dumped again after a cleanup. Either can then be closed
+        without anyone going back to look. CiviFold checks the photos first. Staff make the call.
       </p>
       <DemoRunner
         cases={CASES}

@@ -11,13 +11,13 @@ import { agentRecorded, recordedAgentReport } from "@/lib/demo/scenarios";
 import { defaultMode } from "@/lib/meta/call";
 import { AGENT_LIMITS } from "@/lib/pipeline/config";
 import { VERIFIED } from "@/lib/pipeline/hybrid";
-import { changedFacts, incidentDetail, incidentTitles, reportDetail, staleAnalysis, verifyRunning, WORDS_NOT_READ, wordsNotRead, type FactChange } from "@/lib/server/reports";
+import { changedFacts, incidentDetail, incidentTitles, reportDetail, staleAnalysis, trashIncidents, verifyRunning, WORDS_NOT_READ, wordsNotRead, type FactChange } from "@/lib/server/reports";
 import { liveBudgetLeft, runtime } from "@/lib/server/runtime";
 import type { Box, Channel, Label, RequestItem } from "@/lib/tools/types";
-import { Fact, OpsLabel, Panel, UrgentTag, LABEL_TONE, pct, readable, VERDICT_TEXT } from "@/app/_ui/console";
+import { categoryText, Fact, OpsLabel, Panel, UrgentTag, LABEL_TONE, pct, readable, statusWord, VERDICT_TEXT } from "@/app/_ui/console";
 import { cost, when } from "@/app/_ui/format";
-import { LABEL_TEXT, SyntheticBadge } from "@/app/_ui/labels";
-import { MaskedPhoto } from "@/app/_ui/photo";
+import { LABEL_TEXT, RealPhotoBadge, SyntheticBadge } from "@/app/_ui/labels";
+import { isRealPhoto, MaskedPhoto } from "@/app/_ui/photo";
 import { Actions, RetryButton } from "./actions";
 import { BriefCard, BriefProgress, BriefProvider, type StoredBrief } from "./brief";
 import { summarize, TOOL_TEXT, verdictOf, type StepView, type Verdict } from "./steps";
@@ -60,7 +60,7 @@ const STATUS_WORDS: Record<string, string> = {
   analyzing: "Checking",
   under_review: "Waiting for staff",
   needs_info: "Waiting for the resident",
-  linked: "Linked by staff",
+  linked: "Merged by staff",
   new_incident: "Opened as an incident",
   dismissed: "Dismissed",
   failed: "Check failed",
@@ -82,13 +82,13 @@ function headline(label: Label, incident: string | null, fix: Fix): string {
     case "LATE_REPORT":
       return `Seen before ${incident} was fixed: a late report`;
     case "ALREADY_RESOLVED":
-      return `Already fixed (${incident})`;
+      return `Already ${fix === "cleanup" ? "cleared" : "fixed"}: ${incident}`;
     case "NEW":
       return "A new problem";
     case "POSSIBLE_RECURRENCE":
       return `Back after the ${fix} of ${incident}?`;
     case "NEEDS_INFO":
-      return "Waiting for one more thing from the resident";
+      return "Waiting for the resident's answer";
     case "HUMAN_REVIEW":
       return "Needs a person to decide";
   }
@@ -182,9 +182,10 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
   ];
   // Incidents an agent only read about (a brief reads an incident's history) are named too.
   const readIds = JSON.stringify([latestBrief, runs]).match(/\binc_[a-z0-9_]+/g) ?? [];
-  const incidentNames = await incidentTitles(rt, [
+  const namedIds = [
     ...new Set([...comparedIds, ...readIds, ...changes.map((c) => c.incident_id), ...(report.incident_id ? [report.incident_id] : []), ...(opened?.recurrence_of ? [opened.recurrence_of] : [])]),
-  ]);
+  ];
+  const [incidentNames, trashIds] = await Promise.all([incidentTitles(rt, namedIds), trashIncidents(rt, [...new Set([...namedIds, ...incidents.map((i) => i.id)])])]);
   const incidentLabels = {
     ...Object.fromEntries(incidents.map((i) => [i.id, `the ${i.title}`])),
     ...Object.fromEntries(Object.entries(incidentNames).map(([id, title]) => [id, `the ${title}`])),
@@ -222,7 +223,8 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
         {analysis && (
           <span className="ml-auto font-mono text-[11px] text-ops-dim">
             {/* After a staff-requested check the latest analysis is the check's, its cost the agent's run included. */}
-            {analysis.pipeline_config === "C_rules+verify" ? "check" : "analysis"} {cost(analysis.cost_usd)} · {(analysis.latency_ms / 1000).toFixed(1)}s ·{" "}
+            {analysis.pipeline_config === "C_rules+verify" ? "agent check" : "analysis"} {cost(analysis.cost_usd)} ·{" "}
+            {analysis.latency_ms < 100 ? "under 0.1s" : `${(analysis.latency_ms / 1000).toFixed(1)}s`} ·{" "}
             {/* A report with only typed words carries no media, so it is neither a sample photo nor an upload. */}
             {report.is_synthetic ? "synthetic sample" : photos.some((p) => p.dataset_image_id?.startsWith("sf_")) ? "San Francisco 311 photo" : report.channel === "text" ? "typed message" : "resident upload"}
           </span>
@@ -238,7 +240,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               {intake?.emergency_reason ? `: ${intake.emergency_reason}` : ""}
             </p>
             <p className="mt-0.5 text-red-200/80">
-              Act on it now. The resident was told to call 911; matching to existing incidents was skipped.
+              Act on it now. The resident was told to call&nbsp;911; matching to existing incidents was skipped.
             </p>
           </div>
         </div>
@@ -275,7 +277,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                 src={`/api/images/${photos[0].id}?w=960`}
                 width={photos[0].width}
                 height={photos[0].height}
-                synthetic={photos[0].is_synthetic}
+                synthetic={photos[0].is_synthetic} real={isRealPhoto(photos[0])}
               />
             )}
           </Panel>
@@ -306,14 +308,14 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
         <BriefProvider reportId={report.id} paceMs={briefReplays ? REPLAY_PACE_MS : 0}>
           {/* Verdict and decision: one band that stays under the header while staff look through the evidence. */}
           {/* Sticky only where the screen is tall enough that the band does not cover the photos it decides on. */}
-          <div className="z-[999] -mx-4 mt-4 bg-ops-bg/95 px-4 py-2 backdrop-blur md:[@media(min-height:900px)]:sticky md:top-[45px]">
+          <div className="z-[999] -mx-4 mt-4 bg-ops-bg/95 px-4 py-2 backdrop-blur md:[@media(min-height:900px)]:sticky md:top-[41px]">
             <Actions
               caution={verdict?.kind === "against"}
               status={verdict && !decided && changes.length === 0 ? <VerdictLine verdict={verdict} /> : null}
               ring={report.urgent ? "ring-red-500/60" : final ? LABEL_TONE[final.label].ring : ""}
               reportId={report.id}
               analysisId={analysis.id}
-              final={final ?? null}
+              final={final ? { ...final, cleanup: fix === "cleanup" } : null}
               focusId={focusId}
               askFor={photos.length === 0 ? "photo" : "wider_context"}
               decided={decided}
@@ -322,9 +324,9 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
               demoAnchor={demoAnchor}
               decidedNote={decidedNote(report.status, report.incident_id, [...incidents, ...Object.entries(incidentNames).map(([id, title]) => ({ id, title }))], opened?.recurrence_of ?? null)}
               stale={changes.length > 0}
-              verify={verifiable ? { analysisId: analysis!.id, running: verifying, again: runs.length > 0 } : null}
+              verify={verifiable ? { analysisId: analysis!.id, running: verifying, again: runs.length > 0, live: replayOnly && !verifyReplays } : null}
               verifyLimit={verifyLimit}
-              brief={briefable && !repeatBrief ? { analysisId: analysis!.id, again: briefs.length > 0 } : null}
+              brief={briefable && !repeatBrief ? { analysisId: analysis!.id, again: briefs.length > 0, live: replayOnly && !briefReplays } : null}
               briefLimit={briefLimit}
             >
               {final && (
@@ -335,7 +337,15 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   </div>
                   {/* The headline names the suggested incident; the sentence under it calls it "the incident". */}
                   {lastReason && (
-                    <p className="mt-1 text-sm text-ops-text">{byName(final.incident_id ? readable(lastReason).replaceAll(final.incident_id, "the incident") : readable(lastReason), incidentLabels)}</p>
+                    <p className="mt-1 text-sm text-ops-text">{report.urgent && /^Possible emergency:/.test(lastReason)
+                        ? "Act on the emergency first; these options only file the report."
+                        : byName(
+                            (final.incident_id ? readable(lastReason).replaceAll(final.incident_id, "the incident") : readable(lastReason)).replace(
+                              / was closed\b/g,
+                              fix === "cleanup" ? " was cleared" : " was fixed",
+                            ),
+                            incidentLabels,
+                          )}</p>
                   )}
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
                     {final.incident_id && (
@@ -378,8 +388,8 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   incident={{ id: focus.id, title: focus.title, status: focus.status, resolved: focus.resolved_at, photo: candidatePhoto, facts: candidateFacts }}
                   comparison={best}
                   linked={linked}
+                  recurrence={final?.label === "POSSIBLE_RECURRENCE"}
                   segmentations={segmentations}
-                  names={names}
                   fix={fix}
                 />
               ) : (
@@ -398,10 +408,10 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                           height={photos[0]!.height}
                           maskPath={seg(photos[0]!.id)?.mask_svg_path}
                           box={seg(photos[0]!.id)?.box as Box | null}
-                          synthetic={photos[0]!.is_synthetic}
+                          synthetic={photos[0]!.is_synthetic} real={isRealPhoto(photos[0]!)}
                         />
                         {/* The cut-outs SAM made of this report, as the side-by-side comparison shows them. */}
-                        {seg(photos[0]!.id)?.object_crop_id && <Crops seg={seg(photos[0]!.id)!} synthetic={photos[0]!.is_synthetic} />}
+                        {seg(photos[0]!.id)?.object_crop_id && <Crops seg={seg(photos[0]!.id)!} synthetic={photos[0]!.is_synthetic} real={isRealPhoto(photos[0]!)} />}
                         {photos.length > 1 && (
                           <div className="grid grid-cols-3 gap-2">
                             {photos.slice(1).map((p) => (
@@ -413,7 +423,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                                 height={p.height}
                                 maskPath={seg(p.id)?.mask_svg_path}
                                 box={seg(p.id)?.box as Box | null}
-                                synthetic={p.is_synthetic}
+                                synthetic={p.is_synthetic} real={isRealPhoto(p)}
                                 caption="sent when asked"
                               />
                             ))}
@@ -436,7 +446,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                         {shownMatch.result.asset_match.evidence.slice(0, 3).map((e, i) => (
                           <li key={i} className="flex gap-2">
                             <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-rose-300" />
-                            {photoWords(e, focus.id)}
+                            {photoWords(e, focus.id).replace(/^./, (c) => c.toUpperCase())}
                           </li>
                         ))}
                       </ul>
@@ -454,7 +464,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                               height={candidateFacts?.height ?? 1280}
                               maskPath={seg(candidatePhoto)?.mask_svg_path}
                               box={seg(candidatePhoto)?.box as Box | null}
-                              synthetic={candidateFacts?.is_synthetic ?? false}
+                              synthetic={candidateFacts?.is_synthetic ?? false} real={isRealPhoto(candidatePhoto)}
                               caption={`The ${focus.title ?? focus.id}, not this report`}
                             />
                           </div>
@@ -466,7 +476,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                       title={
                         focus
                           ? linked
-                            ? `${report.status === "linked" ? "Linked" : "Suggested"}: the ${focus.title ?? "incident"}`
+                            ? `${report.status === "linked" ? "Merged" : "Suggested"}: the ${focus.title ?? "incident"}`
                             : compared
                               ? `Compared with the ${focus.title ?? "incident"}`
                               : `Nearest incident: the ${focus.title ?? "incident"}`
@@ -497,7 +507,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                           height={candidateFacts?.height ?? 1280}
                           maskPath={seg(candidatePhoto)?.mask_svg_path}
                           box={seg(candidatePhoto)?.box as Box | null}
-                          synthetic={candidateFacts?.is_synthetic ?? false}
+                          synthetic={candidateFacts?.is_synthetic ?? false} real={isRealPhoto(candidatePhoto)}
                           caption={focus?.title}
                         />
                       ) : (
@@ -505,7 +515,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                           {focus
                             ? "No photo of this incident to show."
                             : decision?.reasons.at(-1)?.rule_id === "R0"
-                              ? "Not searched yet: a usable photo comes first."
+                              ? "A usable photo comes first."
                               : "Nothing of this kind within the search radius."}
                         </div>
                       )}
@@ -544,15 +554,15 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                     <table className="w-full min-w-[640px] text-[13px]">
                       <thead className="text-left text-xs text-ops-dim">
                         <tr>
-                          <th className="pb-2 font-normal">Incident</th>
-                          <th className="pb-2 font-normal">Status</th>
-                          <th className="pb-2 font-normal">Distance</th>
-                          <th className="pb-2 font-normal">Whole photo</th>
-                          <th className="pb-2 font-normal">Cut-out (SAM)</th>
-                          <th className="pb-2 font-normal">Result</th>
+                          <th className="pb-2 pr-4 font-normal">Incident</th>
+                          <th className="pb-2 pr-4 font-normal">Result</th>
+                          <th className="pb-2 pr-4 font-normal">Status</th>
+                          <th className="whitespace-nowrap pb-2 pr-4 font-normal">Distance</th>
+                          <th className="whitespace-nowrap pb-2 pr-4 font-normal">Whole photo</th>
+                          <th className="whitespace-nowrap pb-2 font-normal">Cut-out (SAM)</th>
                         </tr>
                       </thead>
-                      <tbody className="font-mono">
+                      <tbody className="tabular-nums">
                         {candidates.map((c) => {
                           const verdict = (stage: 1 | 2) => {
                             const rs = comparisons.filter((x) => x.incident_id === c.incident_id && x.stage === stage && x.result && !x.fallback);
@@ -582,7 +592,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                             );
                           return (
                             <tr key={c.incident_id} className={`border-t border-ops-line ${c.incident_id === focusId ? "bg-ops-raised" : ""}`}>
-                              <td className="py-1.5">
+                              <td className="max-w-[16rem] py-1.5 pr-4 font-sans">
                                 <Link
                                   href={`/admin/incidents/${c.incident_id}`}
                                   className="text-white underline decoration-ops-dim underline-offset-2 hover:decoration-white"
@@ -590,11 +600,11 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                                   {incidents.find((i) => i.id === c.incident_id)?.title ?? c.incident_id}
                                 </Link>
                               </td>
-                              <td className="text-ops-dim">{c.status}</td>
-                              <td className="tabular-nums">{Math.round(c.distance_m)} m</td>
-                              <td>{verdict(1)}</td>
-                              <td>{verdict(2)}</td>
-                              <td className="font-sans">{result}</td>
+                              <td className="pr-4">{result}</td>
+                              <td className="whitespace-nowrap pr-4 font-sans text-ops-dim">{statusWord(c.status, incidents.find((i) => i.id === c.incident_id)?.category)}</td>
+                              <td className="whitespace-nowrap pr-4 tabular-nums">{Math.round(c.distance_m)} m</td>
+                              <td className="whitespace-nowrap pr-4">{verdict(1)}</td>
+                              <td className="whitespace-nowrap">{verdict(2)}</td>
                             </tr>
                           );
                         })}
@@ -618,7 +628,7 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                         <span className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full ${last ? "bg-white" : "bg-ops-dim"}`} />
                         <span className="min-w-0 flex-1">
                           {last && <span className="mb-0.5 block text-xs text-ops-dim">Result</span>}
-                          <span className={last ? "font-medium text-white" : "text-ops-text"}>{byName(readable(r.text), incidentLabels)}</span>
+                          <span className={last ? "font-medium text-white" : "text-ops-text"}>{byName(readable(r.text).replace(/ was closed\b/g, fix === "cleanup" ? " was cleared" : " was fixed"), incidentLabels)}</span>
                         </span>
                       </li>
                     );
@@ -660,7 +670,12 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
 
               {/* What the agents found sits beside the evidence, never between the decision and the photos. */}
               {verdict && !decided && changes.length === 0 && <VerdictCard verdict={verdict} />}
-              {latestBrief && <BriefCard stored={latestBrief} stale={latestBrief.analysis_id !== analysis.id} names={{ ...names, ...incidentLabels }} />}
+              {latestBrief && <BriefCard
+                  stored={latestBrief}
+                  stale={latestBrief.analysis_id !== analysis.id}
+                  names={{ ...names, ...incidentLabels }}
+                  cleared={trashIds}
+                />}
 
               {(report.description || report.audio_path || intake) && (
                 <Panel title="Resident's message">
@@ -678,11 +693,11 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                   )}
                   {intake && (
                     <div className="mt-3 border-t border-ops-line pt-2">
-                      <Fact k="kind" v={intake.category.replace("_", " ")} />
-                      {intake.problem && <Fact k="problem" v={intake.problem} />}
-                      {intake.place && <Fact k="place" v={intake.place} />}
-                      {intake.observed_time && <Fact k="seen" v={intake.observed_time} />}
-                      {intake.landmarks.length > 0 && <Fact k="landmarks" v={intake.landmarks.join(", ")} />}
+                      <Fact k="Kind" v={categoryText(intake.category, intake.out_of_scope)} />
+                      {intake.problem && <Fact k="Problem" v={intake.problem} />}
+                      {intake.place && <Fact k="Place" v={intake.place} />}
+                      {intake.observed_time && <Fact k="Seen" v={intake.observed_time} />}
+                      {intake.landmarks.length > 0 && <Fact k="Landmarks" v={intake.landmarks.join(", ")} />}
                     </div>
                   )}
                 </Panel>
@@ -697,8 +712,8 @@ export default async function ReportDetail({ params }: { params: Promise<{ id: s
                           ? "asked by staff"
                           : q.source === "agent"
                             ? "asked by the agent"
-                            : `asked by rule ${q.reason_for_staff}`}{" "}
-                        · {q.status}
+                            : <span title={`Rule ${q.reason_for_staff}`}>asked automatically</span>}{" "}
+                        · {q.status === "pending" ? "waiting for an answer" : q.status}
                       </span>
                       <p className="mt-0.5">{q.question}</p>
                     </div>
@@ -741,7 +756,7 @@ function decidedNote(status: string, incidentId: string | null, near: Array<{ id
     const title = near.find((i) => i.id === incidentId)?.title;
     return (
       <>
-        Linked to{" "}
+        Merged into{" "}
         <Link href={`/admin/incidents/${incidentId}`} title={incidentId} className="text-white underline decoration-emerald-400/60 underline-offset-2 hover:decoration-white">
           {title ? `the ${title}` : "the incident"}
         </Link>
@@ -758,7 +773,7 @@ function decidedNote(status: string, incidentId: string | null, near: Array<{ id
   return null;
 }
 
-type PhotoRow = { id: string; width: number; height: number; is_synthetic: boolean };
+type PhotoRow = { id: string; width: number; height: number; is_synthetic: boolean; dataset_image_id?: string | null };
 type SegRow = { noun_phrase: string; mask_svg_path: string | null; box: unknown; object_crop_id: string | null; context_crop_id: string | null };
 
 // The comparison the suggestion rests on, read left to right: both photos, the cut-outs the model compared,
@@ -768,16 +783,16 @@ function PhotoComparison({
   incident,
   comparison,
   linked,
+  recurrence,
   segmentations,
-  names,
   fix,
 }: {
   report: { observed: string; photos: PhotoRow[]; newImageId: string };
   incident: { id: string; title: string | null; status: string; resolved: string | null; photo: string; facts: { width: number; height: number; is_synthetic: boolean } | undefined };
   comparison: Comparison;
   linked: boolean;
+  recurrence: boolean;
   segmentations: Record<string, SegRow | undefined>;
-  names: Record<string, string>;
   fix: Fix;
 }) {
   const result = comparison.result!;
@@ -791,7 +806,7 @@ function PhotoComparison({
   const words = (text: string) => photoWords(text, incident.id);
   return (
     <Panel
-      title={`Compared with the ${incident.title ?? incident.id}${linked ? ", the incident it suggests" : ""}`}
+      title={`Compared with ${linked ? (recurrence ? "the earlier incident, " : "the suggested incident, ") : ""}the ${incident.title ?? incident.id}`}
       aside={<MatchChip verdict={result.asset_match.verdict} confidence={result.asset_match.confidence} crops={crops} />}
     >
       <div className="grid gap-4 md:grid-cols-2">
@@ -809,7 +824,7 @@ function PhotoComparison({
             height={first!.height}
             maskPath={seg(first!.id)?.mask_svg_path}
             box={seg(first!.id)?.box as Box | null}
-            synthetic={first!.is_synthetic}
+            synthetic={first!.is_synthetic} real={isRealPhoto(first!)}
           />
           {more.length > 0 && (
             <div className="grid grid-cols-3 gap-2">
@@ -822,24 +837,27 @@ function PhotoComparison({
                   height={p.height}
                   maskPath={seg(p.id)?.mask_svg_path}
                   box={seg(p.id)?.box as Box | null}
-                  synthetic={p.is_synthetic}
+                  synthetic={p.is_synthetic} real={isRealPhoto(p)}
                   caption="sent when asked"
                 />
               ))}
             </div>
           )}
-          {showCrops && <Crops seg={reportCrops!} synthetic={first!.is_synthetic} />}
+          {showCrops && <Crops seg={reportCrops!} synthetic={first!.is_synthetic} real={isRealPhoto(first!)} />}
         </div>
         <div className="min-w-0 space-y-2">
-          <p className="flex flex-wrap items-baseline gap-x-2 text-sm">
+          <p className="flex items-baseline gap-x-2 text-sm">
             <Link
               href={`/admin/incidents/${incident.id}`}
               title={incident.id}
-              className="font-medium text-white underline decoration-ops-line underline-offset-2 hover:decoration-white"
+              className="shrink-0 font-medium text-white underline decoration-ops-line underline-offset-2 hover:decoration-white"
             >
               The incident on file
             </Link>
-            <span className="text-xs text-ops-dim">{[incident.title, fixed ? `${fix === "cleanup" ? "cleared" : "fixed"} ${when(incident.resolved)}` : incident.status].filter(Boolean).join(" · ")}</span>
+            {/* The panel title names the incident; here only its state, on one line so both photos start level. */}
+            <span className="whitespace-nowrap text-xs text-ops-dim" title={incident.title ?? undefined}>
+              {fixed ? `${fix === "cleanup" ? "cleared" : "fixed"} ${when(incident.resolved)}` : statusWord(incident.status)}
+            </span>
           </p>
           <MaskedPhoto
             variant="ops"
@@ -850,9 +868,9 @@ function PhotoComparison({
             height={incident.facts?.height ?? 1280}
             maskPath={seg(incident.photo)?.mask_svg_path}
             box={seg(incident.photo)?.box as Box | null}
-            synthetic={incident.facts?.is_synthetic ?? false}
+            synthetic={incident.facts?.is_synthetic ?? false} real={isRealPhoto(incident.photo)}
           />
-          {showCrops && <Crops seg={incidentCrops!} synthetic={incident.facts?.is_synthetic ?? false} />}
+          {showCrops && <Crops seg={incidentCrops!} synthetic={incident.facts?.is_synthetic ?? false} real={isRealPhoto(incident.photo)} />}
         </div>
       </div>
       <div className="mt-4 grid gap-4 border-t border-ops-line pt-4 md:grid-cols-2">
@@ -860,8 +878,7 @@ function PhotoComparison({
         <Finding question="Same problem?" verdict={result.damage.same_damage_signature} lines={result.damage.evidence.map(words)} />
       </div>
       <p className="mt-3 text-xs text-ops-dim">
-        Muse Spark compared {crops ? "the SAM 3.1 cut-outs" : "the whole photos"} of {names[comparison.new_image_id] ?? "the report's photo"} and{" "}
-        {names[comparison.candidate_image_id] ?? "the incident's photo"} without seeing any dates. {words(result.summary)}
+        Muse Spark compared {crops ? "SAM 3.1 cut-outs of both photos" : "the whole photos"}, without seeing any dates. {words(result.summary)}
       </p>
     </Panel>
   );
@@ -869,9 +886,10 @@ function PhotoComparison({
 
 // The two cut-outs SAM made from one photo: what triage named (a hydrant, but for a place problem the pothole or
 // pile itself), and a crop three times its size that keeps the landmarks around it.
-function Crops({ seg, synthetic }: { seg: SegRow; synthetic: boolean }) {
+function Crops({ seg, synthetic, real = false }: { seg: SegRow; synthetic: boolean; real?: boolean }) {
   const parts = [
-    { what: seg.noun_phrase, object: true, id: seg.object_crop_id },
+    // Road damage is boxed by Muse Spark before SAM cuts it out, so its stored noun ("pothole") may not name what it is.
+    { what: seg.noun_phrase === "pothole" ? "damage" : seg.noun_phrase, object: true, id: seg.object_crop_id },
     { what: "surroundings", object: false, id: seg.context_crop_id },
   ].filter((p): p is { what: string; object: boolean; id: string } => p.id !== null);
   return (
@@ -882,14 +900,12 @@ function Crops({ seg, synthetic }: { seg: SegRow; synthetic: boolean }) {
             {/* eslint-disable-next-line @next/next/no-img-element -- crops come from our own image route, already sized */}
             <img src={`/api/images/${p.id}?w=480`} alt={`SAM 3.1 cut-out: ${p.what}`} className={`h-full w-full ${p.object ? "object-contain" : "object-cover"}`} />
             {/* Bottom corner: the top of a fixture (caps, dome, lamp) is usually what tells two apart. */}
-            {synthetic && (
-              <span className="absolute bottom-1 left-1">
-                <SyntheticBadge />
-              </span>
-            )}
+            {/* A badge would cover most of the narrow object cut-out, so that one says it in its caption. */}
+            {!p.object && (synthetic || real) && <span className="absolute bottom-1 left-1">{synthetic ? <SyntheticBadge /> : <RealPhotoBadge />}</span>}
           </div>
-          <figcaption className="mt-1 truncate text-[11px] text-ops-dim" title={p.object ? `SAM 3.1 cut out "${p.what}", with a 10% margin` : "Three times the size of the cut-out, so the landmarks around it stay in view"}>
+          <figcaption className={`mt-1 text-[11px] leading-tight text-ops-dim ${p.object ? "" : "truncate"}`} title={p.object ? `SAM 3.1 cut out "${p.what}", with a 10% margin` : "Three times the size of the cut-out, so the landmarks around it stay in view"}>
             Cut-out: {p.what}
+            {p.object && (synthetic || real) && <span className="block font-semibold tracking-wide">{synthetic ? "SYNTHETIC" : "SF 311 PHOTO"}</span>}
           </figcaption>
         </figure>
       ))}
@@ -909,7 +925,7 @@ function Finding({ question, verdict, lines }: { question: string; verdict: stri
         {lines.map((line, i) => (
           <li key={i} className="flex gap-2">
             <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-ops-dim" />
-            {line}
+            {line.charAt(0).toUpperCase() + line.slice(1)}
           </li>
         ))}
       </ul>
@@ -978,11 +994,11 @@ function PipelineTrace(props: {
   const steps: Array<{ name: string; value: string; tone: StepTone }> = [
     {
       name: "Message",
-      value: props.hasMessage ? (intake ? `${intake.category.replace("_", " ")}${intake.emergency ? " · emergency" : ""}` : props.unread ? "not read" : "read") : "none",
+      value: props.hasMessage ? (intake ? `${categoryText(intake.category, intake.out_of_scope).toLowerCase()}${intake.emergency ? " · emergency" : ""}` : props.unread ? "not read" : "read") : "none",
       tone: props.hasMessage ? (intake?.emergency ? "stop" : props.unread ? "warn" : "ok") : "skip",
     },
     {
-      name: "Triage",
+      name: "Photo check",
       value: triage ? `${triage.category.replaceAll("_", " ")} · ${triage.image_quality.replaceAll("_", " ")}` : props.hasPhoto ? "skipped" : "no photo",
       tone: triage ? (triage.image_quality === "ok" ? "ok" : "warn") : "skip",
     },
@@ -999,8 +1015,8 @@ function PipelineTrace(props: {
           ? "skipped"
           : triage && (triage.category === "road_damage" || triage.category === "trash")
             ? props.photoFound
-              ? "boxed by Spark, cut out"
-              : "Spark did not see it"
+              ? "boxed by Muse Spark, cut out by SAM"
+              : "Muse Spark did not find it"
             : props.photoFound
               ? "object found"
               : "not found",
@@ -1040,7 +1056,7 @@ function PipelineTrace(props: {
           <path d="M4.5 2.5 8 6l-3.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
         <span className="font-medium text-ops-text">How the pipeline got here</span>
-        <span className="text-xs text-ops-dim">message, photo check, search, cut-outs, comparison, rules, verification</span>
+        <span className="hidden text-xs text-ops-dim sm:inline">message, photo check, search, cut-outs, comparison, rules, verification</span>
       </summary>
       <ol className="flex flex-wrap items-stretch border-t border-ops-line p-1">
         {steps.map((s, i) => (
@@ -1069,15 +1085,15 @@ function PipelineTrace(props: {
 function TimeBar({ observed, submitted, created, resolved, fix }: { observed: string; submitted: string; created: string | null; resolved: string | null; fix: Fix }) {
   // Seen and sent within the same minute: one mark, not two labels with the same time.
   const together = Math.abs(Date.parse(observed) - Date.parse(submitted)) < 60_000;
+  // A real 311 request is sent in the demo weeks after it was made: on the scale, that send would squeeze the
+  // events that matter into one end of the bar, so it is said under the bar instead.
+  const sentLater = Date.parse(submitted) - Date.parse(observed) > 86_400_000;
   const marks = [
     { t: created, text: "Incident opened", color: "bg-zinc-400" },
     { t: resolved, text: fix === "cleanup" ? "Cleanup recorded" : "Repair recorded", color: "bg-emerald-400" },
     ...(together
       ? [{ t: submitted, text: "Seen and reported", color: "bg-white" }]
-      : [
-          { t: observed, text: "Resident saw it", color: "bg-white" },
-          { t: submitted, text: "Sent in this demo", color: "bg-white" },
-        ]),
+      : [{ t: observed, text: "Resident saw it", color: "bg-white" }, ...(sentLater ? [] : [{ t: submitted, text: "Sent in this demo", color: "bg-white" }])]),
   ].filter((m): m is { t: string; text: string; color: string } => Boolean(m.t));
   const times = marks.map((m) => new Date(m.t).getTime());
   const [min, max] = [Math.min(...times), Math.max(...times)];
@@ -1128,6 +1144,7 @@ function TimeBar({ observed, submitted, created, resolved, fix }: { observed: st
           </div>
         ))}
       </div>
+      {sentLater && <p className="text-right text-xs text-ops-dim">Sent in this demo: {when(submitted)}</p>}
     </Panel>
   );
 }
@@ -1143,7 +1160,7 @@ function span(ms: number): string {
   const min = Math.round(ms / 60_000);
   if (min < 60) return `${min} min`;
   const h = Math.round(min / 60);
-  return h < 48 ? `${h}h` : `${Math.round(h / 24)} days`;
+  return h < 48 ? `${h} hour${h === 1 ? "" : "s"}` : `${Math.round(h / 24)} days`;
 }
 
 // The incident ids in a step's summary, by name where the page knows it.
@@ -1281,9 +1298,15 @@ function VerdictLine({ verdict }: { verdict: Verdict }) {
 function ComparedPhoto({ id }: { id?: string }) {
   if (!id) return null;
   return (
-    <a href={`/api/images/${id}`} target="_blank" rel="noreferrer" className="shrink-0">
+    <a href={`/api/images/${id}`} target="_blank" rel="noreferrer" className="relative shrink-0 overflow-hidden rounded border border-ops-line">
       {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
-      <img src={`/api/images/${id}?w=160`} alt="The incident photo it was compared with" className="h-10 w-14 rounded border border-ops-line object-cover" />
+      <img src={`/api/images/${id}?w=160`} alt="The incident photo it was compared with" className="block h-10 w-14 object-cover" />
+      {/* Generated dataset photos are syn_*, real San Francisco 311 photos sf_*. */}
+      {(id.startsWith("syn_") || isRealPhoto(id)) && (
+        <span className={`absolute inset-x-0 bottom-0 text-center text-[7px] font-semibold leading-[11px] tracking-wide text-white ${id.startsWith("syn_") ? "bg-black/75" : "bg-sky-700/90"}`}>
+          {id.startsWith("syn_") ? "SYNTHETIC" : "SF 311"}
+        </span>
+      )}
     </a>
   );
 }
@@ -1323,7 +1346,7 @@ function VerdictCard({ verdict }: { verdict: Verdict }) {
       )}
       <p className="mt-2 text-[11px] text-ops-dim">
         {verdict.kind === "confirmed"
-          ? "The checks back the suggestion. The suggested decision above applies it."
+          ? "The checks support the suggestion. Approve it above to apply it."
           : "Decide from the evidence beside this. The full run is under Verification agent."}
       </p>
     </section>

@@ -191,10 +191,13 @@ function briefFacts(report: ReportInput, a: Analysis, known: Known): BriefFact[]
   const compared = new Set(a.comparisons.map((c) => c.candidate_image_id));
   const timeline = known.timeline;
   const errors = a.errors.join("; ");
+  // A suggestion to ask is sent to the resident with it, so by the time staff read a brief the question is out;
+  // report.already_asked is the analysis input, from before this suggestion asked. Other suggestions keep their line.
+  const asked = d.label === "NEEDS_INFO" ? `yes, by this suggestion (${d.missing_info.join(", ") || "one question"}), no answer yet` : report.already_asked ? "yes" : "no";
   const lines: string[] = [
     `category ${t.category}; problem: ${t.damage_present ? (t.damage_description ?? "visible") : "not visible"}; repair signs: ${t.repair_signs}; photo quality: ${t.image_quality}; out of scope: ${t.out_of_scope}`,
     `observed at ${report.observed_at}; location ${report.lat.toFixed(6)}, ${report.lng.toFixed(6)}; photos: ${report.image_id} (main)` +
-      `${answers.length ? `, ${answers.join(", ")} (answers)` : ""}; resident already asked: ${report.already_asked ? "yes" : "no"}`,
+      `${answers.length ? `, ${answers.join(", ")} (answers)` : ""}; resident already asked: ${asked}`,
     `pipeline suggestion ${d.label}${d.incident_id ? ` → ${d.incident_id}` : ""} by rule ${d.rule_id}${reasons ? `: ${reasons}` : ""}`,
     ...a.candidates.map((c) => `candidate ${c.incident_id}: ${c.status}, ${c.distance_m} m, created ${c.created_at}, resolved ${c.resolved_at ?? "never"}`),
     ...a.comparisons.map(comparisonFact),

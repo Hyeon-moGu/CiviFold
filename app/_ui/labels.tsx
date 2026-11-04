@@ -30,12 +30,12 @@ export function LabelBadge({ label, size = "sm" }: { label: Label; size?: "sm" |
 }
 
 export function SyntheticBadge() {
-  return <span className="rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white">SYNTHETIC</span>;
+  return <span className="whitespace-nowrap rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white">SYNTHETIC</span>;
 }
 
 /** A real San Francisco 311 photo (a public record), in place of the synthetic mark. */
 export function RealPhotoBadge() {
-  return <span className="rounded bg-sky-700/85 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white">SF 311 PHOTO</span>;
+  return <span className="whitespace-nowrap rounded bg-sky-700/85 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white">SF 311 PHOTO</span>;
 }
 
 export function UrgentBadge() {

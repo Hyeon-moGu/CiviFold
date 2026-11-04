@@ -31,7 +31,7 @@ type Row = { measure: string; note: string; of: number; location: [number, strin
 // for a narrow column that says what each way is in its own text.
 function Board({ rows, compact }: { rows: Row[]; compact: boolean }) {
   const cell = (n: number, total: number, tone: string) => (
-    <td className="px-3 py-2.5 text-center">
+    <td className="px-1.5 py-2.5 sm:px-3 text-center">
       <span className={`text-2xl font-semibold tracking-tight sm:text-3xl ${tone}`}>{n}</span>
       <span className="ml-1 text-sm text-zinc-400">/ {total}</span>
     </td>
@@ -40,19 +40,19 @@ function Board({ rows, compact }: { rows: Row[]; compact: boolean }) {
     <table className="w-full text-left">
       <colgroup>
         <col />
-        <col className={compact ? "w-24 sm:w-36" : "w-28 sm:w-56"} />
-        <col className={compact ? "w-24 sm:w-36" : "w-28 sm:w-56"} />
+        <col className={compact ? "w-[4.75rem] sm:w-36" : "w-[4.75rem] sm:w-56"} />
+        <col className={compact ? "w-[4.75rem] sm:w-36" : "w-[4.75rem] sm:w-56"} />
       </colgroup>
       <thead>
         <tr className="align-bottom">
-          <th className="px-4 pt-3">
+          <th className="pl-3 pr-1 pt-3 sm:px-4">
             <span className="sr-only">Measure</span>
           </th>
-          <th className="px-3 pt-3 text-center text-sm font-medium text-zinc-600">
+          <th className="px-1.5 pt-3 sm:px-3 text-center text-sm font-medium text-zinc-600">
             Location alone
             {!compact && <span className="hidden text-[11px] font-normal text-zinc-400 sm:block">nearest of the same kind, {SEARCH_CONFIG.radius_m.fire_hydrant} m</span>}
           </th>
-          <th className="px-3 pt-3 text-center text-sm font-semibold text-zinc-900">
+          <th className="px-1.5 pt-3 sm:px-3 text-center text-sm font-semibold text-zinc-900">
             CiviFold
             {!compact && <span className="hidden text-[11px] font-normal text-zinc-400 sm:block">photos, Muse Spark and SAM 3.1</span>}
           </th>
@@ -61,7 +61,7 @@ function Board({ rows, compact }: { rows: Row[]; compact: boolean }) {
       <tbody>
         {rows.map((r, i) => (
           <tr key={r.measure} className={i > 0 ? "border-t border-zinc-100" : undefined}>
-            <th scope="row" className="px-4 py-2.5 text-sm font-medium text-zinc-800">
+            <th scope="row" className="text-balance pl-3 pr-1 py-2.5 sm:px-4 text-sm font-medium text-zinc-800">
               {r.measure}
               <span className="block text-xs font-normal text-zinc-500">{r.note}</span>
             </th>
@@ -96,7 +96,7 @@ export function RealScoreboard({ compact = false }: { compact?: boolean }) {
       compact={compact}
       rows={[
         { measure: "New trash after a cleanup, closed as fixed", note: "the same spot, should stay open", of: REAL_SF.afterCleanup, location: [lo.closed, "text-rose-700"], civifold: [cf.closed, "text-emerald-700"] },
-        { measure: "Same pile or damage, merged (the right call)", note: `CiviFold asked or sent ${REAL_SF.civifold.asked} to staff; ${REAL_SF.civifold.apart} wrongly opened as new`, of: REAL_SF.samePairs, location: [lo.merged, "text-zinc-900"], civifold: [cf.merged, "text-zinc-900"] },
+        { measure: "Same pile or damage, merged", note: "the right call here", of: REAL_SF.samePairs, location: [lo.merged, "text-zinc-900"], civifold: [cf.merged, "text-zinc-900"] },
       ]}
     />
   );

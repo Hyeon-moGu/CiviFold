@@ -49,7 +49,7 @@ export function summarize(s: StepView): string {
     case "get_incident_timeline":
       return `${plural((d.events as unknown[]).length, "event")}, ${plural((d.photos as unknown[]).length, "photo")}`;
     case "segment_object":
-      return d.found ? `found ${d.instances} "${(s.args as { noun_phrase: string }).noun_phrase}"` : "nothing found";
+      return d.found ? `found ${d.instances} ${Number(d.instances) === 1 ? "match" : "matches"} for “${(s.args as { noun_phrase: string }).noun_phrase}”` : "nothing found";
     case "compare_images": {
       const c = compared(s)!;
       return `${VERDICT_TEXT[c.verdict] ?? c.verdict} ${pct(c.confidence)} vs ${c.incident_id} (${c.mode})`;
@@ -179,7 +179,7 @@ export function verdictOf(run: {
       ...base,
       kind: "confirmed",
       title: `Confirmed by the checks: ${LABEL_TEXT[before.label]}`,
-      detail: `${plural(checks, "check")} before its proposal: ${plural(matched, "comparison")} matching it${ruledOut ? `, ${ruledOut} ruling out look-alikes` : ""}, none against.`,
+      detail: `The agent ran ${plural(checks, "check")} before proposing: ${plural(matched, "comparison")} ${matched === 1 ? "matches" : "match"}${ruledOut ? `, ${ruledOut} ${ruledOut === 1 ? "rules" : "rule"} out look-alikes` : ""}, and none ${checks === 1 ? "goes" : "go"} against it.`,
     };
   }
   return {

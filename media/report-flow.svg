@@ -50,7 +50,7 @@
   <text x="46" y="343" class="body">turns it into text</text>
 
   <rect x="32" y="362" width="206" height="58" rx="10" fill="#fffbeb" stroke="#d6b764" stroke-width="1.5"/>
-  <text x="46" y="384" class="heading" style="font-size:13.5px">Danger tick</text>
+  <text x="46" y="384" class="heading" style="font-size:13.5px">Danger checkbox</text>
   <text x="46" y="403" class="small">“someone may be in danger”</text>
 
   <path d="M238 145 H260" class="line"/>
@@ -142,8 +142,8 @@
   <rect x="32" y="470" width="896" height="112" rx="12" fill="#0f172a"/>
   <text x="48" y="494" class="label" style="fill:#cbd5e1">5 · STAFF DECIDE</text>
   <text x="48" y="520" class="heading" style="fill:#fff;font-size:17px">Every outcome is a suggestion.</text>
-  <text x="48" y="544" class="body" style="fill:#cbd5e1;font-size:13.5px">Staff link, open a new incident, mark a recurrence, ask or dismiss.</text>
-  <text x="48" y="562" class="body" style="fill:#cbd5e1;font-size:13.5px">Nothing is linked or closed by itself.</text>
+  <text x="48" y="544" class="body" style="fill:#cbd5e1;font-size:13.5px">Staff merge, open a new incident, mark a recurrence, ask or dismiss.</text>
+  <text x="48" y="562" class="body" style="fill:#cbd5e1;font-size:13.5px">Nothing is merged or closed by itself.</text>
 
   <rect x="520" y="480" width="396" height="92" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1.5"/>
   <text x="534" y="500" class="sub" style="fill:#93c5fd">OPTIONAL · VERIFY WITH THE AGENT</text>

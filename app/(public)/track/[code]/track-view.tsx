@@ -8,7 +8,7 @@ import { pauseFrom, usePaused, type PauseKind } from "@/app/_ui/pause";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ResidentView } from "@/lib/server/views";
 import type { RequestItem } from "@/lib/tools/types";
-import { SyntheticBadge } from "@/app/_ui/labels";
+import { RealPhotoBadge, SyntheticBadge } from "@/app/_ui/labels";
 import { when } from "@/app/_ui/format";
 import { isHeic, shrinkForUpload } from "@/app/_ui/shrink";
 
@@ -185,10 +185,8 @@ export function TrackView({ code }: { code: string }) {
             <div key={id} className="relative overflow-hidden rounded-xl border border-zinc-200">
               {/* eslint-disable-next-line @next/next/no-img-element -- resized by our image route */}
               <img src={`/api/images/${id}?w=480`} alt="Your photo" className="aspect-[3/2] w-full object-cover" />
-              {view.synthetic_photos.includes(id) && (
-                <span className="absolute left-1.5 top-1.5">
-                  <SyntheticBadge />
-                </span>
+              {(view.synthetic_photos.includes(id) || view.real_photos?.includes(id)) && (
+                <span className="absolute left-1.5 top-1.5">{view.synthetic_photos.includes(id) ? <SyntheticBadge /> : <RealPhotoBadge />}</span>
               )}
             </div>
           ))}

@@ -348,7 +348,7 @@ export function ReportForm({
                       </span>
                       {picked?.id === s.id && <span className="absolute right-1.5 top-1.5 rounded-full bg-zinc-900 px-1.5 text-xs font-bold text-white">✓</span>}
                       <span className="block px-2 py-1.5 text-xs leading-snug">
-                        <span className="block text-zinc-500">{tileTitle(s.title).place}</span>
+                        <span className="block text-zinc-500 first-letter:uppercase">{tileTitle(s.title).place.replace(/ sign$/, "")}</span>
                         <span className="block font-medium text-zinc-800 first-letter:uppercase">
                           {tileTitle(s.title).state}, {tileTitle(s.title).view}
                         </span>

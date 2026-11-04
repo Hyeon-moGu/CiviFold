@@ -782,7 +782,7 @@ export async function queue(rt: Runtime) {
   // Each report's first photo, for the row's thumbnail.
   const photos = rows.length
     ? await database
-        .select({ id: images.id, report_id: images.report_id, is_synthetic: images.is_synthetic })
+        .select({ id: images.id, report_id: images.report_id, is_synthetic: images.is_synthetic, dataset_image_id: images.dataset_image_id })
         .from(images)
         .where(and(inArray(images.report_id, rows.map((r) => r.id)), eq(images.kind, "original")))
         .orderBy(asc(images.created_at), asc(images.id))
@@ -800,6 +800,13 @@ export async function mapIncidents(rt: Runtime) {
 }
 
 /** Incident titles by id, for screens that name incidents a run came across. */
+/** Which of these incidents are dumped trash: staff say a cleanup, not a repair, for those. */
+export async function trashIncidents(rt: Runtime, ids: string[]): Promise<string[]> {
+  if (ids.length === 0) return [];
+  const rows = await rt.database.select({ id: incidents.id, category: incidents.category }).from(incidents).where(inArray(incidents.id, ids));
+  return rows.filter((r) => r.category === "trash").map((r) => r.id);
+}
+
 export async function incidentTitles(rt: Runtime, ids: string[]): Promise<Record<string, string>> {
   if (ids.length === 0) return {};
   const rows = await rt.database.select({ id: incidents.id, title: incidents.title }).from(incidents).where(inArray(incidents.id, ids));

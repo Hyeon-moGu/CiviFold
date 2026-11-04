@@ -30,7 +30,7 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
               <span className={`h-1.5 w-1.5 rounded-full ${mode === "cached" ? "bg-amber-400" : "bg-emerald-400"}`} />
               models: {models}
             </span>
-            <span className="hidden sm:inline">suggestions only · staff decide</span>
+            <span className="hidden sm:inline">· suggestions only · staff decide</span>
           </span>
         </nav>
       </header>

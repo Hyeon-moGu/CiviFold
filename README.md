@@ -8,9 +8,13 @@
 
 CiviFold groups duplicate photo reports for city staff and keeps a recurrence, or the look-alike next door, out of the pile. Every link and closure is a suggestion until a staff member approves it.
 
-On real San Francisco 311 photos, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) closed **none of 13 requests made after a cleanup at the same spot**, where grouping by location alone would close all 13. It merged fewer true duplicates than location alone (14 of 33) and asked or sent the rest to staff. On a pre-registered holdout of 80 synthetic reports, with look-alikes and repairs placed on purpose, it suggested closing **none of the 33 reports that needed a person**; location alone would have closed 24 ([results](#results)).
+On real San Francisco 311 photos, the default pipeline (Muse Spark, SAM 3.1 and rules, called the fast path below) suggested closing **none of the 13 requests made after a cleanup at the same spot**, where grouping by location alone would have closed all 13. It suggested merging fewer true duplicates than location alone (14 of 33), asked or sent 17 to staff, and wrongly suggested 2 as new problems. On a pre-registered holdout of 80 synthetic reports, with look-alikes and repairs placed on purpose, it suggested closing **none of the 33 reports that needed attention**; location alone would have closed 24 ([results](#results)).
 
-**Try it in three minutes:** open the [demo](https://civi-fold.vercel.app/demo), where the first real San Francisco case is already shown, and send the other three (or press "Run it live" on one) · switch to Hard cases, send case 3, open it in the staff view and press "Verify with the agent" · approve, and the demo card and the resident's page show the decision.
+**Try it in three minutes:**
+
+1. Open the [demo](https://civi-fold.vercel.app/demo). The first real San Francisco case is already shown; send the other three, or press "Run it live" on one.
+2. Switch to Hard cases, send case 3, open it in the staff view and press "Verify with the agent".
+3. Approve it: the demo card and the resident's page show the decision.
 
 - **Nothing closes by itself.** The system never links or closes a report. It suggests, shows the evidence and waits for staff.
 - **Models judge the photo, rules judge the time.** Muse Spark and SAM 3.1 decide whether two photos show the same fixture and the same damage. Rules then apply the observation time and the repair history. The comparison never sees a timestamp.
@@ -34,9 +38,9 @@ CiviFold is for the staff who review incoming reports at a 311 center or public 
 
 ## What staff see
 
-![Staff console: a possible recurrence on a real San Francisco 311 request, seen about six days (142 hours) after Public Works cleared the corner tree on Alemany Boulevard, with its suggested decision, both photos with Muse Spark's box, SAM outlines and cut-outs, and what the comparison found about the place (same) and the problem (not the same).](media/staff-review.webp)
+![Staff console: a possible recurrence on a real San Francisco 311 request, seen about six days (142 hours) after Public Works cleared the trash at the corner tree on Alemany Boulevard, with its suggested decision, both photos with Muse Spark's box, SAM outlines and cut-outs, and what the comparison found about the place (same) and the problem (not the same).](media/staff-review.webp)
 
-The suggestion and why (seen six days after the cleanup, with new trash), both photos with Muse Spark's box, SAM's outline and the cut-outs, and what the comparison found about the place and the problem. Staff accept it in one click or choose another action. *Real San Francisco 311 photos.*
+It shows the suggestion and why (seen six days after the cleanup, with new trash), both photos with Muse Spark's box, SAM's outline and the cut-outs, and what the comparison found about the place and the problem. Staff accept it in one click or choose another action. *Real San Francisco 311 photos.*
 
 ## How it works
 
@@ -53,7 +57,7 @@ The suggestion and why (seen six days after the cleanup, with new trash), both p
 | **Muse Voice Transcribe** | Turns a spoken report into text |
 | **Muse Image** | Generated the 504-image synthetic evaluation set, for about $5 |
 
-Muse Spark returns its judgment as structured fields the rules can check (same fixture, problem visible, signs of repair, the features that matched), not as a similarity score. Neither view is enough alone: on holdout2, cut-outs alone made no critical error but got only 60 of 80 right, and whole photos alone got 70 right with one critical error. The fast path gives the rules both ([ablations](eval/README.md#results-base-sets)).
+Muse Spark returns its judgment as structured fields the rules can check (same fixture, problem visible, signs of repair, the features that matched), not as a similarity score. Each view fails differently. On test, whole photos alone made 2 critical errors and cut-outs alone got only 50 of 78 right, against 1 and 69 with both. On the holdouts the gain is mixed: on holdout2, whole photos alone got more right (70 against 66) with the same one critical error, and on the first holdout each view alone made one critical error fewer. The fast path gives the rules both ([ablations](eval/README.md#results-base-sets)).
 
 ## Results
 
@@ -61,25 +65,25 @@ Muse Spark returns its judgment as structured fields the rules can check (same f
 
 Two checks on public San Francisco 311 requests. Requests were picked by eye from the photos alone, and what counts as right, a miss or critical was written down before the runs; four pairs had been run once earlier to choose the demo photos, and their results count as they came out. Each report ran once, live, through the unchanged fast path at its own place and time ([details](eval/README.md#real-311-photos-san-francisco)). Location alone links each request to the earlier one at its spot.
 
-| Real SF 311 requests | Location alone | **Fast path** |
+| Real SF 311 requests, suggestions | Location alone | **Fast path** |
 |---|---|---|
 | New trash after a cleanup at the same spot, closed as already fixed | 13 / 13 | **0 / 13** |
 | Same pile or damage in both photos, merged (the right call) | 33 / 33 | 14 / 33 |
 
-- **After a cleanup, nothing closed.** Of the 13 requests made within 7 days after Public Works' cleanup, it flagged 3 as possible recurrences and kept the other 10 open: 2 as new problems, 7 with a question to the resident and 1 for staff.
-- **It merges fewer real duplicates and asks more.** When both photos clearly show the same pile or damage, it merged 14 of 33, asked or sent 17 to staff, and opened 2 as new problems. Road damage asked most: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Of 9 further requests that Public Works closed as duplicates, mostly different items at one corner, it merged 1 and opened 3 as new.
+- **After a cleanup, no closing suggestion.** Of the 13 requests made within 7 days after Public Works' cleanup, it flagged 3 as possible recurrences and kept the other 10 open: 2 as new problems, 7 with a question to the resident and 1 for staff.
+- **It suggests fewer merges on real duplicates and asks more.** When both photos clearly show the same pile or damage, it suggested merging 14 of 33, asked or sent 17 to staff, and suggested 2 as new problems. Road damage asked most: a cut-out of a broken cover or a crack in plain pavement rarely carries a sure match, and a merge needs two independent observations. Of 9 further requests that Public Works closed as duplicates, mostly different items at one corner, it suggested merging 1 and opening 3 as new.
 - **Three real photos** of one dumped pile in Korea, run once with the expectations written first, gave no wrong link and no confirmed duplicate either: the views share no fixed feature, so the fast path asked for a wider shot ([details](eval/README.md#real-world-check)).
 - These are small checks picked by eye, not a measurement, and the duplicate labels are Public Works' operational ones. The demo's four real cases are pairs from the second check.
 
 ### Synthetic holdouts
 
-![Bar chart: wrong closing suggestions on reports that needed attention, distance baseline against CiviFold's fast path, on four evaluation sets. test 24 against 1 of 33, holdout 11 against 3 of 16, holdout2 22 against 1 of 33, holdout3 24 against 0 of 33.](media/results.svg)
+![Bar chart: wrong closing suggestions on reports that needed attention, location alone against CiviFold's fast path, on four evaluation sets. test 24 against 1 of 33, holdout 11 against 3 of 16, holdout2 22 against 1 of 33, holdout3 24 against 0 of 33.](media/results.svg)
 
 *Wrong closing suggestions, first run of each set. Rules were improved after test and the first holdout, the fast path was frozen after holdout2 with one later change (finding road damage and dumped piles, below), and each holdout was pre-registered before it ran.*
 
 The latest holdout has 80 reports from 16 assets (8 fixtures or places and their look-alikes). 33 of them describe a new problem or a recurrence that must not be closed. All images and resident answers are **simulated**, and the numbers count suggestions, not staff decisions.
 
-| holdout3 · 80 reports | Distance baseline | **Fast path (default)** | Automatic agent¹ |
+| holdout3 · 80 reports | Location alone | **Fast path (default)** | Automatic agent¹ |
 |---|---|---|---|
 | Wrong closing suggestions on reports needing attention | 24 / 33 | **0 / 33** | 0 / 33 |
 | Correct before any resident answer | 26 / 80 | **51 / 80** | 46 / 80 |
@@ -89,7 +93,7 @@ The latest holdout has 80 reports from 16 assets (8 fixtures or places and their
 
 ¹ Verification run on every closing suggestion (`D_hybrid`), second run, with the neutral names the agent now sees (the first run, with identifiers visible: 49, 66 and 8). It does not measure the app's staff-requested mode.
 
-- **0 / 33 is an observation, not a guarantee.** A second live run of the fast path repeated it (67 / 80 correct after answers); earlier sets had 1 to 3 misses. The baseline proposes the nearest incident of the same kind as a duplicate and stands for no city's actual system.
+- **0 / 33 is an observation, not a guarantee.** A second live run of the fast path repeated it (67 / 80 correct after answers); earlier sets had 1 to 3 misses. Location alone proposes the nearest incident of the same kind as a duplicate and stands for no city's actual system.
 - **It asks rather than guesses.** The fast path asked one question (a wider shot, another angle, a close-up or the time) on 23 reports, and 21 ended correct after the simulated answer. Simulated residents always answer; reports nobody answers stay with staff.
 - **Verification stays optional.** On holdout3 it left the critical count unchanged and raised deferrals from 3 to 12. Across all sets it stopped one wrong suggestion.
 - **One change since.** SAM's noun phrase often missed a patched or lifted road surface and cut a dumped pile down to one bag, so those reports got a question even when the whole photos matched. Muse Spark now boxes the damage or the pile, and SAM segments inside the box. Re-run on holdout3, whose photos had been seen by then, the current version again made 0 / 33 wrong closing suggestions, got 60 of 80 right before any answer (51 before) and asked 14 questions instead of 23 ([details and the development-set check](eval/README.md#after-holdout3-road-damage-and-dumped-piles)).

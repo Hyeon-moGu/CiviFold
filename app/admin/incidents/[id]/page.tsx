@@ -6,8 +6,9 @@ import { notFound } from "next/navigation";
 import { incidentDetail, incidentTitles } from "@/lib/server/reports";
 import { runtime } from "@/lib/server/runtime";
 import { when } from "@/app/_ui/format";
-import { SyntheticBadge } from "@/app/_ui/labels";
-import { Fact, Panel } from "@/app/_ui/console";
+import { RealPhotoBadge, SyntheticBadge } from "@/app/_ui/labels";
+import { isRealPhoto } from "@/app/_ui/photo";
+import { categoryText, Fact, Panel, statusWord } from "@/app/_ui/console";
 import { QueueMapLoader } from "../../queue-map-loader";
 import { RepairButton } from "./repair-button";
 
@@ -35,7 +36,16 @@ export default async function IncidentDetail({ params }: { params: Promise<{ id:
   const linked = [incident.recurrence_of, ...recurrences.map((r) => r.id)].filter((id): id is string => Boolean(id));
   const ids = [...new Set([...linked, ...detail.events.flatMap((e) => e.summary?.match(/\binc_[a-z0-9_]+/g) ?? [])])];
   const titles = await incidentTitles(rt, ids);
-  const events = detail.events.map((e) => ({ ...e, summary: e.summary?.replace(/\binc_[a-z0-9_]+/g, (id) => (titles[id] ? `the ${titles[id]}` : "an earlier incident")) ?? e.summary }));
+  // Stored summaries keep the words the agent's tools read; staff read merged for linked, and a cleanup for trash.
+  const cleanup = detail.incident.category === "trash";
+  const events = detail.events.map((e) => ({
+    ...e,
+    summary:
+      e.summary
+        ?.replace(/\binc_[a-z0-9_]+/g, (id) => (titles[id] ? `the ${titles[id]}` : "an earlier incident"))
+        .replace(/^(Report \S+) linked$/, "$1 merged")
+        .replace(/^Repair recorded by staff$/, cleanup ? "Cleanup recorded by staff" : "Repair recorded by staff") ?? e.summary,
+  }));
   const open = incident.status === "open" || incident.status === "in_progress";
   const mapReports = reports.map((r) => ({ id: r.id, code: r.tracking_code, lat: r.lat, lng: r.lng, label: null, urgent: r.urgent, incident_id: incident.id, n: null }));
 
@@ -57,20 +67,20 @@ export default async function IncidentDetail({ params }: { params: Promise<{ id:
           }`}
         >
           <span className={`h-1.5 w-1.5 rounded-full ${open ? "bg-amber-400" : "bg-emerald-400"}`} />
-          {incident.status.replace("_", " ")}
+          {open ? "Open" : statusWord(incident.status, incident.category).replace(/^./, (c) => c.toUpperCase())}
         </span>
         {open && (
           <div className="ml-auto">
-            <RepairButton incidentId={incident.id} />
+            <RepairButton incidentId={incident.id} cleanup={incident.category === "trash"} />
           </div>
         )}
       </header>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-4">
-          <Panel title="Linked reports" aside={`${reports.length} report${reports.length === 1 ? "" : "s"}`}>
+          <Panel title="Reports on this incident" aside={`${reports.length} report${reports.length === 1 ? "" : "s"}`}>
             {reports.length === 0 ? (
-              <p className="text-[13px] text-ops-dim">No reports linked yet.</p>
+              <p className="text-[13px] text-ops-dim">No reports on it yet.</p>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
                 {reports.map((r) => {
@@ -84,15 +94,13 @@ export default async function IncidentDetail({ params }: { params: Promise<{ id:
                         ) : (
                           <span className="flex h-full items-center justify-center font-mono text-[11px] text-ops-dim">{r.channel.toUpperCase()}</span>
                         )}
-                        {photo?.is_synthetic && (
-                          <span className="absolute left-1.5 top-1.5">
-                            <SyntheticBadge />
-                          </span>
+                        {(photo?.is_synthetic || isRealPhoto(photo)) && (
+                          <span className="absolute left-1.5 top-1.5">{photo?.is_synthetic ? <SyntheticBadge /> : <RealPhotoBadge />}</span>
                         )}
                       </div>
-                      <div className="flex items-baseline justify-between gap-2 px-2 py-1.5">
-                        <span className="font-mono text-[11px] text-ops-text">{r.tracking_code}</span>
-                        <span className="text-[11px] text-ops-dim">{when(r.observed_at)}</span>
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-2 px-2 py-1.5">
+                        <span className="whitespace-nowrap font-mono text-[11px] text-ops-text">{r.tracking_code}</span>
+                        <span className="whitespace-nowrap text-[11px] text-ops-dim">seen {when(r.observed_at)}</span>
                       </div>
                     </Link>
                   );
@@ -110,9 +118,9 @@ export default async function IncidentDetail({ params }: { params: Promise<{ id:
 
         <div className="space-y-4">
           <Panel title="Incident">
-            <Fact k="Category" v={incident.category.replace("_", " ")} />
+            <Fact k="Category" v={categoryText(incident.category)} />
             <Fact k="Opened" v={when(incident.created_at)} />
-            <Fact k={incident.category === "trash" ? "Cleanup recorded" : "Repair recorded"} v={when(incident.resolved_at)} />
+            <Fact k={incident.category === "trash" ? "Cleanup recorded" : "Repair recorded"} v={incident.resolved_at ? when(incident.resolved_at) : "Not yet"} />
             {incident.recurrence_of && (
               <Fact
                 k="Recurrence of"
