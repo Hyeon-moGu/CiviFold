@@ -23,11 +23,24 @@ export const TOOL_TEXT: Record<string, string> = {
 
 export const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
+// A tool input its schema refused arrives as zod's list of issues, in JSON: name the fields instead.
+function refusedFields(error: string): string | null {
+  if (!error.trimStart().startsWith("[")) return null;
+  try {
+    const issues = JSON.parse(error) as Array<{ path?: unknown[] }>;
+    if (!Array.isArray(issues) || issues.length === 0) return null;
+    const fields = [...new Set(issues.map((i) => (Array.isArray(i.path) && i.path.length ? i.path.join(".").replace(/_m$/, "").replaceAll("_", " ") : "input")))];
+    return `rejected an invalid ${fields.join(" and ")}; the agent went on`;
+  } catch {
+    return null;
+  }
+}
+
 export function summarize(s: StepView): string {
   if (!s.ok) {
     // An id the agent made up or misread: the tool refused it, and the run went on.
     if (s.error && /^Unknown (incident|image|photo|report)/i.test(s.error)) return "asked for something not on file; the agent went on";
-    return s.error ?? "failed";
+    return (s.error && refusedFields(s.error)) ?? s.error ?? "failed";
   }
   const d = s.data as Record<string, unknown>;
   switch (s.tool) {

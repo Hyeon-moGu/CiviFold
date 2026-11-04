@@ -2,7 +2,7 @@
 // Created: 2026-10-28
 
 import { describe, expect, it } from "vitest";
-import { verdictOf, type StepView } from "./steps";
+import { summarize, verdictOf, type StepView } from "./steps";
 
 const compare = (n: number, incident: string, verdict: string, confidence = 0.95): StepView => ({
   step: n,
@@ -53,5 +53,21 @@ describe("verdictOf", () => {
   it("does not call an unfinished or unexplained change a confirmation or evidence", () => {
     expect(verdictOf({ status: "failed", guard: null, steps: [compare(1, "inc_a", "same")], before, after: before }).kind).toBe("unsettled");
     expect(verdictOf({ status: "proposed", guard: passed, steps: [compare(1, "inc_a", "same"), propose], before, after: { label: "HUMAN_REVIEW", incident_id: null } }).kind).toBe("unsettled");
+  });
+});
+
+const failed = (error: string): string => summarize({ step: 1, ref: "s1", tool: "search_incidents", ok: false, error, args: {}, data: null });
+
+describe("summarize a refused tool call", () => {
+  it("names the fields a schema refused instead of printing its JSON", () => {
+    const zod = JSON.stringify([{ code: "invalid_value", values: ["fire_hydrant", "trash"], path: ["category"], message: "Invalid option" }]);
+    expect(failed(zod)).toBe("rejected an invalid category; the agent went on");
+    expect(failed(JSON.stringify([{ path: ["radius_m"] }, { path: ["image_quality"] }]))).toBe("rejected an invalid radius and image quality; the agent went on");
+  });
+
+  it("keeps other errors as they are", () => {
+    expect(failed("Unknown incident incident_09")).toBe("asked for something not on file; the agent went on");
+    expect(failed("Tool timed out")).toBe("Tool timed out");
+    expect(failed("[not json")).toBe("[not json");
   });
 });
